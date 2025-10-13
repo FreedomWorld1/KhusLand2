@@ -1,0 +1,881 @@
+Super — hier bekommst du den kompletten, fertigen HTML-Datei-Code (dark & edel, farbige Tabs, modernes Karten-Layout, JSONBin weiterverwendet).
+Einfach die ganze Datei kopieren & in deine index.html (oder ähnlich) einfügen — sie enthält alles (HTML, Tailwind, CSS, JS). Ich habe deine bisherigen Funktionen und die JSONBin-Integration übernommen und die Oberfläche modernisiert.
+
+Hinweis: Ich habe deinen vorhandenen JSONBIN_MASTER_KEY, JSONBIN_BIN_ID und ENCODED_PASSWORD beibehalten, damit nichts kaputt geht. Wenn du nachträglich das Passwort ändern willst, such const ENCODED_PASSWORD und ersetze den Base64-String.
+
+Kopiere komplett:
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title id="htmlTitle">KhusLand Bestellrechner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Zusatzstyles für dunkles, edles Design */
+        :root {
+            --card-bg: rgba(255,255,255,0.03);
+            --card-border: rgba(255,255,255,0.06);
+            --accent: #3b82f6;
+        }
+        body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
+        .tabs-slider {
+            position: absolute;
+            height: 100%;
+            left: var(--tab-left, 0px);
+            width: var(--tab-width, 0px);
+            border-radius: 0.75rem;
+            transition: left .25s ease, width .25s ease, background-color .25s ease;
+            z-index: 5;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+            opacity: .95;
+        }
+        .category-card {
+            background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+            border: 1px solid var(--card-border);
+            border-radius: 0.75rem;
+        }
+        .quantity-control button { width: 42px; height: 42px; display:flex; align-items:center; justify-content:center; }
+        #kopiertHinweis { transition: opacity .2s ease; }
+        /* kleine Anpassung für mobile */
+        @media (max-width: 640px) {
+            .tabs-container { gap: .25rem; }
+        }
+        /* Tab-Farben als Utility (kannst du erweitern) */
+        .tab-color-TABAK { background: linear-gradient(90deg,#ef4444,#dc2626); }
+        .tab-color-BLÄTTER { background: linear-gradient(90deg,#06b6d4,#0891b2); }
+        .tab-color-ESSEN { background: linear-gradient(90deg,#10b981,#059669); }
+        .tab-color-GETRÄNKE { background: linear-gradient(90deg,#3b82f6,#1e40af); }
+        .tab-color-ALKOHOL { background: linear-gradient(90deg,#f97316,#ea580c); }
+        .tab-color-DESSERTS { background: linear-gradient(90deg,#a78bfa,#7c3aed); }
+        .tab-color-PREMIUM { background: linear-gradient(90deg,#f59e0b,#d97706); }
+        .tab-color-RAUCHWAREN { background: linear-gradient(90deg,#f43f5e,#ef4444); }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 antialiased">
+  <div class="min-h-screen px-4 py-8">
+    <div class="max-w-6xl mx-auto">
+      <div class="bg-gradient-to-b from-gray-900 to-gray-800 shadow-2xl rounded-2xl p-6">
+        <div class="flex items-start justify-between gap-6">
+          <div class="flex-1 min-w-0">
+            <h4 class="text-xl font-bold text-blue-400">Bestellseiten</h4>
+            <div class="relative mt-3">
+              <div id="tabsContainer" class="tabs-container flex gap-3 relative p-1">
+                <div id="tabsSlider" class="tabs-slider rounded-lg"></div>
+                <!-- Tab buttons inserted by JS -->
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-col items-center">
+            <img id="headerImage" src="https://via.placeholder.com/150" alt="Logo" class="rounded-lg shadow-lg mb-2" style="width:110px;height:110px;object-fit:cover;" />
+            <h2 id="calculatorTitle" class="text-2xl font-extrabold text-gray-100 whitespace-nowrap">🌴 KhusLand Bestellrechner 🌴</h2>
+          </div>
+
+          <div class="flex items-center space-x-3">
+            <label class="text-sm">🌞</label>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="themeToggle" class="sr-only" onchange="toggleTheme()">
+              <div class="w-11 h-6 bg-gray-600 rounded-full peer-checked:bg-blue-600 relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:h-5 after:w-5 after:rounded-full after:transition-all"></div>
+            </label>
+            <label class="text-sm">🌙</label>
+
+            <button onclick="openSettings()" class="ml-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm font-semibold">⚙️</button>
+          </div>
+        </div>
+
+        <div id="calculatorContent" class="mt-6">
+          <div id="categoriesGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+
+          <div class="mt-6 p-4 rounded-lg bg-gray-800 border border-gray-700">
+            <div class="flex justify-between items-center">
+              <div>
+                <div class="text-sm font-semibold text-gray-300">Grund:</div>
+                <div id="grund" class="text-base text-gray-100 mt-1 whitespace-pre-wrap">Noch nichts berechnet</div>
+              </div>
+              <div class="text-right">
+                <div class="text-sm font-semibold text-gray-300">Preis</div>
+                <div id="preis" class="text-2xl font-extrabold text-blue-400 mt-1">0$</div>
+              </div>
+            </div>
+            <div class="mt-3 flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <label class="font-semibold">Personen:</label>
+                <div class="quantity-control inline-flex items-center rounded-md overflow-hidden bg-gray-700">
+                  <button onclick="changeQuantity('personCountInput', -1)" class="px-3 text-xl">−</button>
+                  <input id="personCountInput" type="number" min="0" value="0" oninput="berechne()" class="w-20 text-center bg-gray-800 border-l border-r border-gray-700 outline-none px-2 py-2" />
+                  <button onclick="changeQuantity('personCountInput', 1)" class="px-3 text-xl">+</button>
+                </div>
+              </div>
+
+              <div class="flex items-center space-x-3">
+                <button onclick="resetRechner()" class="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-md font-semibold">Reset</button>
+                <button onclick="copyText('grund')" class="px-3 py-2 bg-gray-700 rounded-md">📄 Grund</button>
+                <button onclick="copyPriceText()" class="px-3 py-2 bg-gray-700 rounded-md">📄 Preis</button>
+              </div>
+            </div>
+
+            <div id="kopiertHinweis" class="text-sm text-green-400 text-center hidden mt-3">Kopiert ✅</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 hidden">
+    <div class="w-full max-w-3xl bg-gray-900 border border-gray-700 rounded-xl p-6 text-gray-100">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-bold">Einstellungen</h3>
+        <button onclick="closeSettings()" class="px-3 py-1 bg-gray-800 rounded-md">Schließen</button>
+      </div>
+
+      <div id="passwordSection">
+        <label class="block text-sm mb-2">Passwort:</label>
+        <input id="passwordInput" type="password" class="w-full p-2 rounded-md bg-gray-800 border border-gray-700 mb-3" />
+        <div class="flex gap-3">
+          <button onclick="checkPassword()" class="px-4 py-2 bg-blue-600 rounded-md font-semibold">Anmelden</button>
+          <button onclick="loadPreise()" class="px-4 py-2 bg-gray-700 rounded-md">Daten neu laden</button>
+        </div>
+        <p id="passwordError" class="text-red-400 mt-2 hidden">Falsches Passwort!</p>
+      </div>
+
+      <div id="editSection" class="hidden mt-4">
+        <div class="flex gap-3 mb-4">
+          <button class="px-4 py-2 rounded-md border border-transparent hover:border-blue-500" onclick="showEditor('item')">Artikel</button>
+          <button class="px-4 py-2 rounded-md border border-transparent hover:border-blue-500" onclick="showEditor('category')">Kategorien</button>
+          <button class="px-4 py-2 rounded-md border border-transparent hover:border-blue-500" onclick="showEditor('general')">Allgemein</button>
+        </div>
+
+        <div id="itemEditor" class="hidden">
+          <h4 class="font-semibold mb-3">Artikel bearbeiten</h4>
+          <div id="itemEditorContent"></div>
+        </div>
+
+        <div id="categoryEditor" class="hidden">
+          <h4 class="font-semibold mb-3">Kategorien bearbeiten</h4>
+          <div id="categoryEditorContent" class="space-y-3 mb-4"></div>
+          <div class="border-t border-gray-700 pt-4">
+            <label class="block text-sm mb-2">Neue Kategorie:</label>
+            <input id="categoryName" class="w-full p-2 rounded-md bg-gray-800 border border-gray-700 mb-2" />
+            <button onclick="saveCategory()" class="px-4 py-2 bg-green-600 rounded-md">Hinzufügen</button>
+          </div>
+        </div>
+
+        <div id="generalSettingsEditor" class="hidden">
+          <h4 class="font-semibold mb-3">Allgemeine Einstellungen</h4>
+          <label class="block text-sm mb-2">Titel</label>
+          <input id="titleInput" class="w-full p-2 rounded-md bg-gray-800 border border-gray-700 mb-3" />
+          <label class="block text-sm mb-2">Bild</label>
+          <input id="imageUpload" type="file" accept="image/*" class="w-full mb-3" />
+          <div class="flex gap-3">
+            <button onclick="saveGeneralSettings()" class="px-4 py-2 bg-blue-600 rounded-md">Speichern</button>
+            <button onclick="resetImage()" class="px-4 py-2 bg-red-600 rounded-md">Bild zurücksetzen</button>
+          </div>
+        </div>
+
+        <div class="mt-6">
+          <button onclick="closeSettings()" class="w-full px-4 py-2 bg-gray-700 rounded-md">Schließen</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading overlay -->
+  <div id="loadingOverlay" class="fixed inset-0 flex items-center justify-center z-40 bg-black/60 hidden">
+    <div class="loading-spinner border-4 border-gray-700 border-t-4 border-t-blue-500 rounded-full w-10 h-10 animate-spin"></div>
+  </div>
+
+<script>
+/* --------------------------
+   Konfiguration / Default
+   --------------------------*/
+/* !!! ERSETZE DIES MIT DEINEN EIGENEN WERTEN VON JSONBIN.IO !!! */
+const JSONBIN_MASTER_KEY = '$2a$10$szNDzN.Y6Xwin9HEcbhi/O70xfGZCaX/Kcb8a5lLCCSObE/XysMbq';
+const JSONBIN_BIN_ID = '68e3b63aae596e708f080453';
+const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
+const JSONBIN_HEADERS = {
+  'X-Master-Key': JSONBIN_MASTER_KEY,
+  'Content-Type': 'application/json',
+  'X-Bin-Versioning': 'false'
+};
+
+/* Passwort (Base64-kodiert) */
+const ENCODED_PASSWORD = "MTIzIUtSQyExMjM=";
+
+/* Default-Artikel (falls Serverdaten fehlen) */
+const defaultPreise = {
+  beluga: { name: 'Beluga Kaviar', price: 300, category: 'SPEISEN', id: 'beluga' },
+  doener: { name: 'Fischdöner', price: 175, category: 'SPEISEN', id: 'doener' },
+  bowl: { name: 'Seafood Bowl', price: 175, category: 'SPEISEN', id: 'bowl' },
+  fiji: { name: 'Fiji Wasser', price: 75, category: 'GETRÄNKE', id: 'fiji' },
+  cola: { name: 'Cola Cherry', price: 60, category: 'GETRÄNKE', id: 'cola' },
+  dom: { name: 'Dom Perignon', price: 400, category: 'ALKOHOL', id: 'dom' },
+  kuchen: { name: 'Kuchen', price: 400, category: 'DESSERTS', id: 'kuchen' },
+  rose: { name: 'Ecla Lune Rose 1L', price: 10000, category: 'PREMIUM', id: 'rose' },
+  vape: { name: 'Vape', price: 100, category: 'RAUCHWAREN', id: 'vape' }
+};
+
+let currentPreise = {};
+let categories = ['SPEISEN', 'GETRÄNKE', 'ALKOHOL', 'DESSERTS', 'PREMIUM', 'RAUCHWAREN'];
+let foodCategories = ['SPEISEN', 'DESSERTS'];
+let drinkCategories = ['GETRÄNKE', 'ALKOHOL'];
+let rauchwarenCategories = ['RAUCHWAREN'];
+let miscellaneousCategories = ['PREMIUM'];
+let customTitle = '🌴 KhusLand Bestellrechner 🌴';
+let customImage = 'https://via.placeholder.com/150';
+const itemsPerPerson = 5;
+const numTabs = 5;
+let activeTab = 1;
+let calculatorStates = {};
+const DEFAULT_IMAGE_URL = 'https://via.placeholder.com/150';
+
+/* Hilfsfunktionen */
+function showLoading(){document.getElementById('loadingOverlay').classList.remove('hidden');}
+function hideLoading(){document.getElementById('loadingOverlay').classList.add('hidden');}
+function decodeBase64(s){ if (typeof atob === 'function') return atob(s); return ''; }
+
+/* --------------------------
+   Laden & Speichern (JSONBin)
+   --------------------------*/
+async function loadPreise(){
+  showLoading();
+  try {
+    const resp = await fetch(JSONBIN_URL, { headers: { 'X-Master-Key': JSONBIN_MASTER_KEY }});
+    if(!resp.ok) throw new Error('HTTP ' + resp.status);
+    const json = await resp.json();
+    if(json && json.record){
+      const r = json.record;
+      currentPreise = r.items || {...defaultPreise};
+      categories = r.categories || Array.from(new Set(Object.values(currentPreise).map(i=>i.category)));
+      foodCategories = r.foodCategories || foodCategories;
+      drinkCategories = r.drinkCategories || drinkCategories;
+      rauchwarenCategories = r.rauchwarenCategories || rauchwarenCategories;
+      miscellaneousCategories = r.miscellaneousCategories || miscellaneousCategories;
+      customTitle = r.title || customTitle;
+      customImage = r.image || customImage;
+      console.log('Daten geladen.');
+    } else {
+      currentPreise = {...defaultPreise};
+      categories = Array.from(new Set(Object.values(currentPreise).map(i=>i.category)));
+      console.warn('Keine Serverdaten, Standardwerte geladen.');
+    }
+  } catch(err){
+    console.error('Fehler beim Laden:', err);
+    alert('Fehler beim Laden der Artikeldaten. Standardwerte werden verwendet.');
+    currentPreise = {...defaultPreise};
+    categories = Array.from(new Set(Object.values(currentPreise).map(i=>i.category)));
+  } finally {
+    hideLoading();
+    renderTabs();
+    renderCalculatorInputs();
+    updateGeneralSettingsDisplay();
+  }
+}
+
+async function savePreise(){
+  showLoading();
+  try {
+    const dataToSave = {
+      items: currentPreise,
+      categories,
+      foodCategories,
+      drinkCategories,
+      rauchwarenCategories,
+      miscellaneousCategories,
+      title: customTitle,
+      image: customImage
+    };
+    const resp = await fetch(JSONBIN_URL, {
+      method: 'PUT',
+      headers: JSONBIN_HEADERS,
+      body: JSON.stringify(dataToSave)
+    });
+    if(!resp.ok) throw new Error('HTTP ' + resp.status);
+    const j = await resp.json();
+    console.log('Gespeichert', j);
+  } catch(err){
+    console.error('Fehler beim Speichern:', err);
+    alert('Fehler beim Speichern der Artikeldaten. Bitte prüfe API-Einstellungen.');
+  } finally {
+    hideLoading();
+  }
+}
+
+/* --------------------------
+   Tabs + Rendering
+   --------------------------*/
+function renderTabs(){
+  const tabsContainer = document.getElementById('tabsContainer');
+  tabsContainer.querySelectorAll('.tab-button').forEach(n=>n.remove());
+  const slider = document.getElementById('tabsSlider');
+  slider.style.width = '0px';
+  categories.forEach((cat, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'tab-button relative z-10 px-4 py-2 text-sm font-medium rounded-lg text-gray-100';
+    btn.dataset.tab = String(idx+1);
+    btn.dataset.cat = cat;
+    btn.innerText = cat;
+    btn.onclick = () => {
+      switchTab(idx+1);
+    };
+    tabsContainer.appendChild(btn);
+  });
+
+  // set tab colors (first render)
+  setTimeout(()=> {
+    const buttons = tabsContainer.querySelectorAll('.tab-button');
+    buttons.forEach(btn=>{
+      const cat = btn.dataset.cat.replace(/\s/g,'').toUpperCase();
+      const classKey = 'tab-color-' + (btn.dataset.cat.toUpperCase().replace(/\s/g,''));
+      // Apply background to slider on active
+    });
+    // activate first
+    const first = tabsContainer.querySelector('.tab-button[data-tab="'+activeTab+'"]');
+    if(first) { first.classList.add('active'); updateSliderPosition(first); }
+  },50);
+
+  // color slider based on active tab category
+  updateSliderBasedOnActive();
+}
+
+function updateSliderBasedOnActive(){
+  const activeBtn = document.querySelector(`.tab-button[data-tab="${activeTab}"]`);
+  const slider = document.getElementById('tabsSlider');
+  if(!activeBtn || !slider) return;
+  const cat = activeBtn.dataset.cat.toUpperCase();
+  // pick gradient class or inline style
+  let style = '';
+  switch(cat){
+    case 'RAUCHWAREN': style = 'background: linear-gradient(90deg,#f43f5e,#ef4444);'; break;
+    case 'PREMIUM': style = 'background: linear-gradient(90deg,#f59e0b,#d97706);'; break;
+    case 'DESSERTS': style = 'background: linear-gradient(90deg,#a78bfa,#7c3aed);'; break;
+    case 'ALKOHOL': style = 'background: linear-gradient(90deg,#f97316,#ea580c);'; break;
+    case 'GETRÄNKE': style = 'background: linear-gradient(90deg,#3b82f6,#1e40af);'; break;
+    case 'SPEISEN': style = 'background: linear-gradient(90deg,#10b981,#059669);'; break;
+    case 'TABAK': style = 'background: linear-gradient(90deg,#ef4444,#dc2626);'; break;
+    case 'BLÄTTER': style = 'background: linear-gradient(90deg,#06b6d4,#0891b2);'; break;
+    default: style = 'background: linear-gradient(90deg,#3b82f6,#1e40af);';
+  }
+  slider.style.cssText = style + 'position:absolute;height:100%;border-radius:0.75rem;left:var(--tab-left,0);width:var(--tab-width,0);';
+}
+
+/* Positioniert den Slider passend zum Button */
+function updateSliderPosition(tabButton){
+  const slider = document.getElementById('tabsSlider');
+  const tabsContainer = document.getElementById('tabsContainer');
+  tabsContainer.style.position = 'relative';
+  if(tabButton && slider){
+    const buttonRect = tabButton.getBoundingClientRect();
+    const containerRect = tabsContainer.getBoundingClientRect();
+    const left = buttonRect.left - containerRect.left;
+    const width = buttonRect.width;
+    slider.style.setProperty('--tab-left', `${left}px`);
+    slider.style.setProperty('--tab-width', `${width}px`);
+    updateSliderBasedOnActive();
+  }
+}
+
+/* Tab wechseln */
+function switchTab(tabNumber){
+  if(tabNumber === activeTab) return;
+  saveCalculatorState();
+  document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+  const newActiveButton = document.querySelector(`.tab-button[data-tab="${tabNumber}"]`);
+  if(newActiveButton){
+    newActiveButton.classList.add('active');
+    updateSliderPosition(newActiveButton);
+  }
+  activeTab = tabNumber;
+  loadCalculatorState();
+  berechne();
+}
+
+/* --------------------------
+   Render Artikel (Cards)
+   --------------------------*/
+function renderCalculatorInputs(){
+  const grid = document.getElementById('categoriesGrid');
+  grid.innerHTML = '';
+  categories.forEach(category => {
+    const itemsInCategory = Object.values(currentPreise).filter(i => i.category === category);
+    const col = document.createElement('div');
+    col.className = 'category-card p-4';
+    col.innerHTML = `<h3 class="text-lg font-semibold mb-3">${category}</h3><div class="space-y-3"></div>`;
+    const itemsWrap = col.querySelector('div');
+
+    itemsInCategory.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'flex items-start justify-between bg-gray-900/40 p-3 rounded-lg';
+      card.innerHTML = `
+        <div class="min-w-0">
+          <div class="text-sm text-gray-300">${item.name}</div>
+          <div class="text-xs text-gray-400 mt-1">${item.price}$</div>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="quantity-control inline-flex items-center rounded-md overflow-hidden bg-gray-800">
+            <button onclick="changeQuantity('${item.id}', -1)" class="text-xl">−</button>
+            <input id="${item.id}" type="number" min="0" value="0" oninput="berechne()" class="w-16 text-center bg-gray-900 border-l border-r border-gray-800 outline-none px-2 py-1" />
+            <button onclick="changeQuantity('${item.id}', 1)" class="text-xl">+</button>
+          </div>
+        </div>
+      `;
+      itemsWrap.appendChild(card);
+    });
+
+    grid.appendChild(col);
+  });
+}
+
+/* Änderung Quantity */
+function changeQuantity(id, change){
+  const input = document.getElementById(id);
+  if(!input){
+    // If it's the person input
+    if(id === 'personCountInput') {
+      const p = document.getElementById('personCountInput');
+      if(!p) return;
+      let v = parseInt(p.value) || 0; v += change; if(v<0) v=0; p.value = v; berechne(); return;
+    }
+    return;
+  }
+  let val = parseInt(input.value) || 0;
+  val += change;
+  if(val < 0) val = 0;
+  input.value = val;
+  berechne();
+}
+
+/* --------------------------
+   Berechnung
+   --------------------------*/
+function berechne(){
+  let summe = 0;
+  let foodCount = 0, drinkCount = 0, rauchCount = 0;
+  const orderedItems = [];
+  const miscItems = [];
+
+  const manualPersonCount = parseInt(document.getElementById('personCountInput')?.value) || 0;
+
+  for(const key in currentPreise){
+    const el = document.getElementById(key);
+    if(!el) continue;
+    const anzahl = parseInt(el.value) || 0;
+    if(anzahl <= 0) continue;
+    const item = currentPreise[key];
+    summe += anzahl * item.price;
+    const cat = item.category;
+    if(foodCategories.includes(cat)) { foodCount += anzahl; orderedItems.push(`${anzahl}x ${item.name}`); }
+    else if(drinkCategories.includes(cat)) { drinkCount += anzahl; orderedItems.push(`${anzahl}x ${item.name}`); }
+    else if(rauchwarenCategories.includes(cat)) { rauchCount += anzahl; orderedItems.push(`${anzahl}x ${item.name}`); }
+    else if(miscellaneousCategories.includes(cat)) { miscItems.push(`${anzahl}x ${item.name}`); }
+  }
+
+  document.getElementById('preis').innerText = `${summe}$`;
+
+  let grund = '';
+  const totalItems = foodCount + drinkCount + rauchCount + miscItems.length;
+
+  if(totalItems > 0 || manualPersonCount > 0){
+    const day = String(new Date().getDate()).padStart(2,'0');
+    const month = String(new Date().getMonth()+1).padStart(2,'0');
+    const dateString = `${day}.${month}.`;
+
+    const parts = [`KL | ${dateString}`];
+    if(manualPersonCount > 0) parts.push(`${manualPersonCount}P`);
+    else {
+      const personCount = Math.max(foodCount, drinkCount) > 0 ? Math.ceil(Math.max(foodCount, drinkCount)/itemsPerPerson) : 0;
+      if(personCount > 0) parts.push(`${personCount}P`);
+    }
+    const all = [...orderedItems, ...miscItems];
+    if(all.length > 0) parts.push(all.join(' + '));
+    const cats = [];
+    if(foodCount > 0) cats.push('Essen');
+    if(drinkCount > 0) cats.push('Trinken');
+    if(rauchCount > 0) cats.push('Rauchwaren');
+    if(cats.length) parts.push(cats.join(' & '));
+    grund = parts.join(' | ');
+  } else {
+    grund = 'Noch nichts berechnet';
+  }
+
+  document.getElementById('grund').innerText = grund;
+  saveCalculatorState();
+}
+
+/* --------------------------
+   Clipboard
+   --------------------------*/
+function copyToClipboard(text){
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed'; ta.style.left = '-9999px';
+  document.body.appendChild(ta);
+  ta.select(); ta.setSelectionRange(0,99999);
+  try { document.execCommand('copy'); const hinw = document.getElementById('kopiertHinweis'); if(hinw){ hinw.classList.remove('hidden'); setTimeout(()=>hinw.classList.add('hidden'),2000); } }
+  catch(e){ console.error('Kopieren fehlgeschlagen', e); }
+  document.body.removeChild(ta);
+}
+function copyText(id){ copyToClipboard(document.getElementById(id).innerText); }
+function copyPriceText(){ copyToClipboard(document.getElementById('preis').innerText.replace('$','')); }
+
+/* --------------------------
+   Calculator State (localStorage)
+   --------------------------*/
+function initializeCalculatorStates(){
+  for(let i=1;i<=numTabs;i++){
+    calculatorStates[i] = { inputs: {}, grund: 'Noch nichts berechnet', preis: '0$', personCount: '0' };
+  }
+  const saved = localStorage.getItem('calculatorStates');
+  if(saved){
+    try {
+      const parsed = JSON.parse(saved);
+      for(const k in parsed) if(calculatorStates[k]) calculatorStates[k] = parsed[k];
+    } catch(e){}
+  }
+}
+function saveCalculatorState(){
+  const inputs = document.querySelectorAll('#calculatorContent input[type="number"]');
+  const state = { inputs: {} };
+  inputs.forEach(i=> state.inputs[i.id] = i.value);
+  state.grund = document.getElementById('grund').innerText;
+  state.preis = document.getElementById('preis').innerText;
+  state.personCount = document.getElementById('personCountInput')?.value || '0';
+  calculatorStates[activeTab] = state;
+  localStorage.setItem('calculatorStates', JSON.stringify(calculatorStates));
+}
+function loadCalculatorState(){
+  const state = calculatorStates[activeTab];
+  const inputs = document.querySelectorAll('#calculatorContent input[type="number"]');
+  inputs.forEach(i=> i.value = 0);
+  if(state){
+    for(const id in state.inputs){
+      const el = document.getElementById(id);
+      if(el) el.value = state.inputs[id];
+    }
+    document.getElementById('grund').innerText = state.grund;
+    document.getElementById('preis').innerText = state.preis;
+    const p = document.getElementById('personCountInput');
+    if(p) p.value = state.personCount || '0';
+  } else {
+    document.getElementById('grund').innerText = 'Noch nichts berechnet';
+    document.getElementById('preis').innerText = '0$';
+  }
+}
+
+/* --------------------------
+   Einstellungen / Admin
+   --------------------------*/
+function openSettings(){
+  document.getElementById('settingsModal').classList.remove('hidden');
+  document.getElementById('passwordSection').classList.remove('hidden');
+  document.getElementById('editSection').classList.add('hidden');
+  document.getElementById('passwordError').classList.add('hidden');
+  document.getElementById('passwordInput').value = '';
+}
+function closeSettings(){
+  document.getElementById('settingsModal').classList.add('hidden');
+  loadPreise();
+}
+
+async function checkPassword(){
+  const passwordInput = document.getElementById('passwordInput');
+  const passwordError = document.getElementById('passwordError');
+  const decoded = decodeBase64(ENCODED_PASSWORD);
+  if(passwordInput.value === decoded){
+    passwordError.classList.add('hidden');
+    document.getElementById('passwordSection').classList.add('hidden');
+    document.getElementById('editSection').classList.remove('hidden');
+    showEditor('item');
+  } else {
+    passwordError.classList.remove('hidden');
+  }
+}
+
+/* Editor-Funktionen (Artikel/Kategorien/General) */
+function showEditor(type){
+  document.getElementById('itemEditor').classList.add('hidden');
+  document.getElementById('categoryEditor').classList.add('hidden');
+  document.getElementById('generalSettingsEditor').classList.add('hidden');
+  if(type === 'item'){ document.getElementById('itemEditor').classList.remove('hidden'); renderItemEditor(); }
+  if(type === 'category'){ document.getElementById('categoryEditor').classList.remove('hidden'); renderCategoryEditor(); }
+  if(type === 'general'){ document.getElementById('generalSettingsEditor').classList.remove('hidden'); renderGeneralSettingsEditor(); }
+}
+
+/* Item Editor */
+async function renderItemEditor(){
+  await loadPreise(); // ensure data present
+  const container = document.getElementById('itemEditorContent');
+  container.innerHTML = '';
+  const select = document.createElement('select');
+  select.id = 'editorCategorySelect';
+  select.className = 'w-full p-2 rounded-md bg-gray-800 border border-gray-700 mb-3';
+  categories.forEach(c=> { const o = document.createElement('option'); o.value=c; o.innerText=c; select.appendChild(o); });
+  container.appendChild(select);
+
+  const list = document.createElement('div');
+  list.id = 'editorItemsList';
+  list.className = 'space-y-2 mb-4';
+  container.appendChild(list);
+
+  const form = document.createElement('div');
+  form.className = 'border-t border-gray-700 pt-3';
+  form.innerHTML = `
+    <input type="hidden" id="editItemId">
+    <input id="itemName" class="w-full p-2 rounded-md bg-gray-800 border border-gray-700 mb-2" placeholder="Artikelname" />
+    <input id="itemPrice" class="w-full p-2 rounded-md bg-gray-800 border border-gray-700 mb-2" placeholder="Preis" type="number" />
+    <button onclick="saveItem()" class="w-full py-2 bg-green-600 rounded-md">Speichern</button>
+  `;
+  container.appendChild(form);
+
+  select.addEventListener('change', updateEditorItemsList);
+  updateEditorItemsList();
+}
+
+function updateEditorItemsList(){
+  const selected = document.getElementById('editorCategorySelect')?.value;
+  const list = document.getElementById('editorItemsList');
+  if(!list) return;
+  list.innerHTML = '';
+  const items = Object.values(currentPreise).filter(i => i.category === selected);
+  if(items.length === 0){ list.innerHTML = '<div class="text-gray-400">Keine Artikel in dieser Kategorie.</div>'; return; }
+  items.forEach(it=>{
+    const row = document.createElement('div');
+    row.className = 'flex justify-between items-center bg-gray-800 p-2 rounded-md';
+    row.innerHTML = `<div class="truncate">${it.name} (${it.price}$)</div>
+      <div class="flex gap-2">
+        <button onclick="editItem('${it.id}')" class="text-blue-400">✏️</button>
+        <button onclick="deleteItem('${it.id}')" class="text-red-400">🗑️</button>
+      </div>`;
+    list.appendChild(row);
+  });
+}
+
+async function saveItem(){
+  const id = document.getElementById('editItemId').value;
+  const name = document.getElementById('itemName').value.trim();
+  const price = parseInt(document.getElementById('itemPrice').value);
+  const cat = document.getElementById('editorCategorySelect').value;
+  if(!name || isNaN(price) || price<=0){ alert('Bitte gültigen Namen und Preis eingeben.'); return; }
+  if(id && currentPreise[id]){
+    currentPreise[id].name = name;
+    currentPreise[id].price = price;
+    currentPreise[id].category = cat;
+  } else {
+    const newId = 'item_' + Date.now();
+    currentPreise[newId] = { id: newId, name, price, category: cat };
+  }
+  await savePreise();
+  renderCalculatorInputs();
+  updateEditorItemsList();
+  document.getElementById('editItemId').value = '';
+  document.getElementById('itemName').value = '';
+  document.getElementById('itemPrice').value = '';
+}
+
+function editItem(id){
+  const it = currentPreise[id];
+  if(!it) return;
+  document.getElementById('editItemId').value = it.id;
+  document.getElementById('itemName').value = it.name;
+  document.getElementById('itemPrice').value = it.price;
+  document.getElementById('editorCategorySelect').value = it.category;
+}
+
+/* delete item */
+async function deleteItem(id){
+  if(!confirm(`Sicher, dass du "${currentPreise[id].name}" löschen möchtest?`)) return;
+  delete currentPreise[id];
+  await savePreise();
+  renderCalculatorInputs();
+  updateEditorItemsList();
+}
+
+/* Category Editor */
+function renderCategoryEditor(){
+  const ctx = document.getElementById('categoryEditorContent');
+  ctx.innerHTML = '';
+  categories.forEach(cat=>{
+    const div = document.createElement('div');
+    div.className = 'flex justify-between items-center bg-gray-800 p-2 rounded-md';
+    div.innerHTML = `
+      <div class="font-semibold">${cat}</div>
+      <div class="flex gap-2">
+        <button onclick="editCategoryPrompt('${cat}')" class="text-blue-400">✏️</button>
+        <button onclick="deleteCategory('${cat}')" class="text-red-400">🗑️</button>
+      </div>`;
+    ctx.appendChild(div);
+  });
+
+  // area to set types
+  const typeBox = document.createElement('div');
+  typeBox.className = 'mt-3 border-t border-gray-700 pt-3';
+  typeBox.innerHTML = `<div class="text-sm text-gray-400 mb-2">Kategorie-Typen (Essen/Trinken/…)</div>`;
+  categories.forEach(cat=>{
+    const label = document.createElement('label');
+    label.className = 'inline-flex items-center mr-3 mb-2';
+    label.innerHTML = `<input type="checkbox" data-category="${cat}" data-type="food" ${foodCategories.includes(cat)?'checked':''} onchange="updateCategoryTypes()"> <span class="ml-2">${cat} = Essen</span>`;
+    typeBox.appendChild(label);
+    const label2 = document.createElement('label');
+    label2.className = 'inline-flex items-center mr-3 mb-2';
+    label2.innerHTML = `<input type="checkbox" data-category="${cat}" data-type="drink" ${drinkCategories.includes(cat)?'checked':''} onchange="updateCategoryTypes()"> <span class="ml-2">${cat} = Trinken</span>`;
+    typeBox.appendChild(label2);
+  });
+  ctx.appendChild(typeBox);
+}
+
+async function updateCategoryTypes(){
+  foodCategories = []; drinkCategories = []; rauchwarenCategories = []; miscellaneousCategories = [];
+  document.querySelectorAll('input[data-type="food"]').forEach(cb=>{ if(cb.checked) foodCategories.push(cb.dataset.category); });
+  document.querySelectorAll('input[data-type="drink"]').forEach(cb=>{ if(cb.checked) drinkCategories.push(cb.dataset.category); });
+  document.querySelectorAll('input[data-type="rauchwaren"]').forEach(cb=>{ if(cb.checked) rauchwarenCategories.push(cb.dataset.category); });
+  document.querySelectorAll('input[data-type="miscellaneous"]').forEach(cb=>{ if(cb.checked) miscellaneousCategories.push(cb.dataset.category); });
+  await savePreise();
+  renderCalculatorInputs();
+  berechne();
+}
+
+async function saveCategory(){
+  const name = (document.getElementById('categoryName').value || '').trim().toUpperCase();
+  if(!name){ alert('Bitte geben Sie einen Kategorienamen ein.'); return; }
+  if(categories.includes(name)){ alert('Diese Kategorie existiert bereits.'); return; }
+  categories.push(name);
+  await savePreise();
+  renderCategoryEditor();
+  document.getElementById('categoryName').value = '';
+}
+async function editCategoryPrompt(oldName){
+  const newName = prompt(`Neuen Namen für "${oldName}" eingeben:`);
+  if(newName === null) return;
+  const t = newName.trim().toUpperCase();
+  if(!t || t === oldName) return;
+  if(categories.includes(t)){ alert('Kategorie existiert bereits'); return; }
+  // update items
+  for(const id in currentPreise) {
+    if(currentPreise[id].category === oldName) currentPreise[id].category = t;
+  }
+  const idx = categories.indexOf(oldName);
+  if(idx > -1) categories[idx] = t;
+  await savePreise();
+  renderCategoryEditor();
+  renderCalculatorInputs();
+}
+async function deleteCategory(categoryName){
+  const itemsInCategory = Object.values(currentPreise).filter(item => item.category === categoryName);
+  if(itemsInCategory.length > 0){ alert(`Die Kategorie "${categoryName}" enthält noch Artikel.`); return; }
+  if(!confirm(`Sicher, dass du die Kategorie "${categoryName}" löschen möchtest?`)) return;
+  categories = categories.filter(c=> c !== categoryName);
+  foodCategories = foodCategories.filter(c=> c !== categoryName);
+  drinkCategories = drinkCategories.filter(c=> c !== categoryName);
+  rauchwarenCategories = rauchwarenCategories.filter(c=> c !== categoryName);
+  miscellaneousCategories = miscellaneousCategories.filter(c=> c !== categoryName);
+  await savePreise();
+  renderCategoryEditor();
+}
+
+/* General settings */
+function renderGeneralSettingsEditor(){
+  document.getElementById('titleInput').value = customTitle;
+}
+async function saveGeneralSettings(){
+  const newTitle = document.getElementById('titleInput').value.trim();
+  const imageFile = document.getElementById('imageUpload').files[0];
+  if(newTitle) customTitle = newTitle;
+  if(imageFile){
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const img = new Image();
+      img.onload = async () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 150; canvas.height = 150;
+        const ctx = canvas.getContext('2d'); ctx.drawImage(img,0,0,150,150);
+        customImage = canvas.toDataURL(imageFile.type);
+        await savePreise();
+        updateGeneralSettingsDisplay();
+        alert('Einstellungen gespeichert!');
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(imageFile);
+  } else {
+    await savePreise();
+    updateGeneralSettingsDisplay();
+    alert('Einstellungen gespeichert!');
+  }
+}
+async function resetImage(){
+  if(!confirm('Sicher, dass Sie das Bild zurücksetzen möchten?')) return;
+  customImage = DEFAULT_IMAGE_URL;
+  await savePreise();
+  updateGeneralSettingsDisplay();
+  alert('Bild wurde zurückgesetzt!');
+}
+
+function updateGeneralSettingsDisplay(){
+  document.getElementById('htmlTitle').innerText = customTitle;
+  document.getElementById('calculatorTitle').innerText = customTitle;
+  document.getElementById('headerImage').src = customImage;
+}
+
+/* --------------------------
+   Reset & Init
+   --------------------------*/
+function resetCalculatorInputs(){
+  document.querySelectorAll('#calculatorContent input[type="number"]').forEach(i=> i.value = 0);
+  document.getElementById('grund').innerText = 'Noch nichts berechnet';
+  document.getElementById('preis').innerText = '0$';
+}
+function resetRechner(){ document.getElementById('personCountInput').value = 0; resetCalculatorInputs(); saveCalculatorState(); }
+
+/* Theme toggle */
+function toggleTheme(){
+  const html = document.documentElement;
+  const isDark = !html.classList.contains('light');
+  // we keep dark as default; toggling will add/remove a 'light' class
+  if(isDark){ html.classList.add('light'); document.body.classList.add('light'); localStorage.setItem('theme','light'); }
+  else { html.classList.remove('light'); document.body.classList.remove('light'); localStorage.setItem('theme','dark'); }
+  const activeBtn = document.querySelector(`.tab-button[data-tab="${activeTab}"]`);
+  if(activeBtn) updateSliderPosition(activeBtn);
+}
+
+/* --------------------------
+   Window onload init
+   --------------------------*/
+window.onload = async function(){
+  initializeCalculatorStates();
+  const savedTheme = localStorage.getItem('theme');
+  if(savedTheme === 'light'){ document.documentElement.classList.add('light'); document.body.classList.add('light'); document.getElementById('themeToggle').checked = true; }
+  else { document.documentElement.classList.remove('light'); document.body.classList.remove('light'); document.getElementById('themeToggle').checked = false; }
+
+  await loadPreise();
+
+  // Attach click listeners to tabs (after render)
+  document.addEventListener('click', (e) => {
+    if(e.target && e.target.classList && e.target.classList.contains('tab-button')){
+      document.querySelectorAll('.tab-button').forEach(b=>b.classList.remove('active'));
+      e.target.classList.add('active');
+      updateSliderPosition(e.target);
+      const t = parseInt(e.target.dataset.tab);
+      if(!isNaN(t)) { activeTab = t; loadCalculatorState(); berechne(); }
+    }
+  });
+
+  // initial active
+  const initialActive = document.querySelector(`.tab-button[data-tab="${activeTab}"]`);
+  if(initialActive) { initialActive.classList.add('active'); updateSliderPosition(initialActive); }
+
+  // responsive on resize
+  window.addEventListener('resize', ()=>{
+    const cur = document.querySelector(`.tab-button[data-tab="${activeTab}"]`);
+    if(cur) updateSliderPosition(cur);
+  });
+
+  // load saved states
+  loadCalculatorState();
+};
+
+</script>
+</body>
+</html>
