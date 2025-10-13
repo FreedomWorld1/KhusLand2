@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="htmlTitle">kingsrow Bestellrechner</title>
+    <title id="htmlTitle">KhusLand Bestellrechner</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -218,7 +218,7 @@
 
                 <div class="flex flex-col items-center justify-center flex-1">
                     <img id="headerImage" src="https://via.placeholder.com/150" alt="Header Image" class="rounded-lg shadow-md mb-2" style="width: 150px; height: 150px; object-fit: cover;">
-                    <h2 id="calculatorTitle" class="text-3xl font-extrabold text-blue-600 dark:text-blue-400 whitespace-nowrap">🌴 ITALIANA Bestellrechner 🌴</h2>
+                    <h2 id="calculatorTitle" class="text-3xl font-extrabold text-blue-600 dark:text-blue-400 whitespace-nowrap">🌴 KhusLand Bestellrechner 🌴</h2>
                 </div>
 
                 <div class="flex-1"></div>
@@ -382,7 +382,7 @@
         let drinkCategories = ['GETRÄNKE', 'ALKOHOL'];
         let rauchwarenCategories = ['RAUCHWAREN'];
         let miscellaneousCategories = ['PREMIUM'];
-        let customTitle = '🌴 ITALIANA Bestellrechner 🌴';
+        let customTitle = '🌴 KhusLand Bestellrechner 🌴';
         let customImage = 'https://via.placeholder.com/150';
         const itemsPerPerson = 5;
         const numTabs = 5;
@@ -691,7 +691,7 @@
 
             if (totalItems > 0 || manualPersonCount > 0) {
                 
-                let grundParts = [`KRC | ${dateString}`];
+                let grundParts = [`KL | ${dateString}`];
                 
                 if (manualPersonCount > 0) {
                     grundParts.push(`${manualPersonCount}P`);
