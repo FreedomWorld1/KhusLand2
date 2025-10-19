@@ -60,7 +60,7 @@
         .header-gradient {
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             color: white;
-            padding: 1.5rem;
+            padding: 1rem;
             border-radius: 1rem 1rem 0 0;
         }
         
@@ -394,6 +394,18 @@
             font-weight: 600;
         }
         
+        .total-price {
+            background: linear-gradient(135deg, var(--warning) 0%, #d97706 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.75rem;
+            font-weight: 700;
+            font-size: 1.125rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
         .logo {
             display: flex;
             align-items: center;
@@ -419,11 +431,19 @@
         <div class="card">
             <!-- Header -->
             <div class="header-gradient">
-                <div class="flex justify-between items-center mb-4">
-                    <div class="logo">
+                <div class="flex flex-col items-center mb-2">
+                    <div class="logo mb-2">
                         <div class="logo-icon">🍕</div>
                         <span>KhusLand</span>
                     </div>
+                    <div class="total-price">
+                        <span>💰 Gesamtpreis:</span>
+                        <span id="totalPrice">0$</span>
+                    </div>
+                </div>
+                
+                <div class="flex justify-between items-center">
+                    <div></div> <!-- Platzhalter für Symmetrie -->
                     
                     <div class="flex items-center gap-4">
                         <div class="theme-toggle">
@@ -439,19 +459,6 @@
                         </button>
                     </div>
                 </div>
-                
-                <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                    <div class="flex-1">
-                        <!-- Tabs wurden entfernt -->
-                    </div>
-                    
-                    <div class="flex flex-col items-center">
-                        <img id="headerImage" src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&auto=format&fit=crop&w=80&q=80" alt="Header Image" class="rounded-lg shadow-md mb-2" style="width: 60px; height: 60px; object-fit: cover;">
-                        <h2 id="calculatorTitle" class="text-lg font-bold text-center">🍕 ITALIANA Bestellrechner 🍕</h2>
-                    </div>
-                    
-                    <!-- Personen-Zähler wurde entfernt -->
-                </div>
             </div>
             
             <!-- Main Content -->
@@ -459,8 +466,6 @@
                 <div id="categoriesGrid" class="grid-responsive mb-8">
                     <!-- Categories will be populated by JavaScript -->
                 </div>
-                
-                <!-- Bestellübersicht wurde entfernt -->
                 
                 <!-- Action Buttons -->
                 <div class="action-buttons flex justify-between gap-4 mt-6">
@@ -517,14 +522,9 @@
                         <h4 class="text-lg font-bold mb-3">Allgemeine Einstellungen</h4>
                         <div class="mb-4">
                             <label for="titleInput" class="block text-sm font-medium mb-2">Titel ändern:</label>
-                            <input type="text" id="titleInput" placeholder="Neuer Titel" class="w-full p-3 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600" value="🍕 ITALIANA Bestellrechner 🍕">
-                        </div>
-                        <div class="mb-4">
-                            <label for="imageUpload" class="block text-sm font-medium mb-2">Bild hochladen:</label>
-                            <input type="file" id="imageUpload" accept="image/*" class="w-full p-3 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600">
+                            <input type="text" id="titleInput" placeholder="Neuer Titel" class="w-full p-3 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600" value="KhusLand">
                         </div>
                         <button id="saveGeneralSettings" class="w-full btn btn-primary">Speichern</button>
-                        <button id="resetImage" class="mt-2 w-full btn btn-danger">Bild zurücksetzen</button>
                     </div>
 
                     <button id="closeSettings" class="mt-6 w-full btn btn-secondary">Schließen</button>
@@ -568,8 +568,7 @@
 
         let currentPreise = { ...defaultPreise };
         let categories = ['SPEISEN', 'GETRÄNKE', 'ALKOHOL', 'DESSERTS', 'PREMIUM', 'RAUCHWAREN'];
-        let customTitle = '🍕 ITALIANA Bestellrechner 🍕';
-        let customImage = 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&auto=format&fit=crop&w=80&q=80';
+        let customTitle = 'KhusLand';
 
         // DOM-Elemente
         const elements = {
@@ -583,16 +582,13 @@
             passwordError: document.getElementById('passwordError'),
             editSection: document.getElementById('editSection'),
             closeSettings: document.getElementById('closeSettings'),
-            headerImage: document.getElementById('headerImage'),
-            calculatorTitle: document.getElementById('calculatorTitle'),
+            totalPrice: document.getElementById('totalPrice'),
             itemEditorContent: document.getElementById('itemEditorContent'),
             categoryEditorContent: document.getElementById('categoryEditorContent'),
             categoryName: document.getElementById('categoryName'),
             saveCategory: document.getElementById('saveCategory'),
             titleInput: document.getElementById('titleInput'),
-            imageUpload: document.getElementById('imageUpload'),
-            saveGeneralSettings: document.getElementById('saveGeneralSettings'),
-            resetImage: document.getElementById('resetImage')
+            saveGeneralSettings: document.getElementById('saveGeneralSettings')
         };
 
         // Initialisierung
@@ -600,6 +596,7 @@
             renderCalculatorInputs();
             setupEventListeners();
             applySavedTheme();
+            berechne(); // Initiale Berechnung
         }
 
         // Event Listeners
@@ -627,7 +624,6 @@
             
             // General settings
             elements.saveGeneralSettings.addEventListener('click', saveGeneralSettings);
-            elements.resetImage.addEventListener('click', resetImage);
             
             // Close modal on outside click
             elements.settingsModal.addEventListener('click', (e) => {
@@ -681,7 +677,13 @@
                     const id = e.target.dataset.id;
                     const action = e.target.dataset.action;
                     changeQuantity(id, action === 'increase' ? 1 : -1);
+                    berechne(); // Gesamtpreis neu berechnen
                 });
+            });
+            
+            // Event listeners für die Inputs
+            document.querySelectorAll('#categoriesGrid input[type="number"]').forEach(input => {
+                input.addEventListener('input', berechne); // Gesamtpreis neu berechnen
             });
         }
 
@@ -694,6 +696,23 @@
                 if (currentValue < 0) currentValue = 0;
                 input.value = currentValue;
             }
+        }
+
+        // Gesamtpreis berechnen
+        function berechne() {
+            let summe = 0;
+            
+            for (const key in currentPreise) {
+                const inputElement = document.getElementById(key);
+                if (inputElement) {
+                    const anzahl = parseInt(inputElement.value) || 0;
+                    if (anzahl > 0) {
+                        summe += anzahl * currentPreise[key].price;
+                    }
+                }
+            }
+            
+            elements.totalPrice.textContent = `${summe}$`;
         }
 
         // Theme functions
@@ -716,6 +735,7 @@
                 document.querySelectorAll('#categoriesGrid input[type="number"]').forEach(input => {
                     input.value = 0;
                 });
+                berechne(); // Gesamtpreis neu berechnen
             }
         }
 
@@ -974,32 +994,11 @@
 
         function saveGeneralSettings() {
             const newTitle = elements.titleInput.value.trim();
-            const imageFile = elements.imageUpload.files[0];
-
             if (newTitle) {
                 customTitle = newTitle;
-                elements.calculatorTitle.textContent = newTitle;
-                document.title = newTitle;
-            }
-
-            if (imageFile) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    customImage = e.target.result;
-                    elements.headerImage.src = customImage;
-                    showNotification('Einstellungen gespeichert!');
-                };
-                reader.readAsDataURL(imageFile);
-            } else {
+                document.querySelector('.logo span').textContent = newTitle;
+                document.title = newTitle + ' Bestellrechner';
                 showNotification('Einstellungen gespeichert!');
-            }
-        }
-
-        function resetImage() {
-            if (confirm('Sicher, dass Sie das Bild zurücksetzen möchten?')) {
-                customImage = 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&auto=format&fit=crop&w=80&q=80';
-                elements.headerImage.src = customImage;
-                showNotification('Bild zurückgesetzt!');
             }
         }
 
