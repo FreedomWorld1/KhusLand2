@@ -533,14 +533,6 @@
         </div>
     </div>
 
-    <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="modal-overlay hidden">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg flex flex-col items-center">
-            <div class="loading-spinner mb-4"></div>
-            <p class="text-gray-700 dark:text-gray-300">Lade Daten...</p>
-        </div>
-    </div>
-
     <script>
         // Datenmodell
         const defaultPreise = {
@@ -581,7 +573,7 @@
             loginButton: document.getElementById('loginButton'),
             passwordError: document.getElementById('passwordError'),
             editSection: document.getElementById('editSection'),
-            closeSettings: document.getElementById('closeSettings'),
+            closeSettings: document.getElementById('closeSettings'), // Diese Zeile war das Problem
             totalPrice: document.getElementById('totalPrice'),
             itemEditorContent: document.getElementById('itemEditorContent'),
             categoryEditorContent: document.getElementById('categoryEditorContent'),
@@ -609,7 +601,9 @@
             elements.settingsButton.addEventListener('click', openSettings);
             
             // Settings Modal
-            elements.closeSettings.addEventListener('click', closeSettings);
+            if (elements.closeSettings) {
+                elements.closeSettings.addEventListener('click', closeSettings);
+            }
             elements.loginButton.addEventListener('click', checkPassword);
             
             // Editor tabs
