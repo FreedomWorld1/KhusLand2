@@ -6,9 +6,6 @@
     <title>ITALIANA Bestellrechner</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
     <style>
         :root {
             --primary: #3b82f6;
@@ -384,26 +381,15 @@
             darkMode: 'class',
         }
 
-        // Firebase Konfiguration
-        const firebaseConfig = {
-            apiKey: "AIzaSyCw4nadHCIRcouTJJoQ3ElToiVVFr5Rufo",
-            authDomain: "khusland-b7d13.firebaseapp.com",
-            databaseURL: "https://khusland-b7d13-default-rtdb.firebaseio.com",
-            projectId: "khusland-b7d13",
-            storageBucket: "khusland-b7d13.firebasestorage.app",
-            messagingSenderId: "69573193613",
-            appId: "1:69573193613:web:86c4d839281b1e343cd7c4",
-            measurementId: "G-JSCWR4207G"
+        // API-Konfiguration
+        const JSONBIN_MASTER_KEY = '$2a$10$XucE.nX.IQOHF.VOBmrgbOunJNhPV3Mu4L1XeqvWmW8iYWoYe2Y3a';
+        const JSONBIN_BIN_ID = '68ed7d3443b1c97be9665d9e';
+        const JSONBIN_URL = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
+        const JSONBIN_HEADERS = {
+            'X-Master-Key': JSONBIN_MASTER_KEY,
+            'Content-Type': 'application/json',
+            'X-Bin-Versioning': 'false'
         };
-
-        // Firebase initialisieren
-        try {
-            firebase.initializeApp(firebaseConfig);
-            const db = firebase.firestore();
-            console.log("Firebase erfolgreich initialisiert");
-        } catch (error) {
-            console.error("Fehler bei Firebase-Initialisierung:", error);
-        }
 
         const ENCODED_PASSWORD = "S1JDLTA4MTU=";
         
@@ -451,38 +437,34 @@
             document.getElementById('loadingOverlay').classList.add('hidden');
         }
 
-        // Daten laden und speichern mit Firebase
+        // Daten laden und speichern
         async function loadPreise() {
             showLoading();
             try {
-                if (!firebase.apps.length) {
-                    console.error("Firebase nicht initialisiert");
-                    throw new Error("Firebase nicht initialisiert");
+                const response = await fetch(JSONBIN_URL, {
+                    headers: {
+                        'X-Master-Key': JSONBIN_MASTER_KEY,
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
-
-                const docRef = db.collection('restaurant').doc('bestellrechner');
-                const doc = await docRef.get();
-                
-                if (doc.exists) {
-                    const data = doc.data();
-                    currentPreise = data.items || { ...defaultPreise };
-                    categories = data.categories || Object.values(defaultPreise).map(item => item.category).filter((value, index, self) => self.indexOf(value) === index);
-                    customTitle = data.title || 'ITALIANA';
-                    customImage = data.image || DEFAULT_IMAGE_URL;
-                    console.log("Daten erfolgreich von Firebase geladen.");
+                const data = await response.json();
+                if (data && data.record) {
+                    currentPreise = data.record.items || { ...defaultPreise };
+                    categories = data.record.categories || Object.values(defaultPreise).map(item => item.category).filter((value, index, self) => self.indexOf(value) === index);
+                    customTitle = data.record.title || 'ITALIANA';
+                    customImage = data.record.image || DEFAULT_IMAGE_URL;
+                    console.log("Daten erfolgreich vom Server geladen.");
                 } else {
-                    console.warn("Keine Daten in Firebase gefunden. Lade Standardwerte.");
+                    console.warn("Serverdaten leer oder im falschen Format. Lade Standardwerte.");
                     currentPreise = { ...defaultPreise };
                     categories = Object.values(defaultPreise).map(item => item.category).filter((value, index, self) => self.indexOf(value) === index);
                     customTitle = 'ITALIANA';
                     customImage = DEFAULT_IMAGE_URL;
-                    
-                    // Standarddaten in Firebase speichern
-                    await savePreise();
                 }
             } catch (error) {
-                console.error("Fehler beim Laden der Daten von Firebase:", error);
-                alert("Fehler beim Laden der Daten. Lade Standardwerte.");
+                console.error("Fehler beim Laden der Daten vom Server:", error);
                 currentPreise = { ...defaultPreise };
                 categories = Object.values(defaultPreise).map(item => item.category).filter((value, index, self) => self.indexOf(value) === index);
                 customTitle = 'ITALIANA';
@@ -497,23 +479,23 @@
         async function savePreise() {
             showLoading();
             try {
-                if (!firebase.apps.length) {
-                    console.error("Firebase nicht initialisiert");
-                    throw new Error("Firebase nicht initialisiert");
-                }
-
                 const dataToSave = {
                     items: currentPreise,
                     categories: categories,
                     title: customTitle,
-                    image: customImage,
-                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                    image: customImage
                 };
-                
-                await db.collection('restaurant').doc('bestellrechner').set(dataToSave);
-                console.log("Daten erfolgreich in Firebase gespeichert.");
+                const response = await fetch(JSONBIN_URL, {
+                    method: 'PUT',
+                    headers: JSONBIN_HEADERS,
+                    body: JSON.stringify(dataToSave)
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                console.log("Daten erfolgreich auf dem Server gespeichert.");
             } catch (error) {
-                console.error("Fehler beim Speichern der Daten in Firebase:", error);
+                console.error("Fehler beim Speichern der Daten auf dem Server:", error);
                 alert("Fehler beim Speichern der Daten. Bitte versuchen Sie es erneut.");
             } finally {
                 hideLoading();
