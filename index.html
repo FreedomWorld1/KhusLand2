@@ -419,7 +419,7 @@
         <div class="card">
             <!-- Header -->
             <div class="header-gradient">
-                <div class="flex justify-between items-center mb-6">
+                <div class="flex justify-between items-center mb-4">
                     <div class="logo">
                         <div class="logo-icon">🍕</div>
                         <span>KhusLand</span>
@@ -446,8 +446,8 @@
                     </div>
                     
                     <div class="flex flex-col items-center">
-                        <img id="headerImage" src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&auto=format&fit=crop&w=150&q=80" alt="Header Image" class="rounded-lg shadow-md mb-2" style="width: 120px; height: 120px; object-fit: cover;">
-                        <h2 id="calculatorTitle" class="text-2xl font-bold text-center">🍕 ITALIANA Bestellrechner 🍕</h2>
+                        <img id="headerImage" src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&auto=format&fit=crop&w=80&q=80" alt="Header Image" class="rounded-lg shadow-md mb-2" style="width: 60px; height: 60px; object-fit: cover;">
+                        <h2 id="calculatorTitle" class="text-lg font-bold text-center">🍕 ITALIANA Bestellrechner 🍕</h2>
                     </div>
                     
                     <!-- Personen-Zähler wurde entfernt -->
@@ -467,10 +467,6 @@
                     <button id="resetButton" class="btn btn-danger">
                         <span>🗑️</span>
                         Alle zurücksetzen
-                    </button>
-                    <button id="quickOrder" class="btn btn-primary">
-                        <span>⚡</span>
-                        Schnellbestellung
                     </button>
                 </div>
             </div>
@@ -573,7 +569,7 @@
         let currentPreise = { ...defaultPreise };
         let categories = ['SPEISEN', 'GETRÄNKE', 'ALKOHOL', 'DESSERTS', 'PREMIUM', 'RAUCHWAREN'];
         let customTitle = '🍕 ITALIANA Bestellrechner 🍕';
-        let customImage = 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&auto=format&fit=crop&w=150&q=80';
+        let customImage = 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&auto=format&fit=crop&w=80&q=80';
 
         // DOM-Elemente
         const elements = {
@@ -581,7 +577,6 @@
             categoriesGrid: document.getElementById('categoriesGrid'),
             settingsButton: document.getElementById('settingsButton'),
             resetButton: document.getElementById('resetButton'),
-            quickOrder: document.getElementById('quickOrder'),
             settingsModal: document.getElementById('settingsModal'),
             passwordInput: document.getElementById('passwordInput'),
             loginButton: document.getElementById('loginButton'),
@@ -614,7 +609,6 @@
             
             // Buttons
             elements.resetButton.addEventListener('click', resetRechner);
-            elements.quickOrder.addEventListener('click', quickOrder);
             elements.settingsButton.addEventListener('click', openSettings);
             
             // Settings Modal
@@ -723,16 +717,6 @@
                     input.value = 0;
                 });
             }
-        }
-
-        // Quick order function
-        function quickOrder() {
-            // Setze Beispielbestellung
-            document.getElementById('beluga').value = 2;
-            document.getElementById('doener').value = 3;
-            document.getElementById('fiji').value = 4;
-            document.getElementById('dom').value = 1;
-            showNotification('Schnellbestellung geladen!');
         }
 
         // Settings functions
@@ -1013,7 +997,7 @@
 
         function resetImage() {
             if (confirm('Sicher, dass Sie das Bild zurücksetzen möchten?')) {
-                customImage = 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&auto=format&fit=crop&w=150&q=80';
+                customImage = 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&auto=format&fit=crop&w=80&q=80';
                 elements.headerImage.src = customImage;
                 showNotification('Bild zurückgesetzt!');
             }
