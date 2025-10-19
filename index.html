@@ -31,84 +31,74 @@
 
         body {
             font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
-            background: linear-gradient(135deg, var(--background) 0%, #e2e8f0 100%);
+            background: var(--background);
             color: var(--text);
             transition: all 0.3s ease;
             min-height: 100vh;
         }
 
-        .dark body {
-            background: linear-gradient(135deg, var(--background) 0%, #1e293b 100%);
-        }
-
         .glass-card {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            background: var(--surface);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .dark .glass-card {
-            background: rgba(30, 41, 59, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
         .category-card {
             background: var(--surface);
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            transition: all 0.2s ease;
+            border: 1px solid rgba(0, 0, 0, 0.05);
         }
 
         .dark .category-card {
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .category-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .item-card {
             background: transparent;
-            border-radius: 12px;
-            padding: 12px;
-            margin-bottom: 8px;
+            border-radius: 8px;
+            padding: 8px;
+            margin-bottom: 6px;
             transition: all 0.2s ease;
-            border: 1px solid transparent;
         }
 
         .item-card:hover {
             background: rgba(59, 130, 246, 0.05);
-            border-color: rgba(59, 130, 246, 0.1);
-        }
-
-        .dark .item-card:hover {
-            background: rgba(96, 165, 250, 0.05);
         }
 
         .quantity-control {
             display: flex;
             align-items: center;
-            border-radius: 12px;
+            border-radius: 8px;
             overflow: hidden;
             background: var(--surface);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             border: 1px solid rgba(0, 0, 0, 0.1);
         }
 
         .dark .quantity-control {
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .quantity-control button {
             background: transparent;
             border: none;
-            padding: 8px 12px;
+            padding: 6px 8px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 12px;
             color: var(--primary);
             transition: all 0.2s ease;
         }
@@ -118,52 +108,52 @@
         }
 
         .quantity-control input {
-            width: 50px;
+            width: 40px;
             text-align: center;
             background: transparent;
             border: none;
-            padding: 8px 4px;
+            padding: 6px 2px;
             color: var(--text);
             font-weight: 600;
-            font-size: 14px;
+            font-size: 12px;
         }
 
         .result-card {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            color: white;
-            border-radius: 20px;
-            box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3);
+            background: var(--surface);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .dark .result-card {
+            border: 1px solid rgba(96, 165, 250, 0.2);
         }
 
         .btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: 12px 24px;
-            border-radius: 12px;
+            padding: 8px 16px;
+            border-radius: 8px;
             font-weight: 600;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             border: none;
             cursor: pointer;
-            gap: 8px;
-            font-size: 14px;
+            gap: 6px;
+            font-size: 12px;
         }
 
         .btn-primary {
             background: var(--primary);
             color: white;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
 
         .btn-primary:hover {
             background: var(--primary-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
         }
 
         .btn-secondary {
             background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
             color: var(--text);
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
@@ -179,13 +169,10 @@
         .btn-danger {
             background: #ef4444;
             color: white;
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
         }
 
         .btn-danger:hover {
             background: #dc2626;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
         }
 
         .modal-overlay {
@@ -200,13 +187,13 @@
             justify-content: center;
             align-items: center;
             z-index: 1000;
-            padding: 20px;
+            padding: 16px;
         }
 
         .modal-content {
             background: var(--surface);
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
             max-width: 500px;
             width: 100%;
             max-height: 90vh;
@@ -214,11 +201,11 @@
         }
 
         .loading-spinner {
-            border: 3px solid rgba(59, 130, 246, 0.3);
-            border-top: 3px solid var(--primary);
+            border: 2px solid rgba(59, 130, 246, 0.3);
+            border-top: 2px solid var(--primary);
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 30px;
+            height: 30px;
             animation: spin 1s linear infinite;
         }
 
@@ -227,97 +214,81 @@
             100% { transform: rotate(360deg); }
         }
 
-        .fade-in {
-            animation: fadeIn 0.5s ease-in-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
         .category-header {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--primary);
             font-weight: 700;
         }
     </style>
 </head>
 <body class="dark:bg-gray-900 dark:text-gray-50 transition-colors duration-300">
-    <div class="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
-        <div class="glass-card rounded-3xl p-6 w-full max-w-7xl mx-auto fade-in">
+    <div class="min-h-screen py-6 px-4 sm:px-6 lg:px-8">
+        <div class="glass-card rounded-2xl p-4 w-full max-w-6xl mx-auto">
             <!-- Header -->
-            <div class="flex flex-col lg:flex-row justify-between items-center mb-8 gap-6">
-                <div class="flex items-center gap-4">
+            <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+                <div class="flex items-center gap-3">
                     <div class="relative">
-                        <img id="headerImage" src="https://via.placeholder.com/80" alt="Restaurant Logo" class="rounded-2xl shadow-lg w-20 h-20 object-cover">
-                        <div class="absolute inset-0 rounded-2xl border-2 border-white/20"></div>
+                        <img id="headerImage" src="https://via.placeholder.com/60" alt="Restaurant Logo" class="rounded-xl shadow w-12 h-12 object-cover">
                     </div>
                     <div>
-                        <h1 id="calculatorTitle" class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">ITALIANA</h1>
-                        <p class="text-gray-600 dark:text-gray-400">Bestellrechner</p>
+                        <h1 id="calculatorTitle" class="text-xl font-bold text-blue-600 dark:text-blue-400">ITALIANA</h1>
+                        <p class="text-gray-600 dark:text-gray-400 text-xs">Bestellrechner</p>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2">
                     <!-- Theme Toggle -->
-                    <button id="themeToggle" class="btn btn-secondary">
-                        <i class="fas fa-moon"></i>
+                    <button id="themeToggle" class="btn btn-secondary p-2">
+                        <i class="fas fa-moon text-xs"></i>
                     </button>
                     
                     <!-- Settings Button -->
-                    <button onclick="openSettings()" class="btn btn-secondary">
-                        <i class="fas fa-cog"></i>
+                    <button onclick="openSettings()" class="btn btn-secondary p-2">
+                        <i class="fas fa-cog text-xs"></i>
                     </button>
 
                     <!-- Reset Button -->
                     <button onclick="resetRechner()" class="btn btn-danger">
-                        <i class="fas fa-trash"></i>
+                        <i class="fas fa-trash text-xs"></i>
                         Reset
                     </button>
                 </div>
             </div>
 
             <!-- Categories Grid -->
-            <div id="categoriesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+            <div id="categoriesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-6">
                 <!-- Categories will be dynamically inserted here -->
             </div>
 
-            <!-- Results Card -->
-            <div class="result-card p-6 mb-6 fade-in">
-                <div class="flex justify-between items-start mb-4">
-                    <div>
-                        <h3 class="text-lg font-semibold text-white/90">Bestellübersicht</h3>
-                        <p class="text-white/70 text-sm">Aktuelle Berechnung</p>
-                    </div>
-                    <div class="flex gap-2">
-                        <button onclick="copyText('grund')" class="bg-white/20 hover:bg-white/30 text-white p-2 rounded-lg transition-colors" title="Bestelltext kopieren">
+            <!-- Compact Results Card -->
+            <div class="result-card p-4 mb-4">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-200">Bestellübersicht</h3>
+                    <div class="flex gap-1">
+                        <button onclick="copyText('grund')" class="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 p-1 rounded text-xs" title="Bestelltext kopieren">
                             <i class="fas fa-copy"></i>
                         </button>
-                        <button onclick="copyPriceText()" class="bg-white/20 hover:bg-white/30 text-white p-2 rounded-lg transition-colors" title="Preis kopieren">
+                        <button onclick="copyPriceText()" class="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 p-1 rounded text-xs" title="Preis kopieren">
                             <i class="fas fa-dollar-sign"></i>
                         </button>
                     </div>
                 </div>
                 
-                <div class="space-y-4">
+                <div class="space-y-2">
                     <div>
-                        <p class="text-white/80 text-sm font-medium mb-2">Bestelltext:</p>
-                        <div id="grund" class="text-white text-lg font-semibold bg-white/10 p-3 rounded-xl">Noch nichts berechnet</div>
+                        <p class="text-gray-600 dark:text-gray-400 text-xs font-medium mb-1">Bestelltext:</p>
+                        <div id="grund" class="text-gray-800 dark:text-gray-200 text-sm bg-gray-50 dark:bg-gray-800 p-2 rounded-lg min-h-[40px] max-h-[60px] overflow-y-auto">Noch nichts berechnet</div>
                     </div>
                     
-                    <div class="flex justify-between items-center pt-4 border-t border-white/20">
-                        <span class="text-white/80 text-lg font-medium">Gesamtpreis:</span>
-                        <span id="preis" class="text-3xl font-bold text-white">0$</span>
+                    <div class="flex justify-between items-center pt-2 border-t border-gray-200 dark:border-gray-700">
+                        <span class="text-gray-700 dark:text-gray-300 text-sm font-medium">Gesamtpreis:</span>
+                        <span id="preis" class="text-lg font-bold text-blue-600 dark:text-blue-400">0$</span>
                     </div>
                 </div>
             </div>
 
             <!-- Success Message -->
-            <div id="kopiertHinweis" class="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-xl shadow-lg transition-all duration-300 transform translate-x-full">
-                <div class="flex items-center gap-2">
+            <div id="kopiertHinweis" class="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow text-sm transition-all duration-300 transform translate-x-full">
+                <div class="flex items-center gap-1">
                     <i class="fas fa-check-circle"></i>
                     <span>Kopiert!</span>
                 </div>
@@ -327,47 +298,47 @@
 
     <!-- Settings Modal -->
     <div id="settingsModal" class="modal-overlay hidden">
-        <div class="modal-content p-6">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-bold">Einstellungen</h3>
-                <button onclick="closeSettings()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-xl">
+        <div class="modal-content p-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold">Einstellungen</h3>
+                <button onclick="closeSettings()" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
 
             <div id="passwordSection">
-                <div class="mb-4">
-                    <label for="passwordInput" class="block text-sm font-medium mb-2">Passwort:</label>
-                    <input type="password" id="passwordInput" class="w-full p-3 rounded-xl bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-100" placeholder="Passwort eingeben">
+                <div class="mb-3">
+                    <label for="passwordInput" class="block text-sm font-medium mb-1">Passwort:</label>
+                    <input type="password" id="passwordInput" class="w-full p-2 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-900 dark:text-gray-100 text-sm" placeholder="Passwort eingeben">
                 </div>
-                <button onclick="checkPassword()" class="btn btn-primary w-full">
+                <button onclick="checkPassword()" class="btn btn-primary w-full text-sm">
                     <i class="fas fa-sign-in-alt"></i>
                     Anmelden
                 </button>
-                <p id="passwordError" class="text-red-500 text-sm mt-2 hidden text-center">
+                <p id="passwordError" class="text-red-500 text-xs mt-1 hidden text-center">
                     <i class="fas fa-exclamation-triangle"></i> Falsches Passwort!
                 </p>
             </div>
 
             <div id="editSection" class="hidden">
-                <div class="flex gap-2 mb-6 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">
-                    <button class="flex-1 py-2 px-4 rounded-lg transition-all settings-tab active" onclick="showEditor('item')">Artikel</button>
-                    <button class="flex-1 py-2 px-4 rounded-lg transition-all settings-tab" onclick="showEditor('category')">Kategorien</button>
-                    <button class="flex-1 py-2 px-4 rounded-lg transition-all settings-tab" onclick="showEditor('general')">Allgemein</button>
+                <div class="flex gap-1 mb-4 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
+                    <button class="flex-1 py-1 px-2 rounded text-xs transition-all settings-tab active" onclick="showEditor('item')">Artikel</button>
+                    <button class="flex-1 py-1 px-2 rounded text-xs transition-all settings-tab" onclick="showEditor('category')">Kategorien</button>
+                    <button class="flex-1 py-1 px-2 rounded text-xs transition-all settings-tab" onclick="showEditor('general')">Allgemein</button>
                 </div>
 
                 <div id="itemEditor" class="hidden">
-                    <h4 class="text-lg font-bold mb-4">Artikel bearbeiten</h4>
+                    <h4 class="text-base font-bold mb-3">Artikel bearbeiten</h4>
                     <div id="itemEditorContent"></div>
                 </div>
 
                 <div id="categoryEditor" class="hidden">
-                    <h4 class="text-lg font-bold mb-4">Kategorien bearbeiten</h4>
-                    <div id="categoryEditorContent" class="space-y-4 mb-6"></div>
-                    <div class="border-t border-gray-300 dark:border-gray-600 pt-4">
-                        <h5 class="font-semibold mb-3">Neue Kategorie:</h5>
-                        <input type="text" id="categoryName" placeholder="Kategoriename" class="w-full p-3 rounded-xl bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-100 mb-3">
-                        <button onclick="saveCategory()" class="btn btn-primary w-full">
+                    <h4 class="text-base font-bold mb-3">Kategorien bearbeiten</h4>
+                    <div id="categoryEditorContent" class="space-y-3 mb-4"></div>
+                    <div class="border-t border-gray-300 dark:border-gray-600 pt-3">
+                        <h5 class="font-semibold mb-2 text-sm">Neue Kategorie:</h5>
+                        <input type="text" id="categoryName" placeholder="Kategoriename" class="w-full p-2 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-900 dark:text-gray-100 text-sm mb-2">
+                        <button onclick="saveCategory()" class="btn btn-primary w-full text-sm">
                             <i class="fas fa-plus"></i>
                             Hinzufügen
                         </button>
@@ -375,21 +346,21 @@
                 </div>
                 
                 <div id="generalSettingsEditor" class="hidden">
-                    <h4 class="text-lg font-bold mb-4">Allgemeine Einstellungen</h4>
-                    <div class="space-y-4">
+                    <h4 class="text-base font-bold mb-3">Allgemeine Einstellungen</h4>
+                    <div class="space-y-3">
                         <div>
-                            <label for="titleInput" class="block text-sm font-medium mb-2">Titel:</label>
-                            <input type="text" id="titleInput" placeholder="Restaurant Name" class="w-full p-3 rounded-xl bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-100">
+                            <label for="titleInput" class="block text-sm font-medium mb-1">Titel:</label>
+                            <input type="text" id="titleInput" placeholder="Restaurant Name" class="w-full p-2 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-900 dark:text-gray-100 text-sm">
                         </div>
                         <div>
-                            <label for="imageUpload" class="block text-sm font-medium mb-2">Logo:</label>
-                            <input type="file" id="imageUpload" accept="image/*" class="w-full p-3 rounded-xl bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-100">
+                            <label for="imageUpload" class="block text-sm font-medium mb-1">Logo:</label>
+                            <input type="file" id="imageUpload" accept="image/*" class="w-full p-2 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-900 dark:text-gray-100 text-sm">
                         </div>
-                        <button onclick="saveGeneralSettings()" class="btn btn-primary w-full">
+                        <button onclick="saveGeneralSettings()" class="btn btn-primary w-full text-sm">
                             <i class="fas fa-save"></i>
                             Speichern
                         </button>
-                        <button onclick="resetImage()" class="btn btn-danger w-full">
+                        <button onclick="resetImage()" class="btn btn-danger w-full text-sm">
                             <i class="fas fa-undo"></i>
                             Logo zurücksetzen
                         </button>
@@ -450,8 +421,8 @@
         let currentPreise = {};
         let categories = ['SPEISEN', 'GETRÄNKE', 'ALKOHOL', 'DESSERTS', 'PREMIUM', 'RAUCHWAREN'];
         let customTitle = 'ITALIANA';
-        let customImage = 'https://via.placeholder.com/80';
-        const DEFAULT_IMAGE_URL = 'https://via.placeholder.com/80';
+        let customImage = 'https://via.placeholder.com/60';
+        const DEFAULT_IMAGE_URL = 'https://via.placeholder.com/60';
 
         // Hilfsfunktionen
         function decodeBase64(str) {
@@ -543,27 +514,27 @@
             
             categories.forEach(category => {
                 const categoryDiv = document.createElement('div');
-                categoryDiv.className = 'category-card p-6 fade-in';
+                categoryDiv.className = 'category-card p-4';
                 categoryDiv.innerHTML = `
-                    <h2 class="category-header text-xl font-bold mb-4 text-center">${category.toUpperCase()}</h2>
-                    <div class="space-y-3"></div>
+                    <h2 class="category-header text-base font-bold mb-3 text-center">${category.toUpperCase()}</h2>
+                    <div class="space-y-2"></div>
                 `;
                 categoriesGrid.appendChild(categoryDiv);
 
-                const itemsDiv = categoryDiv.querySelector('.space-y-3');
+                const itemsDiv = categoryDiv.querySelector('.space-y-2');
                 const itemsInCategory = Object.values(currentPreise).filter(item => item.category === category);
 
                 if (itemsInCategory.length === 0) {
-                    itemsDiv.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-center py-4">Keine Artikel</p>';
+                    itemsDiv.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-center py-2 text-xs">Keine Artikel</p>';
                 } else {
                     itemsInCategory.forEach(item => {
                         const div = document.createElement('div');
                         div.className = 'item-card';
                         div.innerHTML = `
                             <div class="flex items-center justify-between">
-                                <div class="flex-1 min-w-0 mr-4">
-                                    <div class="font-medium text-gray-800 dark:text-gray-200 truncate">${item.name}</div>
-                                    <div class="text-sm text-blue-600 dark:text-blue-400 font-semibold">${item.price}$</div>
+                                <div class="flex-1 min-w-0 mr-3">
+                                    <div class="font-medium text-gray-800 dark:text-gray-200 text-sm truncate">${item.name}</div>
+                                    <div class="text-xs text-blue-600 dark:text-blue-400 font-semibold">${item.price}$</div>
                                 </div>
                                 <div class="quantity-control">
                                     <button onclick="changeQuantity('${item.id}', -1)" class="hover:bg-gray-100 dark:hover:bg-gray-700">
@@ -682,9 +653,9 @@
             const themeToggle = document.getElementById('themeToggle');
             const icon = themeToggle.querySelector('i');
             if (document.documentElement.classList.contains('dark')) {
-                icon.className = 'fas fa-sun';
+                icon.className = 'fas fa-sun text-xs';
             } else {
-                icon.className = 'fas fa-moon';
+                icon.className = 'fas fa-moon text-xs';
             }
         }
 
@@ -733,11 +704,11 @@
             document.getElementById('generalSettingsEditor').classList.add('hidden');
             
             document.querySelectorAll('.settings-tab').forEach(tab => {
-                tab.classList.remove('active', 'bg-white', 'dark:bg-gray-700', 'shadow-sm');
+                tab.classList.remove('active', 'bg-white', 'dark:bg-gray-700');
             });
 
             const activeTab = document.querySelector(`.settings-tab:nth-child(${editorType === 'item' ? 1 : editorType === 'category' ? 2 : 3})`);
-            activeTab.classList.add('active', 'bg-white', 'dark:bg-gray-700', 'shadow-sm');
+            activeTab.classList.add('active', 'bg-white', 'dark:bg-gray-700');
 
             if (editorType === 'item') {
                 document.getElementById('itemEditor').classList.remove('hidden');
@@ -758,7 +729,7 @@
 
             const categorySelect = document.createElement('select');
             categorySelect.id = 'editorCategorySelect';
-            categorySelect.className = 'w-full p-3 rounded-xl bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-100 mb-4';
+            categorySelect.className = 'w-full p-2 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-900 dark:text-gray-100 text-sm mb-3';
             categories.forEach(cat => {
                 const option = document.createElement('option');
                 option.value = cat;
@@ -769,19 +740,19 @@
 
             const itemsListDiv = document.createElement('div');
             itemsListDiv.id = 'editorItemsList';
-            itemsListDiv.className = 'space-y-3 mb-6 max-h-60 overflow-y-auto';
+            itemsListDiv.className = 'space-y-2 mb-4 max-h-48 overflow-y-auto';
             itemEditorDiv.appendChild(itemsListDiv);
 
             const itemForm = document.createElement('div');
-            itemForm.className = 'border-t border-gray-300 dark:border-gray-600 pt-4';
+            itemForm.className = 'border-t border-gray-300 dark:border-gray-600 pt-3';
             itemForm.innerHTML = `
-                <h5 class="font-semibold mb-3">Artikel hinzufügen/bearbeiten:</h5>
+                <h5 class="font-semibold mb-2 text-sm">Artikel hinzufügen/bearbeiten:</h5>
                 <input type="hidden" id="editItemId">
-                <div class="space-y-3">
-                    <input type="text" id="itemName" placeholder="Artikelname" class="w-full p-3 rounded-xl bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-100">
-                    <input type="number" id="itemPrice" placeholder="Preis" class="w-full p-3 rounded-xl bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 dark:text-gray-100">
+                <div class="space-y-2">
+                    <input type="text" id="itemName" placeholder="Artikelname" class="w-full p-2 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-900 dark:text-gray-100 text-sm">
+                    <input type="number" id="itemPrice" placeholder="Preis" class="w-full p-2 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-900 dark:text-gray-100 text-sm">
                 </div>
-                <button onclick="saveItem()" class="btn btn-primary w-full mt-4">
+                <button onclick="saveItem()" class="btn btn-primary w-full mt-3 text-sm">
                     <i class="fas fa-save"></i>
                     Speichern
                 </button>
@@ -800,22 +771,22 @@
             const itemsInCategory = Object.values(currentPreise).filter(item => item.category === selectedCategory);
 
             if (itemsInCategory.length === 0) {
-                itemsListDiv.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-center py-4">Keine Artikel in dieser Kategorie.</p>';
+                itemsListDiv.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-center py-3 text-xs">Keine Artikel in dieser Kategorie.</p>';
             } else {
                 itemsInCategory.forEach(item => {
                     const div = document.createElement('div');
-                    div.className = 'flex justify-between items-center bg-gray-100 dark:bg-gray-700 p-3 rounded-xl';
+                    div.className = 'flex justify-between items-center bg-gray-100 dark:bg-gray-700 p-2 rounded-lg';
                     div.innerHTML = `
                         <div>
-                            <div class="font-medium text-gray-800 dark:text-gray-200">${item.name}</div>
-                            <div class="text-sm text-blue-600 dark:text-blue-400">${item.price}$</div>
+                            <div class="font-medium text-gray-800 dark:text-gray-200 text-sm">${item.name}</div>
+                            <div class="text-xs text-blue-600 dark:text-blue-400">${item.price}$</div>
                         </div>
-                        <div class="flex gap-2">
-                            <button onclick="editItem('${item.id}')" class="text-blue-500 hover:text-blue-700 p-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20">
-                                <i class="fas fa-edit"></i>
+                        <div class="flex gap-1">
+                            <button onclick="editItem('${item.id}')" class="text-blue-500 hover:text-blue-700 p-1 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                                <i class="fas fa-edit text-xs"></i>
                             </button>
-                            <button onclick="deleteItem('${item.id}')" class="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20">
-                                <i class="fas fa-trash"></i>
+                            <button onclick="deleteItem('${item.id}')" class="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20">
+                                <i class="fas fa-trash text-xs"></i>
                             </button>
                         </div>
                     `;
@@ -883,20 +854,20 @@
             categoryEditorDiv.innerHTML = '';
 
             const categoryListDiv = document.createElement('div');
-            categoryListDiv.className = 'space-y-3 mb-6';
+            categoryListDiv.className = 'space-y-2 mb-4';
             categoryEditorDiv.appendChild(categoryListDiv);
 
             categories.forEach(cat => {
                 const div = document.createElement('div');
-                div.className = 'flex justify-between items-center bg-gray-100 dark:bg-gray-700 p-3 rounded-xl';
+                div.className = 'flex justify-between items-center bg-gray-100 dark:bg-gray-700 p-2 rounded-lg';
                 div.innerHTML = `
-                    <span class="font-medium text-gray-800 dark:text-gray-200">${cat}</span>
-                    <div class="flex gap-2">
-                        <button onclick="editCategory('${cat}')" class="text-blue-500 hover:text-blue-700 p-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20">
-                            <i class="fas fa-edit"></i>
+                    <span class="font-medium text-gray-800 dark:text-gray-200 text-sm">${cat}</span>
+                    <div class="flex gap-1">
+                        <button onclick="editCategory('${cat}')" class="text-blue-500 hover:text-blue-700 p-1 rounded hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                            <i class="fas fa-edit text-xs"></i>
                         </button>
-                        <button onclick="deleteCategory('${cat}')" class="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20">
-                            <i class="fas fa-trash"></i>
+                        <button onclick="deleteCategory('${cat}')" class="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/20">
+                            <i class="fas fa-trash text-xs"></i>
                         </button>
                     </div>
                 `;
@@ -987,9 +958,9 @@
                     img.onload = async function() {
                         const canvas = document.createElement('canvas');
                         const ctx = canvas.getContext('2d');
-                        canvas.width = 80;
-                        canvas.height = 80;
-                        ctx.drawImage(img, 0, 0, 80, 80);
+                        canvas.width = 60;
+                        canvas.height = 60;
+                        ctx.drawImage(img, 0, 0, 60, 60);
                         customImage = canvas.toDataURL(imageFile.type);
                         await savePreise();
                         updateGeneralSettingsDisplay();
