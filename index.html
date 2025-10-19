@@ -172,70 +172,6 @@
             color: #f8fafc;
         }
         
-        .tabs-container {
-            position: relative;
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
-            background: rgba(255, 255, 255, 0.7);
-            border-radius: 0.75rem;
-            padding: 0.5rem;
-            backdrop-filter: blur(10px);
-        }
-        
-        body.dark .tabs-container {
-            background: rgba(30, 41, 59, 0.7);
-        }
-        
-        .tab-button {
-            position: relative;
-            z-index: 10;
-            padding: 0.75rem 1.5rem;
-            font-weight: 500;
-            border-radius: 0.5rem;
-            transition: all 0.3s ease;
-            background: transparent;
-            color: #64748b;
-            border: none;
-            cursor: pointer;
-            flex: 1;
-            text-align: center;
-        }
-        
-        .tab-button.active {
-            color: white;
-        }
-        
-        .tabs-slider {
-            position: absolute;
-            height: calc(100% - 1rem);
-            width: var(--tab-width, 0px);
-            left: var(--tab-left, 0px);
-            top: 0.5rem;
-            border-radius: 0.5rem;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            transition: all 0.3s ease;
-            z-index: 5;
-        }
-        
-        body.dark .tabs-slider {
-            background: linear-gradient(135deg, var(--primary-dark) 0%, #7c3aed 100%);
-        }
-        
-        .result-box {
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            border-left: 4px solid var(--primary);
-            padding: 1.5rem;
-            border-radius: 0.75rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-        
-        body.dark .result-box {
-            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-            border-left: 4px solid var(--primary-dark);
-        }
-        
         .btn {
             padding: 0.75rem 1.5rem;
             font-weight: 600;
@@ -439,15 +375,6 @@
                 grid-template-columns: 1fr;
             }
             
-            .tabs-container {
-                flex-wrap: wrap;
-            }
-            
-            .tab-button {
-                flex: 1 0 45%;
-                margin-bottom: 0.5rem;
-            }
-            
             .action-buttons {
                 flex-direction: column;
                 gap: 1rem;
@@ -465,16 +392,6 @@
             border-radius: 1rem;
             font-size: 0.875rem;
             font-weight: 600;
-        }
-        
-        .person-counter {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 0.75rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
         }
         
         .logo {
@@ -525,15 +442,7 @@
                 
                 <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                     <div class="flex-1">
-                        <h4 class="text-xl font-bold mb-2">Bestellseiten</h4>
-                        <div class="tabs-container" id="tabsContainer">
-                            <div class="tabs-slider" id="tabsSlider"></div>
-                            <button class="tab-button active" data-tab="1">Seite 1</button>
-                            <button class="tab-button" data-tab="2">Seite 2</button>
-                            <button class="tab-button" data-tab="3">Seite 3</button>
-                            <button class="tab-button" data-tab="4">Seite 4</button>
-                            <button class="tab-button" data-tab="5">Seite 5</button>
-                        </div>
+                        <!-- Tabs wurden entfernt -->
                     </div>
                     
                     <div class="flex flex-col items-center">
@@ -541,14 +450,7 @@
                         <h2 id="calculatorTitle" class="text-2xl font-bold text-center">🍕 ITALIANA Bestellrechner 🍕</h2>
                     </div>
                     
-                    <div class="person-counter">
-                        <span>👥 Personen:</span>
-                        <div class="quantity-control">
-                            <button id="decreasePerson">-</button>
-                            <input id="personCountInput" type="number" min="0" value="0">
-                            <button id="increasePerson">+</button>
-                        </div>
-                    </div>
+                    <!-- Personen-Zähler wurde entfernt -->
                 </div>
             </div>
             
@@ -558,41 +460,7 @@
                     <!-- Categories will be populated by JavaScript -->
                 </div>
                 
-                <!-- Results Box -->
-                <div class="result-box">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-lg font-bold flex items-center gap-2">
-                            <span>📋</span>
-                            Bestellübersicht
-                        </h3>
-                        <button id="copyAll" class="btn btn-primary">
-                            <span>📄</span>
-                            Alles kopieren
-                        </button>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="font-medium">Bestellgrund:</span>
-                            <button id="copyGrund" class="text-sm btn btn-secondary py-1 px-2">
-                                Kopieren
-                            </button>
-                        </div>
-                        <div id="grund" class="bg-white dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300">
-                            Noch nichts berechnet
-                        </div>
-                    </div>
-                    
-                    <div class="flex justify-between items-center">
-                        <span class="font-medium">Gesamtpreis:</span>
-                        <div class="flex items-center gap-2">
-                            <span id="preis" class="text-2xl font-bold text-green-600 dark:text-green-400">0$</span>
-                            <button id="copyPreis" class="text-sm btn btn-secondary py-1 px-2">
-                                Kopieren
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <!-- Bestellübersicht wurde entfernt -->
                 
                 <!-- Action Buttons -->
                 <div class="action-buttons flex justify-between gap-4 mt-6">
@@ -706,24 +574,12 @@
         let categories = ['SPEISEN', 'GETRÄNKE', 'ALKOHOL', 'DESSERTS', 'PREMIUM', 'RAUCHWAREN'];
         let customTitle = '🍕 ITALIANA Bestellrechner 🍕';
         let customImage = 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&auto=format&fit=crop&w=150&q=80';
-        let activeTab = 1;
-        let calculatorStates = {};
 
         // DOM-Elemente
         const elements = {
             themeToggle: document.getElementById('themeToggle'),
-            tabsContainer: document.getElementById('tabsContainer'),
-            tabsSlider: document.getElementById('tabsSlider'),
             categoriesGrid: document.getElementById('categoriesGrid'),
-            grund: document.getElementById('grund'),
-            preis: document.getElementById('preis'),
-            copyGrund: document.getElementById('copyGrund'),
-            copyPreis: document.getElementById('copyPreis'),
-            copyAll: document.getElementById('copyAll'),
             settingsButton: document.getElementById('settingsButton'),
-            personCountInput: document.getElementById('personCountInput'),
-            decreasePerson: document.getElementById('decreasePerson'),
-            increasePerson: document.getElementById('increasePerson'),
             resetButton: document.getElementById('resetButton'),
             quickOrder: document.getElementById('quickOrder'),
             settingsModal: document.getElementById('settingsModal'),
@@ -731,7 +587,6 @@
             loginButton: document.getElementById('loginButton'),
             passwordError: document.getElementById('passwordError'),
             editSection: document.getElementById('editSection'),
-            closeModal: document.getElementById('closeModal'),
             closeSettings: document.getElementById('closeSettings'),
             headerImage: document.getElementById('headerImage'),
             calculatorTitle: document.getElementById('calculatorTitle'),
@@ -749,33 +604,13 @@
         function init() {
             renderCalculatorInputs();
             setupEventListeners();
-            initializeCalculatorStates();
-            loadCalculatorState();
             applySavedTheme();
-            updateSliderPosition();
         }
 
         // Event Listeners
         function setupEventListeners() {
             // Theme Toggle
             elements.themeToggle.addEventListener('change', toggleTheme);
-            
-            // Tabs
-            document.querySelectorAll('.tab-button').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    switchTab(parseInt(e.target.dataset.tab));
-                });
-            });
-            
-            // Copy buttons
-            elements.copyGrund.addEventListener('click', () => copyText('grund'));
-            elements.copyPreis.addEventListener('click', copyPriceText);
-            elements.copyAll.addEventListener('click', copyAllText);
-            
-            // Person count
-            elements.decreasePerson.addEventListener('click', () => changeQuantity('personCountInput', -1));
-            elements.increasePerson.addEventListener('click', () => changeQuantity('personCountInput', 1));
-            elements.personCountInput.addEventListener('input', berechne);
             
             // Buttons
             elements.resetButton.addEventListener('click', resetRechner);
@@ -799,9 +634,6 @@
             // General settings
             elements.saveGeneralSettings.addEventListener('click', saveGeneralSettings);
             elements.resetImage.addEventListener('click', resetImage);
-            
-            // Window resize
-            window.addEventListener('resize', updateSliderPosition);
             
             // Close modal on outside click
             elements.settingsModal.addEventListener('click', (e) => {
@@ -857,11 +689,6 @@
                     changeQuantity(id, action === 'increase' ? 1 : -1);
                 });
             });
-            
-            // Event listeners für die Inputs
-            document.querySelectorAll('#categoriesGrid input[type="number"]').forEach(input => {
-                input.addEventListener('input', berechne);
-            });
         }
 
         // Business Logic
@@ -872,68 +699,6 @@
                 currentValue += change;
                 if (currentValue < 0) currentValue = 0;
                 input.value = currentValue;
-                berechne();
-            }
-        }
-
-        function berechne() {
-            let summe = 0;
-            const orderedItems = [];
-            
-            for (const key in currentPreise) {
-                const inputElement = document.getElementById(key);
-                if (inputElement) {
-                    const anzahl = parseInt(inputElement.value) || 0;
-                    if (anzahl > 0) {
-                        summe += anzahl * currentPreise[key].price;
-                        orderedItems.push(`${anzahl}x ${currentPreise[key].name}`);
-                    }
-                }
-            }
-
-            elements.preis.textContent = `${summe}$`;
-            
-            const personCount = parseInt(elements.personCountInput.value) || 0;
-            const today = new Date();
-            const dateString = `${String(today.getDate()).padStart(2, '0')}.${String(today.getMonth() + 1).padStart(2, '0')}.`;
-            
-            let grund = "Noch nichts berechnet";
-            if (orderedItems.length > 0 || personCount > 0) {
-                const parts = [`KL | ${dateString}`];
-                if (personCount > 0) parts.push(`${personCount}P`);
-                if (orderedItems.length > 0) parts.push(orderedItems.join(' + '));
-                grund = parts.join(' | ');
-            }
-            
-            elements.grund.textContent = grund;
-            saveCalculatorState();
-        }
-
-        function switchTab(tabNumber) {
-            if (tabNumber === activeTab) return;
-            
-            saveCalculatorState();
-            
-            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-            const newActiveButton = document.querySelector(`.tab-button[data-tab="${tabNumber}"]`);
-            if (newActiveButton) {
-                newActiveButton.classList.add('active');
-                activeTab = tabNumber;
-                updateSliderPosition();
-            }
-            
-            loadCalculatorState();
-            berechne();
-        }
-
-        function updateSliderPosition() {
-            const activeButton = document.querySelector('.tab-button.active');
-            if (activeButton && elements.tabsSlider) {
-                const buttonRect = activeButton.getBoundingClientRect();
-                const containerRect = elements.tabsContainer.getBoundingClientRect();
-                
-                elements.tabsSlider.style.setProperty('--tab-left', `${buttonRect.left - containerRect.left}px`);
-                elements.tabsSlider.style.setProperty('--tab-width', `${buttonRect.width}px`);
             }
         }
 
@@ -951,59 +716,12 @@
             }
         }
 
-        // Copy functions
-        function copyText(id) {
-            const text = document.getElementById(id).textContent;
-            copyToClipboard(text);
-            showNotification('Text kopiert!');
-        }
-
-        function copyPriceText() {
-            const priceText = elements.preis.textContent.replace('$', '');
-            copyToClipboard(priceText);
-            showNotification('Preis kopiert!');
-        }
-
-        function copyAllText() {
-            const grundText = elements.grund.textContent;
-            const priceText = elements.preis.textContent.replace('$', '');
-            const allText = `Bestellung: ${grundText}\nPreis: ${priceText}$`;
-            copyToClipboard(allText);
-            showNotification('Alles kopiert!');
-        }
-
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).catch(err => {
-                console.error('Kopieren fehlgeschlagen: ', err);
-                // Fallback für ältere Browser
-                const textArea = document.createElement('textarea');
-                textArea.value = text;
-                document.body.appendChild(textArea);
-                textArea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textArea);
-            });
-        }
-
-        function showNotification(message) {
-            const notification = document.createElement('div');
-            notification.className = 'copy-notification';
-            notification.textContent = message;
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                document.body.removeChild(notification);
-            }, 2000);
-        }
-
         // Reset function
         function resetRechner() {
             if (confirm('Möchten Sie wirklich alle Eingaben zurücksetzen?')) {
                 document.querySelectorAll('#categoriesGrid input[type="number"]').forEach(input => {
                     input.value = 0;
                 });
-                elements.personCountInput.value = 0;
-                berechne();
             }
         }
 
@@ -1014,8 +732,6 @@
             document.getElementById('doener').value = 3;
             document.getElementById('fiji').value = 4;
             document.getElementById('dom').value = 1;
-            elements.personCountInput.value = 4;
-            berechne();
             showNotification('Schnellbestellung geladen!');
         }
 
@@ -1303,57 +1019,15 @@
             }
         }
 
-        // Calculator state management
-        function initializeCalculatorStates() {
-            for (let i = 1; i <= 5; i++) {
-                calculatorStates[i] = {
-                    inputs: {},
-                    grund: 'Noch nichts berechnet',
-                    preis: '0$',
-                    personCount: '0'
-                };
-            }
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'copy-notification';
+            notification.textContent = message;
+            document.body.appendChild(notification);
             
-            const savedStates = localStorage.getItem('calculatorStates');
-            if (savedStates) {
-                Object.assign(calculatorStates, JSON.parse(savedStates));
-            }
-        }
-
-        function saveCalculatorState() {
-            const state = {
-                inputs: {},
-                grund: elements.grund.textContent,
-                preis: elements.preis.textContent,
-                personCount: elements.personCountInput.value
-            };
-            
-            document.querySelectorAll('#categoriesGrid input[type="number"]').forEach(input => {
-                state.inputs[input.id] = input.value;
-            });
-            
-            calculatorStates[activeTab] = state;
-            localStorage.setItem('calculatorStates', JSON.stringify(calculatorStates));
-        }
-
-        function loadCalculatorState() {
-            const state = calculatorStates[activeTab];
-            if (!state) return;
-            
-            // Reset all inputs first
-            document.querySelectorAll('#categoriesGrid input[type="number"]').forEach(input => {
-                input.value = 0;
-            });
-            
-            // Load saved values
-            for (const id in state.inputs) {
-                const input = document.getElementById(id);
-                if (input) input.value = state.inputs[id];
-            }
-            
-            elements.grund.textContent = state.grund;
-            elements.preis.textContent = state.preis;
-            elements.personCountInput.value = state.personCount || '0';
+            setTimeout(() => {
+                document.body.removeChild(notification);
+            }, 2000);
         }
 
         // Initialize when DOM is loaded
