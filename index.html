@@ -4,308 +4,681 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KhusLand Bestellrechner</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body {
-            font-family: sans-serif;
-            margin: auto;
-            background-color: #f0f0f0;
-            color: #333;
-            transition: background-color 0.3s ease, color 0.3s ease;
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #1e293b;
+            --light: #f8fafc;
         }
-        body.dark {
-            background-color: #1a202c;
-            color: #f7fafc;
-        }
-        input[type="number"] {
-            -moz-appearance: textfield;
-        }
-        input[type="number"]::-webkit-inner-spin-button,
-        input[type="number"]::-webkit-outer-spin-button {
-            -webkit-appearance: none;
+        
+        * {
+            box-sizing: border-box;
             margin: 0;
+            padding: 0;
         }
-        #grund {
-            white-space: pre-wrap;
-            word-break: break-word;
-            overflow-x: auto;
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f0f4ff 0%, #e6f0ff 100%);
+            color: #334155;
+            min-height: 100vh;
+            transition: all 0.3s ease;
         }
+        
+        body.dark {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #cbd5e1;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        body.dark .card {
+            background: rgba(30, 41, 59, 0.9);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .header-gradient {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 1rem 1rem 0 0;
+        }
+        
+        body.dark .header-gradient {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, #7c3aed 100%);
+        }
+        
+        .category-card {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        body.dark .category-card {
+            background: #1e293b;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+        }
+        
+        .category-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 0.75rem 1rem;
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        body.dark .category-header {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, #1e40af 100%);
+        }
+        
+        .item-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            transition: background-color 0.2s;
+        }
+        
+        body.dark .item-row {
+            border-bottom: 1px solid #374151;
+        }
+        
+        .item-row:hover {
+            background-color: #f8fafc;
+        }
+        
+        body.dark .item-row:hover {
+            background-color: #2d3748;
+        }
+        
+        .item-row:last-child {
+            border-bottom: none;
+        }
+        
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            background: #f1f5f9;
+        }
+        
+        body.dark .quantity-control {
+            background: #374151;
+        }
+        
+        .quantity-control button {
+            background: transparent;
+            border: none;
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+            font-size: 1.125rem;
+            line-height: 1;
+            color: #475569;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        body.dark .quantity-control button {
+            color: #d1d5db;
+        }
+        
+        .quantity-control button:hover {
+            background: #e2e8f0;
+        }
+        
+        body.dark .quantity-control button:hover {
+            background: #4b5563;
+        }
+        
+        .quantity-control input {
+            width: 3rem;
+            text-align: center;
+            background: white;
+            border: none;
+            padding: 0.5rem 0.25rem;
+            font-weight: 500;
+            color: #1e293b;
+        }
+        
+        body.dark .quantity-control input {
+            background: #1f2937;
+            color: #f8fafc;
+        }
+        
         .tabs-container {
             position: relative;
             display: flex;
             gap: 0.5rem;
             margin-bottom: 1.5rem;
-            margin-top: 0.5rem;
-            margin-left: 0.5rem;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 0.75rem;
+            padding: 0.5rem;
+            backdrop-filter: blur(10px);
         }
+        
+        body.dark .tabs-container {
+            background: rgba(30, 41, 59, 0.7);
+        }
+        
         .tab-button {
             position: relative;
             z-index: 10;
-            padding: 0.5rem 1rem;
-            font-size: 0.875rem;
+            padding: 0.75rem 1.5rem;
             font-weight: 500;
             border-radius: 0.5rem;
-            transition: all 0.2s;
-            border: 1px solid #d1d5db;
-            background-color: transparent;
-            color: inherit;
+            transition: all 0.3s ease;
+            background: transparent;
+            color: #64748b;
+            border: none;
+            cursor: pointer;
+            flex: 1;
+            text-align: center;
         }
-        .dark .tab-button {
-            border-color: #4b5563;
-        }
-        .tabs-slider {
-            position: absolute;
-            height: 100%;
-            width: var(--tab-width, 0px);
-            left: var(--tab-left, 0px);
-            border-radius: 0.5rem;
-            background-color: #3b82f6;
-            transition: left 0.3s ease, width 0.3s ease;
-            z-index: 5;
-        }
-        body.dark .tabs-slider {
-            background-color: #1d4ed8;
-        }
+        
         .tab-button.active {
             color: white;
         }
+        
+        .tabs-slider {
+            position: absolute;
+            height: calc(100% - 1rem);
+            width: var(--tab-width, 0px);
+            left: var(--tab-left, 0px);
+            top: 0.5rem;
+            border-radius: 0.5rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            transition: all 0.3s ease;
+            z-index: 5;
+        }
+        
+        body.dark .tabs-slider {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, #7c3aed 100%);
+        }
+        
+        .result-box {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-left: 4px solid var(--primary);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        body.dark .result-box {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border-left: 4px solid var(--primary-dark);
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            border-radius: 0.75rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .theme-toggle {
+            position: relative;
+            width: 60px;
+            height: 30px;
+        }
+        
+        .theme-toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .theme-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #374151 0%, #6b7280 100%);
+            transition: .4s;
+            border-radius: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 8px;
+            color: white;
+            font-size: 12px;
+        }
+        
+        .theme-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+            z-index: 2;
+        }
+        
+        input:checked + .theme-slider {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        }
+        
+        input:checked + .theme-slider:before {
+            transform: translateX(30px);
+        }
+        
         .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.75);
+            background: rgba(0, 0, 0, 0.7);
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 1000;
+            backdrop-filter: blur(5px);
         }
+        
         .modal-content {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 0.75rem;
-            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
             width: 90%;
             max-width: 600px;
-            color: #333;
+            max-height: 90vh;
+            overflow-y: auto;
+            color: #334155;
         }
+        
         body.dark .modal-content {
-            background-color: #2d3748;
-            color: #f7fafc;
+            background: #1e293b;
+            color: #cbd5e1;
         }
+        
+        .settings-tab {
+            padding: 1rem 1.5rem;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            color: #64748b;
+        }
+        
+        .settings-tab.active {
+            border-bottom-color: var(--primary);
+            color: var(--primary);
+        }
+        
+        body.dark .settings-tab.active {
+            color: var(--primary-dark);
+            border-bottom-color: var(--primary-dark);
+        }
+        
+        .editor-tab {
+            display: none;
+        }
+        
+        .editor-tab.active {
+            display: block;
+        }
+        
         .loading-spinner {
             border: 4px solid rgba(0, 0, 0, 0.1);
-            border-top: 4px solid #3b82f6;
+            border-top: 4px solid var(--primary);
             border-radius: 50%;
-            width: 24px;
-            height: 24px;
+            width: 40px;
+            height: 40px;
             animation: spin 1s linear infinite;
             margin: 0 auto;
         }
+        
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        .quantity-control {
+        
+        .copy-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--success);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            z-index: 1001;
+            animation: slideIn 0.3s ease, slideOut 0.3s ease 1.7s forwards;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+        
+        .grid-responsive {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .grid-responsive {
+                grid-template-columns: 1fr;
+            }
+            
+            .tabs-container {
+                flex-wrap: wrap;
+            }
+            
+            .tab-button {
+                flex: 1 0 45%;
+                margin-bottom: 0.5rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .action-buttons > * {
+                width: 100%;
+            }
+        }
+        
+        .price-tag {
+            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .person-counter {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.75rem;
             display: flex;
             align-items: center;
-            border-radius: 0.375rem;
-            overflow: hidden;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-            background-color: #e5e7eb;
-            flex-shrink: 0;
+            gap: 0.75rem;
         }
-        body.dark .quantity-control {
-            background-color: #4B5563;
-        }
-        .quantity-control button {
-            background-color: transparent;
-            border: none;
-            padding: 0.5rem 0.5rem;
-            cursor: pointer;
-            font-size: 1.25rem;
-            line-height: 1;
-            color: #4B5563;
-            transition: background-color 0.2s ease;
-        }
-        .quantity-control button:hover {
-            background-color: #d1d5db;
-        }
-        body.dark .quantity-control button {
-            color: #d1d5db;
-        }
-        body.dark .quantity-control button:hover {
-            background-color: #6B7280;
-        }
-        .quantity-control input {
-            width: 3rem;
-            text-align: center;
-            background-color: #f3f4f6;
-            border: none;
-            padding: 0.5rem 0.25rem;
-            -moz-appearance: textfield;
-            color: #1f2937;
-        }
-        body.dark .quantity-control input {
-            background-color: #1f2937;
-            color: #f7fafc;
-        }
-        #categoriesGrid .space-y-3 > div {
+        
+        .logo {
             display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 0.5rem;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 700;
+            font-size: 1.5rem;
         }
-        #categoriesGrid .space-y-3 > div .item-details {
-            flex-grow: 1;
-            min-width: 0;
-            word-break: break-word;
-        }
-        .hidden {
-            display: none !important;
+        
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
         }
     </style>
 </head>
 <body>
-    <div class="px-4 sm:px-6 lg:px-8 pt-4">
-        <div class="bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-6 w-full max-w-6xl relative mx-auto">
-
-            <div class="absolute top-4 right-4 flex items-center space-x-2">
-                <label class="text-sm">🌞</label>
-                <label class="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" id="themeToggle" class="sr-only peer">
-                    <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                    <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300"></span>
-                </label>
-                <label class="text-sm">🌙</label>
+    <div class="container">
+        <div class="card">
+            <!-- Header -->
+            <div class="header-gradient">
+                <div class="flex justify-between items-center mb-6">
+                    <div class="logo">
+                        <div class="logo-icon">🍕</div>
+                        <span>KhusLand</span>
+                    </div>
+                    
+                    <div class="flex items-center gap-4">
+                        <div class="theme-toggle">
+                            <input type="checkbox" id="themeToggle">
+                            <label class="theme-slider">
+                                <span>🌙</span>
+                                <span>☀️</span>
+                            </label>
+                        </div>
+                        <button id="settingsButton" class="btn btn-secondary">
+                            <span>⚙️</span>
+                            Einstellungen
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div class="flex-1">
+                        <h4 class="text-xl font-bold mb-2">Bestellseiten</h4>
+                        <div class="tabs-container" id="tabsContainer">
+                            <div class="tabs-slider" id="tabsSlider"></div>
+                            <button class="tab-button active" data-tab="1">Seite 1</button>
+                            <button class="tab-button" data-tab="2">Seite 2</button>
+                            <button class="tab-button" data-tab="3">Seite 3</button>
+                            <button class="tab-button" data-tab="4">Seite 4</button>
+                            <button class="tab-button" data-tab="5">Seite 5</button>
+                        </div>
+                    </div>
+                    
+                    <div class="flex flex-col items-center">
+                        <img id="headerImage" src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&auto=format&fit=crop&w=150&q=80" alt="Header Image" class="rounded-lg shadow-md mb-2" style="width: 120px; height: 120px; object-fit: cover;">
+                        <h2 id="calculatorTitle" class="text-2xl font-bold text-center">🍕 ITALIANA Bestellrechner 🍕</h2>
+                    </div>
+                    
+                    <div class="person-counter">
+                        <span>👥 Personen:</span>
+                        <div class="quantity-control">
+                            <button id="decreasePerson">-</button>
+                            <input id="personCountInput" type="number" min="0" value="0">
+                            <button id="increasePerson">+</button>
+                        </div>
+                    </div>
+                </div>
             </div>
             
-            <div class="flex justify-between items-center mb-6 relative">
-                <div class="flex flex-col items-start flex-1 min-w-0">
-                    <h4 class="text-xl font-bold text-left text-blue-600 dark:text-blue-400">Bestellseiten</h4>
-                    <div class="tabs-container" id="tabsContainer">
-                        <div class="tabs-slider" id="tabsSlider"></div>
-                        <button class="tab-button" data-tab="1">1</button>
-                        <button class="tab-button" data-tab="2">2</button>
-                        <button class="tab-button" data-tab="3">3</button>
-                        <button class="tab-button" data-tab="4">4</button>
-                        <button class="tab-button" data-tab="5">5</button>
-                    </div>
-                </div>
-
-                <div class="flex flex-col items-center justify-center flex-1">
-                    <img id="headerImage" src="https://via.placeholder.com/150" alt="Header Image" class="rounded-lg shadow-md mb-2" style="width: 150px; height: 150px; object-fit: cover;">
-                    <h2 id="calculatorTitle" class="text-3xl font-extrabold text-blue-600 dark:text-blue-400 whitespace-nowrap">🌴 ITALIANA Bestellrechner 🌴</h2>
-                </div>
-
-                <div class="flex-1"></div>
-            </div>
-
-            <div id="calculatorContent">
-                <div id="categoriesGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8 mb-6">
-                    <!-- Wird durch JavaScript befüllt -->
+            <!-- Main Content -->
+            <div class="p-6">
+                <div id="categoriesGrid" class="grid-responsive mb-8">
+                    <!-- Categories will be populated by JavaScript -->
                 </div>
                 
-                <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg shadow-inner mb-4 flex flex-col space-y-2">
-                    <div class="flex justify-between items-center">
-                        <div class="font-bold text-lg text-gray-800 dark:text-gray-200 flex items-center">
-                            Grund:&nbsp;
-                            <span id="grund" class="text-base font-normal text-gray-700 dark:text-gray-300">Noch nichts berechnet</span>
-                        </div>
-                        <button id="copyGrund" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-600 text-2xl">📄</button>
+                <!-- Results Box -->
+                <div class="result-box">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-bold flex items-center gap-2">
+                            <span>📋</span>
+                            Bestellübersicht
+                        </h3>
+                        <button id="copyAll" class="btn btn-primary">
+                            <span>📄</span>
+                            Alles kopieren
+                        </button>
                     </div>
-                    <hr class="my-2 border-gray-300 dark:border-gray-600">
-                    <div class="flex justify-between items-center">
-                        <div class="font-bold text-lg text-gray-800 dark:text-gray-200 flex items-center">
-                            Preis:&nbsp;
-                            <span id="preis" class="text-lg font-semibold text-blue-600 dark:text-blue-400">0$</span>
+                    
+                    <div class="mb-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-medium">Bestellgrund:</span>
+                            <button id="copyGrund" class="text-sm btn btn-secondary py-1 px-2">
+                                Kopieren
+                            </button>
                         </div>
-                        <button id="copyPreis" class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-600 text-2xl">📄</button>
+                        <div id="grund" class="bg-white dark:bg-gray-800 p-3 rounded border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300">
+                            Noch nichts berechnet
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-between items-center">
+                        <span class="font-medium">Gesamtpreis:</span>
+                        <div class="flex items-center gap-2">
+                            <span id="preis" class="text-2xl font-bold text-green-600 dark:text-green-400">0$</span>
+                            <button id="copyPreis" class="text-sm btn btn-secondary py-1 px-2">
+                                Kopieren
+                            </button>
+                        </div>
                     </div>
                 </div>
-
-            </div>
-            <div id="kopiertHinweis" class="text-sm text-green-600 dark:text-green-400 text-center hidden mt-4">Kopiert ✅</div>
-
-            <div class="flex justify-between items-center mt-6">
-                <button id="settingsButton" class="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white font-bold rounded-lg shadow-md">
-                    ⚙️
-                </button>
                 
-                <div class="flex items-center">
-                    <label class="text-sm font-bold text-gray-800 dark:text-gray-200 mr-2 whitespace-nowrap">Personen:</label>
-                    <div class="quantity-control">
-                        <button id="decreasePerson">-</button>
-                        <input id="personCountInput" type="number" min="0" value="0">
-                        <button id="increasePerson">+</button>
-                    </div>
+                <!-- Action Buttons -->
+                <div class="action-buttons flex justify-between gap-4 mt-6">
+                    <button id="resetButton" class="btn btn-danger">
+                        <span>🗑️</span>
+                        Alle zurücksetzen
+                    </button>
+                    <button id="quickOrder" class="btn btn-primary">
+                        <span>⚡</span>
+                        Schnellbestellung
+                    </button>
                 </div>
-
-                <button id="resetButton" class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg shadow-md">
-                    Reset 🗑️
-                </button>
             </div>
         </div>
     </div>
 
+    <!-- Settings Modal -->
     <div id="settingsModal" class="modal-overlay hidden">
         <div class="modal-content">
-            <h3 class="text-xl font-bold mb-4">Einstellungen</h3>
-            <div id="passwordSection">
-                <label for="passwordInput" class="block text-sm font-medium mb-2">Passwort:</label>
-                <input type="password" id="passwordInput" class="w-full p-2 rounded-md bg-gray-100 dark:bg-gray-700 border border-gray-300">
-                <button id="loginButton" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Anmelden</button>
-                <p id="passwordError" class="text-red-500 text-sm mt-2 hidden">Falsches Passwort!</p>
+            <div class="header-gradient rounded-t-lg">
+                <h3 class="text-xl font-bold flex items-center gap-2">
+                    <span>⚙️</span>
+                    Einstellungen
+                </h3>
             </div>
-            <div id="editSection" class="hidden">
-                <div class="tabs flex justify-around mb-4">
-                    <button class="px-4 py-2 text-sm font-medium rounded-t-lg border-b-2 border-blue-500" data-editor="item">Artikel</button>
-                    <button class="px-4 py-2 text-sm font-medium rounded-t-lg border-b-2 border-transparent" data-editor="category">Kategorien</button>
-                    <button class="px-4 py-2 text-sm font-medium rounded-t-lg border-b-2 border-transparent" data-editor="general">Generelle Einstellungen</button>
-                </div>
-
-                <div id="itemEditor" class="editor-tab">
-                    <h4 class="text-lg font-bold mb-3">Artikel bearbeiten</h4>
-                    <div id="itemEditorContent"></div>
-                </div>
-
-                <div id="categoryEditor" class="editor-tab hidden">
-                    <h4 class="text-lg font-bold mb-3">Kategorien bearbeiten</h4>
-                    <div id="categoryEditorContent" class="space-y-3 mb-6"></div>
-                    <div class="border-t border-gray-300 dark:border-gray-600 pt-4">
-                        <h5 class="font-semibold mb-2">Kategorie hinzufügen:</h5>
-                        <input type="text" id="categoryName" placeholder="Kategoriename" class="w-full p-2 rounded-md bg-gray-100 dark:bg-gray-700 border border-gray-300 mb-2">
-                        <button id="saveCategory" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg">Hinzufügen</button>
-                    </div>
+            
+            <div class="p-6">
+                <div id="passwordSection">
+                    <label for="passwordInput" class="block text-sm font-medium mb-2">Passwort für Admin-Bereich:</label>
+                    <input type="password" id="passwordInput" class="w-full p-3 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Passwort eingeben">
+                    <button id="loginButton" class="mt-4 w-full btn btn-primary">Anmelden</button>
+                    <p id="passwordError" class="text-red-500 text-sm mt-2 hidden">Falsches Passwort!</p>
                 </div>
                 
-                <div id="generalSettingsEditor" class="editor-tab hidden">
-                    <h4 class="text-lg font-bold mb-3">Generelle Einstellungen</h4>
-                    <div class="mb-4">
-                        <label for="titleInput" class="block text-sm font-medium mb-2">Titel ändern:</label>
-                        <input type="text" id="titleInput" placeholder="Neuer Titel" class="w-full p-2 rounded-md bg-gray-100 dark:bg-gray-700 border border-gray-300">
+                <div id="editSection" class="hidden">
+                    <div class="flex border-b border-gray-200 dark:border-gray-700 mb-4">
+                        <button class="settings-tab active" data-editor="item">Artikel</button>
+                        <button class="settings-tab" data-editor="category">Kategorien</button>
+                        <button class="settings-tab" data-editor="general">Allgemein</button>
                     </div>
-                    <div class="mb-4">
-                        <label for="imageUpload" class="block text-sm font-medium mb-2">Bild hochladen:</label>
-                        <input type="file" id="imageUpload" accept="image/*" class="w-full p-2 rounded-md bg-gray-100 dark:bg-gray-700 border border-gray-300">
-                    </div>
-                    <button id="saveGeneralSettings" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Speichern</button>
-                    <button id="resetImage" class="mt-2 w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg">Bild zurücksetzen</button>
-                </div>
 
-                <button id="closeSettings" class="mt-6 w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg">Schließen</button>
+                    <div id="itemEditor" class="editor-tab active">
+                        <h4 class="text-lg font-bold mb-3">Artikel bearbeiten</h4>
+                        <div id="itemEditorContent"></div>
+                    </div>
+
+                    <div id="categoryEditor" class="editor-tab">
+                        <h4 class="text-lg font-bold mb-3">Kategorien bearbeiten</h4>
+                        <div id="categoryEditorContent" class="space-y-3 mb-6"></div>
+                        <div class="border-t border-gray-300 dark:border-gray-600 pt-4">
+                            <h5 class="font-semibold mb-2">Neue Kategorie hinzufügen:</h5>
+                            <input type="text" id="categoryName" placeholder="Kategoriename" class="w-full p-3 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 mb-2">
+                            <button id="saveCategory" class="w-full btn btn-primary">Hinzufügen</button>
+                        </div>
+                    </div>
+                    
+                    <div id="generalSettingsEditor" class="editor-tab">
+                        <h4 class="text-lg font-bold mb-3">Allgemeine Einstellungen</h4>
+                        <div class="mb-4">
+                            <label for="titleInput" class="block text-sm font-medium mb-2">Titel ändern:</label>
+                            <input type="text" id="titleInput" placeholder="Neuer Titel" class="w-full p-3 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600" value="🍕 ITALIANA Bestellrechner 🍕">
+                        </div>
+                        <div class="mb-4">
+                            <label for="imageUpload" class="block text-sm font-medium mb-2">Bild hochladen:</label>
+                            <input type="file" id="imageUpload" accept="image/*" class="w-full p-3 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600">
+                        </div>
+                        <button id="saveGeneralSettings" class="w-full btn btn-primary">Speichern</button>
+                        <button id="resetImage" class="mt-2 w-full btn btn-danger">Bild zurücksetzen</button>
+                    </div>
+
+                    <button id="closeSettings" class="mt-6 w-full btn btn-secondary">Schließen</button>
+                </div>
             </div>
-            <button id="closeModal" class="mt-4 px-4 py-2 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-800 dark:text-gray-200 rounded-lg float-right">X</button>
         </div>
     </div>
 
+    <!-- Loading Overlay -->
     <div id="loadingOverlay" class="modal-overlay hidden">
-        <div class="loading-spinner"></div>
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg flex flex-col items-center">
+            <div class="loading-spinner mb-4"></div>
+            <p class="text-gray-700 dark:text-gray-300">Lade Daten...</p>
+        </div>
     </div>
 
     <script>
-        // Einfache Standarddaten als Fallback
+        // Datenmodell
         const defaultPreise = {
             beluga: { name: 'Beluga Kaviar', price: 300, category: 'SPEISEN', id: 'beluga' },
             doener: { name: 'Fischdöner', price: 175, category: 'SPEISEN', id: 'doener' },
@@ -331,12 +704,12 @@
 
         let currentPreise = { ...defaultPreise };
         let categories = ['SPEISEN', 'GETRÄNKE', 'ALKOHOL', 'DESSERTS', 'PREMIUM', 'RAUCHWAREN'];
-        let customTitle = '🌴 ITALIANA Bestellrechner 🌴';
-        let customImage = 'https://via.placeholder.com/150';
+        let customTitle = '🍕 ITALIANA Bestellrechner 🍕';
+        let customImage = 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&auto=format&fit=crop&w=150&q=80';
         let activeTab = 1;
         let calculatorStates = {};
 
-        // DOM Elemente
+        // DOM-Elemente
         const elements = {
             themeToggle: document.getElementById('themeToggle'),
             tabsContainer: document.getElementById('tabsContainer'),
@@ -346,12 +719,13 @@
             preis: document.getElementById('preis'),
             copyGrund: document.getElementById('copyGrund'),
             copyPreis: document.getElementById('copyPreis'),
-            kopiertHinweis: document.getElementById('kopiertHinweis'),
+            copyAll: document.getElementById('copyAll'),
             settingsButton: document.getElementById('settingsButton'),
             personCountInput: document.getElementById('personCountInput'),
             decreasePerson: document.getElementById('decreasePerson'),
             increasePerson: document.getElementById('increasePerson'),
             resetButton: document.getElementById('resetButton'),
+            quickOrder: document.getElementById('quickOrder'),
             settingsModal: document.getElementById('settingsModal'),
             passwordInput: document.getElementById('passwordInput'),
             loginButton: document.getElementById('loginButton'),
@@ -360,19 +734,28 @@
             closeModal: document.getElementById('closeModal'),
             closeSettings: document.getElementById('closeSettings'),
             headerImage: document.getElementById('headerImage'),
-            calculatorTitle: document.getElementById('calculatorTitle')
+            calculatorTitle: document.getElementById('calculatorTitle'),
+            itemEditorContent: document.getElementById('itemEditorContent'),
+            categoryEditorContent: document.getElementById('categoryEditorContent'),
+            categoryName: document.getElementById('categoryName'),
+            saveCategory: document.getElementById('saveCategory'),
+            titleInput: document.getElementById('titleInput'),
+            imageUpload: document.getElementById('imageUpload'),
+            saveGeneralSettings: document.getElementById('saveGeneralSettings'),
+            resetImage: document.getElementById('resetImage')
         };
 
         // Initialisierung
         function init() {
             renderCalculatorInputs();
             setupEventListeners();
+            initializeCalculatorStates();
             loadCalculatorState();
             applySavedTheme();
             updateSliderPosition();
         }
 
-        // Event Listeners setup
+        // Event Listeners
         function setupEventListeners() {
             // Theme Toggle
             elements.themeToggle.addEventListener('change', toggleTheme);
@@ -387,71 +770,101 @@
             // Copy buttons
             elements.copyGrund.addEventListener('click', () => copyText('grund'));
             elements.copyPreis.addEventListener('click', copyPriceText);
+            elements.copyAll.addEventListener('click', copyAllText);
             
             // Person count
             elements.decreasePerson.addEventListener('click', () => changeQuantity('personCountInput', -1));
             elements.increasePerson.addEventListener('click', () => changeQuantity('personCountInput', 1));
             elements.personCountInput.addEventListener('input', berechne);
             
-            // Reset
+            // Buttons
             elements.resetButton.addEventListener('click', resetRechner);
-            
-            // Settings
+            elements.quickOrder.addEventListener('click', quickOrder);
             elements.settingsButton.addEventListener('click', openSettings);
-            elements.closeModal.addEventListener('click', closeSettings);
+            
+            // Settings Modal
             elements.closeSettings.addEventListener('click', closeSettings);
             elements.loginButton.addEventListener('click', checkPassword);
             
             // Editor tabs
-            document.querySelectorAll('[data-editor]').forEach(button => {
+            document.querySelectorAll('.settings-tab').forEach(button => {
                 button.addEventListener('click', (e) => {
                     showEditor(e.target.dataset.editor);
                 });
             });
             
+            // Category editor
+            elements.saveCategory.addEventListener('click', saveCategory);
+            
+            // General settings
+            elements.saveGeneralSettings.addEventListener('click', saveGeneralSettings);
+            elements.resetImage.addEventListener('click', resetImage);
+            
             // Window resize
             window.addEventListener('resize', updateSliderPosition);
+            
+            // Close modal on outside click
+            elements.settingsModal.addEventListener('click', (e) => {
+                if (e.target === elements.settingsModal) {
+                    closeSettings();
+                }
+            });
         }
 
-        // Grundlegende Funktionen
+        // Rendering
         function renderCalculatorInputs() {
             elements.categoriesGrid.innerHTML = '';
             
             categories.forEach(category => {
-                const categoryDiv = document.createElement('div');
-                categoryDiv.innerHTML = `
-                    <h1 class="text-xl font-bold mb-4 text-center text-red-700 dark:text-red-400">${category}</h1>
-                    <div class="space-y-3"></div>
+                const categoryCard = document.createElement('div');
+                categoryCard.className = 'category-card';
+                categoryCard.innerHTML = `
+                    <div class="category-header">${category}</div>
+                    <div class="space-y-0"></div>
                 `;
-                elements.categoriesGrid.appendChild(categoryDiv);
+                elements.categoriesGrid.appendChild(categoryCard);
 
-                const itemsDiv = categoryDiv.querySelector('.space-y-3');
+                const itemsContainer = categoryCard.querySelector('.space-y-0');
                 const itemsInCategory = Object.values(currentPreise).filter(item => item.category === category);
 
-                itemsInCategory.forEach(item => {
-                    const div = document.createElement('div');
-                    div.className = 'flex items-center justify-between';
-                    div.innerHTML = `
-                        <div class="flex flex-col items-start item-details"> 
-                            <label for="${item.id}" class="text-gray-700 dark:text-gray-300">${item.name}</label>
-                            <span class="text-sm text-gray-500 dark:text-gray-400">${item.price}$</span>
-                        </div>
-                        <div class="quantity-control">
-                            <button onclick="changeQuantity('${item.id}', -1)">-</button>
-                            <input id="${item.id}" type="number" min="0" value="0">
-                            <button onclick="changeQuantity('${item.id}', 1)">+</button>
-                        </div>
-                    `;
-                    itemsDiv.appendChild(div);
+                if (itemsInCategory.length === 0) {
+                    itemsContainer.innerHTML = '<div class="item-row text-center text-gray-500 py-4">Keine Artikel</div>';
+                } else {
+                    itemsInCategory.forEach(item => {
+                        const itemRow = document.createElement('div');
+                        itemRow.className = 'item-row';
+                        itemRow.innerHTML = `
+                            <div class="flex flex-col"> 
+                                <span class="font-medium">${item.name}</span>
+                                <span class="price-tag">${item.price}$</span>
+                            </div>
+                            <div class="quantity-control">
+                                <button data-id="${item.id}" data-action="decrease">-</button>
+                                <input id="${item.id}" type="number" min="0" value="0">
+                                <button data-id="${item.id}" data-action="increase">+</button>
+                            </div>
+                        `;
+                        itemsContainer.appendChild(itemRow);
+                    });
+                }
+            });
+            
+            // Event listeners für die Quantity-Buttons
+            document.querySelectorAll('.quantity-control button').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const id = e.target.dataset.id;
+                    const action = e.target.dataset.action;
+                    changeQuantity(id, action === 'increase' ? 1 : -1);
                 });
             });
             
-            // Event listeners für die neuen Inputs setzen
+            // Event listeners für die Inputs
             document.querySelectorAll('#categoriesGrid input[type="number"]').forEach(input => {
                 input.addEventListener('input', berechne);
             });
         }
 
+        // Business Logic
         function changeQuantity(id, change) {
             const input = document.getElementById(id);
             if (input) {
@@ -542,29 +955,68 @@
         function copyText(id) {
             const text = document.getElementById(id).textContent;
             copyToClipboard(text);
+            showNotification('Text kopiert!');
         }
 
         function copyPriceText() {
             const priceText = elements.preis.textContent.replace('$', '');
             copyToClipboard(priceText);
+            showNotification('Preis kopiert!');
+        }
+
+        function copyAllText() {
+            const grundText = elements.grund.textContent;
+            const priceText = elements.preis.textContent.replace('$', '');
+            const allText = `Bestellung: ${grundText}\nPreis: ${priceText}$`;
+            copyToClipboard(allText);
+            showNotification('Alles kopiert!');
         }
 
         function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                elements.kopiertHinweis.classList.remove('hidden');
-                setTimeout(() => elements.kopiertHinweis.classList.add('hidden'), 2000);
+            navigator.clipboard.writeText(text).catch(err => {
+                console.error('Kopieren fehlgeschlagen: ', err);
+                // Fallback für ältere Browser
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
             });
+        }
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'copy-notification';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                document.body.removeChild(notification);
+            }, 2000);
         }
 
         // Reset function
         function resetRechner() {
             if (confirm('Möchten Sie wirklich alle Eingaben zurücksetzen?')) {
-                document.querySelectorAll('#calculatorContent input[type="number"]').forEach(input => {
+                document.querySelectorAll('#categoriesGrid input[type="number"]').forEach(input => {
                     input.value = 0;
                 });
                 elements.personCountInput.value = 0;
                 berechne();
             }
+        }
+
+        // Quick order function
+        function quickOrder() {
+            // Setze Beispielbestellung
+            document.getElementById('beluga').value = 2;
+            document.getElementById('doener').value = 3;
+            document.getElementById('fiji').value = 4;
+            document.getElementById('dom').value = 1;
+            elements.personCountInput.value = 4;
+            berechne();
+            showNotification('Schnellbestellung geladen!');
         }
 
         // Settings functions
@@ -594,13 +1046,261 @@
         }
 
         function showEditor(editorType) {
-            document.querySelectorAll('.editor-tab').forEach(tab => tab.classList.add('hidden'));
-            document.querySelectorAll('[data-editor]').forEach(btn => {
-                btn.classList.remove('border-blue-500');
+            document.querySelectorAll('.editor-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.settings-tab').forEach(btn => {
+                btn.classList.remove('active');
             });
             
-            document.getElementById(editorType + 'Editor').classList.remove('hidden');
-            document.querySelector(`[data-editor="${editorType}"]`).classList.add('border-blue-500');
+            document.getElementById(editorType + 'Editor').classList.add('active');
+            document.querySelector(`[data-editor="${editorType}"]`).classList.add('active');
+            
+            if (editorType === 'item') {
+                renderItemEditor();
+            } else if (editorType === 'category') {
+                renderCategoryEditor();
+            } else if (editorType === 'general') {
+                renderGeneralSettingsEditor();
+            }
+        }
+
+        function renderItemEditor() {
+            elements.itemEditorContent.innerHTML = `
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2">Kategorie auswählen:</label>
+                    <select id="editorCategorySelect" class="w-full p-3 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600">
+                        ${categories.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
+                    </select>
+                </div>
+                <div id="editorItemsList" class="space-y-3 mb-6"></div>
+                <div class="border-t border-gray-300 dark:border-gray-600 pt-4">
+                    <h5 class="font-semibold mb-2">Artikel hinzufügen/bearbeiten:</h5>
+                    <input type="hidden" id="editItemId">
+                    <input type="text" id="itemName" placeholder="Artikelname" class="w-full p-3 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 mb-2">
+                    <input type="number" id="itemPrice" placeholder="Preis" class="w-full p-3 rounded-lg bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 mb-2">
+                    <button id="saveItem" class="w-full btn btn-primary">Speichern</button>
+                </div>
+            `;
+            
+            document.getElementById('editorCategorySelect').addEventListener('change', updateEditorItemsList);
+            document.getElementById('saveItem').addEventListener('click', saveItem);
+            
+            updateEditorItemsList();
+        }
+
+        function updateEditorItemsList() {
+            const selectedCategory = document.getElementById('editorCategorySelect').value;
+            const itemsListDiv = document.getElementById('editorItemsList');
+            itemsListDiv.innerHTML = '';
+
+            const itemsInCategory = Object.values(currentPreise).filter(item => item.category === selectedCategory);
+
+            if (itemsInCategory.length === 0) {
+                itemsListDiv.innerHTML = '<p class="text-gray-500 dark:text-gray-400 text-center py-4">Keine Artikel in dieser Kategorie</p>';
+            } else {
+                itemsInCategory.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'flex justify-between items-center bg-gray-100 dark:bg-gray-700 p-3 rounded-lg';
+                    div.innerHTML = `
+                        <span>${item.name} (${item.price}$)</span>
+                        <div>
+                            <button class="edit-item-btn text-blue-500 hover:text-blue-700 mr-2" data-id="${item.id}">✏️</button>
+                            <button class="delete-item-btn text-red-500 hover:text-red-700" data-id="${item.id}">🗑️</button>
+                        </div>
+                    `;
+                    itemsListDiv.appendChild(div);
+                });
+                
+                // Event listeners für Edit/Delete Buttons
+                document.querySelectorAll('.edit-item-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        editItem(e.target.dataset.id);
+                    });
+                });
+                
+                document.querySelectorAll('.delete-item-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        deleteItem(e.target.dataset.id);
+                    });
+                });
+            }
+        }
+
+        function saveItem() {
+            const itemId = document.getElementById('editItemId').value;
+            const itemName = document.getElementById('itemName').value.trim();
+            const itemPrice = parseInt(document.getElementById('itemPrice').value);
+            const itemCategory = document.getElementById('editorCategorySelect').value;
+
+            if (!itemName || isNaN(itemPrice) || itemPrice <= 0) {
+                alert('Bitte gültigen Namen und Preis eingeben.');
+                return;
+            }
+
+            if (itemId && currentPreise[itemId]) {
+                currentPreise[itemId].name = itemName;
+                currentPreise[itemId].price = itemPrice;
+                currentPreise[itemId].category = itemCategory;
+            } else {
+                const newId = 'item_' + Date.now();
+                currentPreise[newId] = {
+                    id: newId,
+                    name: itemName,
+                    price: itemPrice,
+                    category: itemCategory
+                };
+            }
+
+            updateEditorItemsList();
+            document.getElementById('editItemId').value = '';
+            document.getElementById('itemName').value = '';
+            document.getElementById('itemPrice').value = '';
+            showNotification('Artikel gespeichert!');
+        }
+
+        function editItem(id) {
+            const item = currentPreise[id];
+            if (item) {
+                document.getElementById('editItemId').value = item.id;
+                document.getElementById('itemName').value = item.name;
+                document.getElementById('itemPrice').value = item.price;
+                document.getElementById('editorCategorySelect').value = item.category;
+                document.getElementById('itemName').focus();
+            }
+        }
+
+        function deleteItem(id) {
+            if (confirm(`Sicher, dass du "${currentPreise[id].name}" löschen möchtest?`)) {
+                delete currentPreise[id];
+                updateEditorItemsList();
+                showNotification('Artikel gelöscht!');
+            }
+        }
+
+        function renderCategoryEditor() {
+            elements.categoryEditorContent.innerHTML = '';
+            
+            categories.forEach(cat => {
+                const div = document.createElement('div');
+                div.className = 'flex justify-between items-center bg-gray-100 dark:bg-gray-700 p-3 rounded-lg';
+                div.innerHTML = `
+                    <span>${cat}</span>
+                    <div>
+                        <button class="edit-category-btn text-blue-500 hover:text-blue-700 mr-2" data-category="${cat}">✏️</button>
+                        <button class="delete-category-btn text-red-500 hover:text-red-700" data-category="${cat}">🗑️</button>
+                    </div>
+                `;
+                elements.categoryEditorContent.appendChild(div);
+            });
+            
+            // Event listeners
+            document.querySelectorAll('.edit-category-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    editCategory(e.target.dataset.category);
+                });
+            });
+            
+            document.querySelectorAll('.delete-category-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    deleteCategory(e.target.dataset.category);
+                });
+            });
+        }
+
+        function saveCategory() {
+            const categoryName = elements.categoryName.value.trim().toUpperCase();
+            if (!categoryName) {
+                alert('Bitte geben Sie einen Kategorienamen ein.');
+                return;
+            }
+
+            if (categories.includes(categoryName)) {
+                alert('Diese Kategorie existiert bereits.');
+                return;
+            }
+
+            categories.push(categoryName);
+            renderCategoryEditor();
+            elements.categoryName.value = '';
+            showNotification('Kategorie hinzugefügt!');
+        }
+
+        function editCategory(oldName) {
+            const newName = prompt(`Neuen Namen für die Kategorie "${oldName}" eingeben:`, oldName);
+            if (newName === null || newName.trim() === '') {
+                return;
+            }
+            const trimmedNewName = newName.trim().toUpperCase();
+            
+            if (trimmedNewName === oldName) return;
+
+            if (categories.includes(trimmedNewName)) {
+                 alert('Eine Kategorie mit diesem Namen existiert bereits.');
+                 return;
+            }
+
+            // Update category in items
+            for (const itemId in currentPreise) {
+                if (currentPreise[itemId].category === oldName) {
+                    currentPreise[itemId].category = trimmedNewName;
+                }
+            }
+
+            // Update categories array
+            const index = categories.indexOf(oldName);
+            if (index > -1) {
+                categories[index] = trimmedNewName;
+            }
+
+            renderCategoryEditor();
+            showNotification('Kategorie bearbeitet!');
+        }
+
+        function deleteCategory(categoryName) {
+            const itemsInCategory = Object.values(currentPreise).filter(item => item.category === categoryName);
+            if (itemsInCategory.length > 0) {
+                alert(`Die Kategorie "${categoryName}" enthält noch Artikel und kann nicht gelöscht werden. Bitte löschen oder verschieben Sie die Artikel zuerst.`);
+                return;
+            }
+            if (confirm(`Sicher, dass du die Kategorie "${categoryName}" löschen möchtest?`)) {
+                categories = categories.filter(cat => cat !== categoryName);
+                renderCategoryEditor();
+                showNotification('Kategorie gelöscht!');
+            }
+        }
+
+        function renderGeneralSettingsEditor() {
+            elements.titleInput.value = customTitle;
+        }
+
+        function saveGeneralSettings() {
+            const newTitle = elements.titleInput.value.trim();
+            const imageFile = elements.imageUpload.files[0];
+
+            if (newTitle) {
+                customTitle = newTitle;
+                elements.calculatorTitle.textContent = newTitle;
+                document.title = newTitle;
+            }
+
+            if (imageFile) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    customImage = e.target.result;
+                    elements.headerImage.src = customImage;
+                    showNotification('Einstellungen gespeichert!');
+                };
+                reader.readAsDataURL(imageFile);
+            } else {
+                showNotification('Einstellungen gespeichert!');
+            }
+        }
+
+        function resetImage() {
+            if (confirm('Sicher, dass Sie das Bild zurücksetzen möchten?')) {
+                customImage = 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-1.2.1&auto=format&fit=crop&w=150&q=80';
+                elements.headerImage.src = customImage;
+                showNotification('Bild zurückgesetzt!');
+            }
         }
 
         // Calculator state management
@@ -628,7 +1328,7 @@
                 personCount: elements.personCountInput.value
             };
             
-            document.querySelectorAll('#calculatorContent input[type="number"]').forEach(input => {
+            document.querySelectorAll('#categoriesGrid input[type="number"]').forEach(input => {
                 state.inputs[input.id] = input.value;
             });
             
@@ -641,7 +1341,7 @@
             if (!state) return;
             
             // Reset all inputs first
-            document.querySelectorAll('#calculatorContent input[type="number"]').forEach(input => {
+            document.querySelectorAll('#categoriesGrid input[type="number"]').forEach(input => {
                 input.value = 0;
             });
             
@@ -657,14 +1357,7 @@
         }
 
         // Initialize when DOM is loaded
-        document.addEventListener('DOMContentLoaded', () => {
-            initializeCalculatorStates();
-            init();
-            
-            // Set initial active tab
-            const initialTab = document.querySelector('.tab-button[data-tab="1"]');
-            if (initialTab) initialTab.classList.add('active');
-        });
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
