@@ -341,16 +341,6 @@
       align-items: center;
       gap: 6px;
     }
-    .total-time-display {
-      background: linear-gradient(135deg, #dc2626 0%, #ea580c 100%);
-      color: white;
-      padding: 12px 16px;
-      border-radius: 12px;
-      margin-top: 15px;
-      text-align: center;
-      font-weight: bold;
-      box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
-    }
     .workbench-grid {
       display: grid;
       grid-template-columns: 1fr;
@@ -389,6 +379,35 @@
       justify-content: space-between;
       font-size: 0.8rem;
       margin-bottom: 3px;
+    }
+    .workbench-image {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+    .image-preview {
+      max-width: 100%;
+      max-height: 200px;
+      border-radius: 8px;
+      margin-top: 10px;
+      display: none;
+    }
+    .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      width: 100%;
+    }
+    .file-input-wrapper input[type=file] {
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -437,7 +456,7 @@
             <span class="text-white font-bold">⚒️</span>
           </div>
           <div>
-            <h1 class="text-2xl md:text-3xl font-bold gradient-text tracking-tight">Kokain Werkbank Manager</h1>
+            <h1 class="text-2xl md:text-3xl font-bold gradient-text tracking-tight">Werkbank Manager</h1>
             <p id="userInfo" class="text-sm text-gray-400">
               Eingeloggt als: <span id="username">Unbekannt</span>
               <span id="accessBadge" class="access-badge access-permanent hidden">Permanent</span>
@@ -495,16 +514,6 @@
               <div class="stat-label">Letzte hinzugefügt</div>
               <div id="lastAdded" class="stat-value text-green-400">-</div>
             </div>
-            <div class="stat-card">
-              <div class="stat-label">Gesamtzeit</div>
-              <div id="totalTime" class="stat-value text-orange-400">0s</div>
-            </div>
-          </div>
-          
-          <!-- Gesamtzeit Anzeige -->
-          <div id="totalTimeDisplay" class="total-time-display hidden">
-            <i class="fas fa-clock mr-2"></i>
-            <span id="totalTimeText">Gesamtzeit: 0 Sekunden</span>
           </div>
           
           <!-- Suchfeld -->
@@ -629,6 +638,21 @@
           <div id="resourcesList" class="resource-list">
             <!-- Ressourcen werden hier dynamisch hinzugefügt -->
           </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-1">
+            <i class="fas fa-image mr-1"></i> Bild hochladen
+          </label>
+          <div class="file-input-wrapper">
+            <button type="button" class="w-full p-3 rounded-lg bg-gray-800/50 border border-gray-700 hover:bg-gray-700/50 flex items-center justify-center gap-2">
+              <i class="fas fa-upload mr-2"></i>
+              Bild auswählen
+            </button>
+            <input type="file" id="workbenchImageFile" accept="image/*" class="file-input">
+          </div>
+          <div class="text-xs text-gray-500 mt-1">Unterstützte Formate: JPG, PNG, GIF (max. 5MB)</div>
+          <img id="imagePreview" class="image-preview" alt="Vorschau">
+          <input type="hidden" id="workbenchImageData">
         </div>
         <div class="flex gap-3 pt-2">
           <button type="submit" class="flex-1 px-4 py-3 bg-red-600 hover:bg-red-500 rounded-lg btn font-medium flex items-center justify-center gap-2">
@@ -1169,7 +1193,6 @@
       renderWorkbenches();
       renderAdminTable();
       updateStatistics();
-      calculateTotalTime();
     });
 
     onValue(categoriesRef, (snapshot) => {
@@ -1318,6 +1341,16 @@
         const el = document.createElement('div');
         el.className = 'resource-item p-4 rounded-lg bg-gray-800/50 border border-gray-700 hover:border-red-500/30 transition-all duration-200';
         
+        // Bild für diese Werkbank
+        let imageHtml = '';
+        if (workbench.imageData) {
+          imageHtml = `<img src="${workbench.imageData}" alt="${workbench.name}" class="workbench-image">`;
+        } else {
+          imageHtml = `<div class="workbench-image bg-gray-700 flex items-center justify-center text-gray-400">
+            <i class="fas fa-tools text-3xl"></i>
+          </div>`;
+        }
+        
         // Ressourcen für diese Werkbank
         let resourcesHtml = '';
         if (workbench.resources && workbench.resources.length > 0) {
@@ -1328,6 +1361,7 @@
         
         el.innerHTML = `
           <div class="workbench-card">
+            ${imageHtml}
             <div class="flex justify-between items-start mb-2">
               <div class="font-semibold text-lg">${workbench.name}</div>
               <div class="px-2 py-1 bg-gray-700 text-xs rounded-full text-blue-400">
@@ -1436,9 +1470,6 @@
               resultsContainer.appendChild(conversionDiv);
             }
           });
-          
-          // Gesamtzeit neu berechnen
-          calculateTotalTime();
         };
         
         // Initiale Berechnung
@@ -1463,33 +1494,6 @@
           updateCalculation();
         });
       });
-    }
-
-    // Gesamtzeit berechnen
-    function calculateTotalTime() {
-      let totalSeconds = 0;
-      
-      workbenches.forEach(workbench => {
-        const quantity = userQuantities[workbench.key] || 0;
-        if (quantity > 0) {
-          const timePerWorkbench = parseInt(workbench.time) || 0;
-          totalSeconds += timePerWorkbench * quantity;
-        }
-      });
-      
-      // Statistik-Karte aktualisieren
-      document.getElementById('totalTime').textContent = `${totalSeconds}s`;
-      
-      // Gesamtzeit-Anzeige aktualisieren
-      const totalTimeDisplay = document.getElementById('totalTimeDisplay');
-      const totalTimeText = document.getElementById('totalTimeText');
-      
-      if (totalSeconds > 0) {
-        totalTimeText.textContent = `Gesamtzeit: ${totalSeconds} Sekunden`;
-        totalTimeDisplay.classList.remove('hidden');
-      } else {
-        totalTimeDisplay.classList.add('hidden');
-      }
     }
 
     function filterWorkbenches(category) {
@@ -1547,6 +1551,33 @@
     const newResourceMax = document.getElementById('newResourceMax');
     const addResourceBtn = document.getElementById('addResourceBtn');
     const resourcesList = document.getElementById('resourcesList');
+
+    // Bild-Upload Elemente
+    const workbenchImageFile = document.getElementById('workbenchImageFile');
+    const imagePreview = document.getElementById('imagePreview');
+    const workbenchImageData = document.getElementById('workbenchImageData');
+
+    // Bild-Upload Event Listener
+    workbenchImageFile.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        // Dateigröße prüfen (max. 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+          showNotification('Die Datei ist zu groß. Maximale Größe: 5MB', 'error');
+          this.value = '';
+          return;
+        }
+        
+        // Vorschau anzeigen
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          imagePreview.src = e.target.result;
+          imagePreview.style.display = 'block';
+          workbenchImageData.value = e.target.result; // Base64 Daten speichern
+        };
+        reader.readAsDataURL(file);
+      }
+    });
 
     // Ressource hinzufügen
     addResourceBtn.addEventListener('click', () => {
@@ -1687,6 +1718,16 @@
       currentResources = workbench.resources ? [...workbench.resources] : [];
       renderResourcesList();
       
+      // Bild-Daten setzen
+      if (workbench.imageData) {
+        imagePreview.src = workbench.imageData;
+        imagePreview.style.display = 'block';
+        workbenchImageData.value = workbench.imageData;
+      } else {
+        imagePreview.style.display = 'none';
+        workbenchImageData.value = '';
+      }
+      
       // Modal-Titel ändern
       workbenchModalTitle.innerHTML = '<i class="fas fa-edit mr-2"></i> Werkbank bearbeiten';
       
@@ -1702,6 +1743,8 @@
       // Formular zurücksetzen
       workbenchForm.reset();
       workbenchKeyInput.value = '';
+      imagePreview.style.display = 'none';
+      workbenchImageData.value = '';
       currentResources = [];
       renderResourcesList();
       
@@ -1715,6 +1758,8 @@
     cancelWorkbench.addEventListener('click', () => {
       hide(workbenchModal);
       workbenchForm.reset();
+      imagePreview.style.display = 'none';
+      workbenchImageData.value = '';
       currentResources = [];
       renderResourcesList();
     });
@@ -1762,7 +1807,7 @@
       } else if (tempCategories.includes(categoryName)) {
         showNotification('Kategorie existiert bereits', 'error');
       }
-    });
+    }
 
     // Kategorie entfernen
     categoriesList.addEventListener('click', (e) => {
@@ -1821,6 +1866,8 @@
           hide(modal);
           if (modal === workbenchModal) {
             workbenchForm.reset();
+            imagePreview.style.display = 'none';
+            workbenchImageData.value = '';
             currentResources = [];
             renderResourcesList();
           }
@@ -1846,6 +1893,7 @@
       const name = document.getElementById('workbenchName').value;
       const category = document.getElementById('workbenchCategory').value;
       const time = document.getElementById('workbenchTime').value;
+      const imageData = workbenchImageData.value;
       const key = workbenchKeyInput.value;
       
       // Werkbank-Objekt erstellen
@@ -1857,6 +1905,11 @@
         date: new Date().toISOString(),
         timestamp: Date.now()
       };
+      
+      // Bild-Daten hinzufügen, falls vorhanden
+      if (imageData) {
+        workbenchData.imageData = imageData;
+      }
       
       let success;
       if (key) {
@@ -1870,6 +1923,8 @@
       if (success) {
         hide(workbenchModal);
         workbenchForm.reset();
+        imagePreview.style.display = 'none';
+        workbenchImageData.value = '';
         currentResources = [];
         renderResourcesList();
         showNotification(`Werkbank erfolgreich ${key ? 'aktualisiert' : 'hinzugefügt'}`, 'success');
