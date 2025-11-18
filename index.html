@@ -372,6 +372,24 @@
       gap: 1rem;
       align-items: start;
     }
+    .conversion-rates {
+      margin-top: 10px;
+      padding: 10px;
+      background: rgba(30, 41, 59, 0.5);
+      border-radius: 8px;
+      border: 1px solid rgba(220, 38, 38, 0.2);
+    }
+    .conversion-title {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-bottom: 5px;
+    }
+    .conversion-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      margin-bottom: 3px;
+    }
   </style>
 </head>
 <body class="text-gray-100 antialiased min-h-screen">
@@ -479,14 +497,14 @@
             </div>
             <div class="stat-card">
               <div class="stat-label">Gesamtzeit</div>
-              <div id="totalTime" class="stat-value text-orange-400">0h 0m</div>
+              <div id="totalTime" class="stat-value text-orange-400">0s</div>
             </div>
           </div>
           
           <!-- Gesamtzeit Anzeige -->
           <div id="totalTimeDisplay" class="total-time-display hidden">
             <i class="fas fa-clock mr-2"></i>
-            <span id="totalTimeText">Gesamtzeit: 0 Stunden, 0 Minuten</span>
+            <span id="totalTimeText">Gesamtzeit: 0 Sekunden</span>
           </div>
           
           <!-- Suchfeld -->
@@ -592,7 +610,7 @@
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-300 mb-1">
-            <i class="fas fa-clock mr-1"></i> Herstellungszeit (Minuten)
+            <i class="fas fa-clock mr-1"></i> Herstellungszeit (Sekunden)
           </label>
           <input type="number" id="workbenchTime" class="p-3 rounded-lg bg-gray-800/50 border border-gray-700 w-full focus:border-red-500" placeholder="z.B.: 120" required/>
         </div>
@@ -1079,6 +1097,15 @@
     const ADMIN_PASSWORD = '1101';
     let userQuantities = {}; // Speichert die Mengenangaben des Benutzers
 
+    // Ressourcen-Konvertierungsraten
+    const resourceConversionRates = {
+      'Holzstamm': { 'Holz': 10 }, // 1 Holzstamm = 10 Holz
+      'Eisenbarren': { 'Eisenerz': 5 }, // 1 Eisenbarren = 5 Eisenerz
+      'Goldbarren': { 'Golderz': 5 }, // 1 Goldbarren = 5 Golderz
+      'Diamant': { 'Diamanterz': 3 }, // 1 Diamant = 3 Diamanterz
+      'Leder': { 'Tierhaut': 2 } // 1 Leder = 2 Tierhaut
+    };
+
     // Utility
     function show(el) { 
       el.classList.remove('hidden'); 
@@ -1304,7 +1331,7 @@
             <div class="flex justify-between items-start mb-2">
               <div class="font-semibold text-lg">${workbench.name}</div>
               <div class="px-2 py-1 bg-gray-700 text-xs rounded-full text-blue-400">
-                <i class="fas fa-clock mr-1"></i>${workbench.time} Minuten
+                <i class="fas fa-clock mr-1"></i>${workbench.time} Sekunden
               </div>
             </div>
             <div class="text-xs text-gray-400 mb-2">
@@ -1356,15 +1383,12 @@
           const timePerWorkbench = parseInt(workbench.time) || 0;
           const totalTime = timePerWorkbench * quantity;
           
-          const hours = Math.floor(totalTime / 60);
-          const minutes = totalTime % 60;
-          
           if (quantity > 0) {
             const timeEl = document.createElement('div');
             timeEl.className = 'result-item';
             timeEl.innerHTML = `
               <div class="flex-1 font-medium text-sm">Gesamtzeit</div>
-              <div class="result-range text-sm">${hours}h ${minutes}m</div>
+              <div class="result-range text-sm">${totalTime}s</div>
             `;
             resultsContainer.appendChild(timeEl);
           }
@@ -1388,6 +1412,29 @@
               <div class="result-range text-sm">${minTotal}-${maxTotal}</div>
             `;
             resultsContainer.appendChild(resultEl);
+            
+            // Konvertierungsraten anzeigen
+            if (resourceConversionRates[resource.name]) {
+              const conversions = resourceConversionRates[resource.name];
+              const conversionDiv = document.createElement('div');
+              conversionDiv.className = 'conversion-rates';
+              conversionDiv.innerHTML = '<div class="conversion-title">Konvertierung:</div>';
+              
+              Object.entries(conversions).forEach(([convertedResource, rate]) => {
+                const minConverted = minTotal * rate;
+                const maxConverted = maxTotal * rate;
+                
+                const conversionItem = document.createElement('div');
+                conversionItem.className = 'conversion-item';
+                conversionItem.innerHTML = `
+                  <span>${convertedResource}:</span>
+                  <span>${minConverted}-${maxConverted}</span>
+                `;
+                conversionDiv.appendChild(conversionItem);
+              });
+              
+              resultsContainer.appendChild(conversionDiv);
+            }
           });
           
           // Gesamtzeit neu berechnen
@@ -1420,28 +1467,25 @@
 
     // Gesamtzeit berechnen
     function calculateTotalTime() {
-      let totalMinutes = 0;
+      let totalSeconds = 0;
       
       workbenches.forEach(workbench => {
         const quantity = userQuantities[workbench.key] || 0;
         if (quantity > 0) {
           const timePerWorkbench = parseInt(workbench.time) || 0;
-          totalMinutes += timePerWorkbench * quantity;
+          totalSeconds += timePerWorkbench * quantity;
         }
       });
       
-      const hours = Math.floor(totalMinutes / 60);
-      const minutes = totalMinutes % 60;
-      
       // Statistik-Karte aktualisieren
-      document.getElementById('totalTime').textContent = `${hours}h ${minutes}m`;
+      document.getElementById('totalTime').textContent = `${totalSeconds}s`;
       
       // Gesamtzeit-Anzeige aktualisieren
       const totalTimeDisplay = document.getElementById('totalTimeDisplay');
       const totalTimeText = document.getElementById('totalTimeText');
       
-      if (totalMinutes > 0) {
-        totalTimeText.textContent = `Gesamtzeit: ${hours} Stunden, ${minutes} Minuten`;
+      if (totalSeconds > 0) {
+        totalTimeText.textContent = `Gesamtzeit: ${totalSeconds} Sekunden`;
         totalTimeDisplay.classList.remove('hidden');
       } else {
         totalTimeDisplay.classList.add('hidden');
@@ -1593,7 +1637,7 @@
         tr.innerHTML = `
           <td class="p-3">${workbench.name}</td>
           <td class="p-3">${workbench.category}</td>
-          <td class="p-3">${workbench.time} Minuten</td>
+          <td class="p-3">${workbench.time} Sekunden</td>
           <td class="p-3">
             <div class="flex gap-2">
               <button class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-sm rounded-lg btn flex items-center gap-1 edit-workbench" data-key="${workbench.key}">
@@ -1856,7 +1900,7 @@
         return;
       }
       
-      const header = ['Name', 'Kategorie', 'Herstellungszeit (Minuten)', 'Ressourcen'];
+      const header = ['Name', 'Kategorie', 'Herstellungszeit (Sekunden)', 'Ressourcen'];
       const rows = workbenches.map(wb => {
         const resourcesText = wb.resources && wb.resources.length > 0 
           ? wb.resources.map(r => `${r.name} (${r.min}-${r.max})`).join('; ')
