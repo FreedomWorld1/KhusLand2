@@ -420,6 +420,60 @@
       margin-right: 8px;
       border: 1px solid rgba(220, 38, 38, 0.3);
     }
+    .global-quantity-input {
+      width: 120px;
+      text-align: center;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: rgba(30, 41, 59, 0.5);
+      border: 1px solid rgba(220, 38, 38, 0.3);
+      color: #dc2626;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+    .global-quantity-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding: 16px;
+      background: rgba(30, 41, 59, 0.6);
+      border-radius: 12px;
+      border: 1px solid rgba(220, 38, 38, 0.2);
+    }
+    .global-quantity-label {
+      font-weight: 600;
+      color: #dc2626;
+      font-size: 1.1rem;
+    }
+    .resource-conversion {
+      margin-top: 10px;
+      padding: 10px;
+      background: rgba(30, 41, 59, 0.5);
+      border-radius: 8px;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+    .resource-conversion-title {
+      font-size: 0.8rem;
+      color: #22c55e;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+    .resource-conversion-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      margin-bottom: 3px;
+    }
+    .total-resources-display {
+      background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+      color: white;
+      padding: 12px 16px;
+      border-radius: 12px;
+      margin-top: 15px;
+      font-weight: bold;
+      box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+    }
   </style>
 </head>
 <body class="text-gray-100 antialiased min-h-screen">
@@ -511,6 +565,12 @@
             Meine Werkbänke
           </h2>
           
+          <!-- Globale Mengeneingabe -->
+          <div class="global-quantity-container">
+            <span class="global-quantity-label">Anzahl Werkbänke:</span>
+            <input type="number" id="globalQuantity" class="global-quantity-input" value="1" min="1">
+          </div>
+          
           <!-- Statistik-Karten -->
           <div class="stats-grid">
             <div class="stat-card">
@@ -535,6 +595,12 @@
           <div id="totalTimeDisplay" class="total-time-display hidden">
             <i class="fas fa-clock mr-2"></i>
             <span id="totalTimeText">Gesamtzeit: 0 Sekunden</span>
+          </div>
+          
+          <!-- Gesamtressourcen Anzeige -->
+          <div id="totalResourcesDisplay" class="total-resources-display hidden">
+            <i class="fas fa-cubes mr-2"></i>
+            <span id="totalResourcesText">Benötigte Ressourcen werden berechnet...</span>
           </div>
           
           <!-- Suchfeld -->
@@ -782,6 +848,7 @@
     const notification = document.getElementById('notification');
     const accessBadge = document.getElementById('accessBadge');
     const forceCheckBtn = document.getElementById('forceCheckBtn');
+    const globalQuantityInput = document.getElementById('globalQuantity');
 
     // Notification System
     function showNotification(message, type = 'info', duration = 5000) {
@@ -1149,7 +1216,16 @@
     let tempCategories = [];
     let currentResources = [];
     const ADMIN_PASSWORD = '1101';
-    let userQuantities = {}; // Speichert die Mengenangaben des Benutzers
+    let globalQuantity = 1;
+
+    // Ressourcen-Konvertierungsraten
+    const resourceConversionRates = {
+      'Holzstamm': { 'Holz': 10 }, // 1 Holzstamm = 10 Holz
+      'Eisenbarren': { 'Eisenerz': 5 }, // 1 Eisenbarren = 5 Eisenerz
+      'Goldbarren': { 'Golderz': 5 }, // 1 Goldbarren = 5 Golderz
+      'Diamant': { 'Diamanterz': 3 }, // 1 Diamant = 3 Diamanterz
+      'Leder': { 'Tierhaut': 2 } // 1 Leder = 2 Tierhaut
+    };
 
     // Utility
     function show(el) { 
@@ -1235,6 +1311,7 @@
       renderAdminTable();
       updateStatistics();
       calculateTotalTime();
+      calculateTotalResources();
     });
 
     onValue(categoriesRef, (snapshot) => {
@@ -1316,6 +1393,18 @@
       renderWorkbenches();
     });
 
+    // Globale Mengeneingabe
+    globalQuantityInput.addEventListener('input', () => {
+      globalQuantity = parseInt(globalQuantityInput.value) || 1;
+      if (globalQuantity < 1) {
+        globalQuantity = 1;
+        globalQuantityInput.value = 1;
+      }
+      renderWorkbenches();
+      calculateTotalTime();
+      calculateTotalResources();
+    });
+
     // Event Listener für Kategorie Buttons
     function setupCategoryFilters() {
       document.addEventListener('click', function(e) {
@@ -1379,7 +1468,6 @@
       }
       
       filteredWorkbenches.forEach(workbench => {
-        const quantity = userQuantities[workbench.key] || 0;
         const el = document.createElement('div');
         el.className = 'resource-item p-4 rounded-lg bg-gray-800/50 border border-gray-700 hover:border-red-500/30 transition-all duration-200';
         
@@ -1405,13 +1493,51 @@
           `;
         }
         
+        // Berechnete Werte für diese Werkbank mit globaler Menge
+        const totalTime = (workbench.time || 0) * globalQuantity;
+        const totalResources = workbench.resources ? 
+          workbench.resources.map(resource => ({
+            name: resource.name,
+            amount: resource.amount * globalQuantity
+          })) : [];
+        
+        // Konvertierte Ressourcen anzeigen
+        let convertedResourcesHtml = '';
+        if (totalResources.length > 0) {
+          convertedResourcesHtml = `
+            <div class="resource-conversion">
+              <div class="resource-conversion-title">Benötigte Ressourcen (für ${globalQuantity}x):</div>
+              ${totalResources.map(resource => {
+                let conversionHtml = '';
+                if (resourceConversionRates[resource.name]) {
+                  const conversions = resourceConversionRates[resource.name];
+                  conversionHtml = Object.entries(conversions).map(([convertedResource, rate]) => 
+                    `<div class="resource-conversion-item">
+                       <span>${convertedResource}:</span>
+                       <span>${resource.amount * rate}</span>
+                     </div>`
+                  ).join('');
+                }
+                
+                return `
+                  <div class="conversion-item">
+                    <span>${resource.name}:</span>
+                    <span>${resource.amount}</span>
+                  </div>
+                  ${conversionHtml}
+                `;
+              }).join('')}
+            </div>
+          `;
+        }
+        
         el.innerHTML = `
           <div class="workbench-card">
             ${imageHtml}
             <div class="flex justify-between items-start mb-2">
               <div class="font-semibold text-lg">${workbench.name}</div>
               <div class="px-2 py-1 bg-gray-700 text-xs rounded-full text-blue-400">
-                <i class="fas fa-clock mr-1"></i>${formatTime(workbench.time)}
+                <i class="fas fa-clock mr-1"></i>${formatTime(workbench.time || 0)}
               </div>
             </div>
             <div class="text-xs text-gray-400 mb-2">
@@ -1419,112 +1545,23 @@
             </div>
             ${resourcesHtml}
             
-            <!-- Werkbank Rechner -->
+            <!-- Berechnete Werte für globale Menge -->
             <div class="calculator-section">
               <div class="calculator-title">
                 <i class="fas fa-calculator"></i>
-                Werkbank Rechner
+                Berechnung für ${globalQuantity}x Werkbank(en)
               </div>
               
-              <div class="quantity-controls">
-                <button class="quantity-btn decrease-quantity">
-                  <i class="fas fa-minus"></i>
-                </button>
-                <input type="number" value="${quantity}" min="0" class="quantity-input workbench-quantity" data-key="${workbench.key}">
-                <button class="quantity-btn increase-quantity">
-                  <i class="fas fa-plus"></i>
-                </button>
-                <span class="text-gray-300 ml-2 text-sm">Werkbank(en)</span>
+              <div class="result-item">
+                <div class="flex-1 font-medium text-sm">Gesamtzeit</div>
+                <div class="result-range text-sm">${formatTime(totalTime)}</div>
               </div>
               
-              <div class="calculation-results">
-                <!-- Ergebnisse werden hier dynamisch eingefügt -->
-              </div>
+              ${convertedResourcesHtml}
             </div>
           </div>
         `;
         workbenchesGrid.appendChild(el);
-        
-        // Event Listener für Quantity Controls
-        const quantityInput = el.querySelector('.workbench-quantity');
-        const decreaseBtn = el.querySelector('.decrease-quantity');
-        const increaseBtn = el.querySelector('.increase-quantity');
-        const resultsContainer = el.querySelector('.calculation-results');
-        
-        // Berechnung für diese Werkbank
-        const updateCalculation = () => {
-          const quantity = parseInt(quantityInput.value) || 0;
-          const workbenchKey = quantityInput.getAttribute('data-key');
-          userQuantities[workbenchKey] = quantity;
-          
-          resultsContainer.innerHTML = '';
-          
-          // Zeitberechnung
-          const timePerWorkbench = parseFloat(workbench.time) || 0;
-          const totalTime = timePerWorkbench * quantity;
-          
-          if (quantity > 0) {
-            const timeEl = document.createElement('div');
-            timeEl.className = 'result-item';
-            timeEl.innerHTML = `
-              <div class="flex-1 font-medium text-sm">Gesamtzeit</div>
-              <div class="result-range text-sm">${formatTime(totalTime)}</div>
-            `;
-            resultsContainer.appendChild(timeEl);
-          }
-          
-          // Ressourcenberechnung
-          const workbenchResources = workbench.resources || [];
-          
-          if (workbenchResources.length === 0 && quantity === 0) {
-            resultsContainer.innerHTML = '<div class="text-gray-400 text-center py-2 text-sm">Keine Ressourcen für diese Werkbank definiert</div>';
-            return;
-          }
-          
-          // Ressourcen anzeigen
-          const resourcesDiv = document.createElement('div');
-          resourcesDiv.className = 'conversion-rates';
-          resourcesDiv.innerHTML = '<div class="conversion-title">Benötigte Ressourcen:</div>';
-          
-          workbenchResources.forEach(resource => {
-            const totalAmount = resource.amount * quantity;
-            
-            const resourceEl = document.createElement('div');
-            resourceEl.className = 'conversion-item';
-            resourceEl.innerHTML = `
-              <span>${resource.name}:</span>
-              <span>${totalAmount}</span>
-            `;
-            resourcesDiv.appendChild(resourceEl);
-          });
-          
-          resultsContainer.appendChild(resourcesDiv);
-          
-          // Gesamtzeit neu berechnen
-          calculateTotalTime();
-        };
-        
-        // Initiale Berechnung
-        updateCalculation();
-        
-        // Event Listener
-        decreaseBtn.addEventListener('click', () => {
-          const current = parseInt(quantityInput.value) || 0;
-          if (current > 0) {
-            quantityInput.value = current - 1;
-            updateCalculation();
-          }
-        });
-
-        increaseBtn.addEventListener('click', () => {
-          const current = parseInt(quantityInput.value) || 0;
-          quantityInput.value = current + 1;
-          updateCalculation();
-        });
-
-        quantityInput.addEventListener('input', () => {
-          updateCalculation();
-        });
       });
     }
 
@@ -1533,11 +1570,7 @@
       let totalSeconds = 0;
       
       workbenches.forEach(workbench => {
-        const quantity = userQuantities[workbench.key] || 0;
-        if (quantity > 0) {
-          const timePerWorkbench = parseFloat(workbench.time) || 0;
-          totalSeconds += timePerWorkbench * quantity;
-        }
+        totalSeconds += (workbench.time || 0) * globalQuantity;
       });
       
       // Statistik-Karte aktualisieren
@@ -1548,10 +1581,64 @@
       const totalTimeText = document.getElementById('totalTimeText');
       
       if (totalSeconds > 0) {
-        totalTimeText.textContent = `Gesamtzeit: ${formatTime(totalSeconds)}`;
+        totalTimeText.textContent = `Gesamtzeit für ${globalQuantity}x Werkbänke: ${formatTime(totalSeconds)}`;
         totalTimeDisplay.classList.remove('hidden');
       } else {
         totalTimeDisplay.classList.add('hidden');
+      }
+    }
+
+    // Gesamtressourcen berechnen
+    function calculateTotalResources() {
+      const totalResources = {};
+      
+      workbenches.forEach(workbench => {
+        if (workbench.resources) {
+          workbench.resources.forEach(resource => {
+            const resourceName = resource.name;
+            const resourceAmount = resource.amount * globalQuantity;
+            
+            if (!totalResources[resourceName]) {
+              totalResources[resourceName] = 0;
+            }
+            totalResources[resourceName] += resourceAmount;
+          });
+        }
+      });
+      
+      // Konvertierte Ressourcen hinzufügen
+      const convertedResources = {};
+      Object.entries(totalResources).forEach(([resourceName, amount]) => {
+        if (resourceConversionRates[resourceName]) {
+          Object.entries(resourceConversionRates[resourceName]).forEach(([convertedResource, rate]) => {
+            if (!convertedResources[convertedResource]) {
+              convertedResources[convertedResource] = 0;
+            }
+            convertedResources[convertedResource] += amount * rate;
+          });
+        }
+      });
+      
+      // Gesamtressourcen-Anzeige aktualisieren
+      const totalResourcesDisplay = document.getElementById('totalResourcesDisplay');
+      const totalResourcesText = document.getElementById('totalResourcesText');
+      
+      if (Object.keys(totalResources).length > 0) {
+        let resourcesText = 'Benötigte Ressourcen: ';
+        const resourceItems = [];
+        
+        Object.entries(totalResources).forEach(([resourceName, amount]) => {
+          resourceItems.push(`${resourceName}: ${amount}`);
+        });
+        
+        Object.entries(convertedResources).forEach(([resourceName, amount]) => {
+          resourceItems.push(`${resourceName}: ${amount}`);
+        });
+        
+        totalResourcesText.textContent = resourceItems.join(' | ');
+        totalResourcesDisplay.classList.remove('hidden');
+      } else {
+        totalResourcesDisplay.classList.add('hidden');
       }
     }
 
@@ -1716,7 +1803,7 @@
         tr.innerHTML = `
           <td class="p-3">${workbench.name}</td>
           <td class="p-3">${workbench.category}</td>
-          <td class="p-3">${formatTime(workbench.time)}</td>
+          <td class="p-3">${formatTime(workbench.time || 0)}</td>
           <td class="p-3">
             <div class="flex gap-2">
               <button class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-sm rounded-lg btn flex items-center gap-1 edit-workbench" data-key="${workbench.key}">
@@ -1761,7 +1848,7 @@
       document.getElementById('workbenchCategory').value = workbench.category;
       
       // Zeit zerlegen
-      const totalSeconds = workbench.time;
+      const totalSeconds = workbench.time || 0;
       const minutes = Math.floor(totalSeconds / 60);
       const seconds = Math.floor(totalSeconds % 60);
       const milliseconds = Math.round((totalSeconds % 1) * 1000);
@@ -2023,7 +2110,7 @@
         return [
           `"${wb.name}"`,
           `"${wb.category}"`,
-          `"${wb.time}"`,
+          `"${wb.time || 0}"`,
           `"${resourcesText.replace(/"/g, '""')}"`
         ].join(';');
       });
