@@ -474,6 +474,39 @@
       font-weight: bold;
       box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
     }
+    .output-resources {
+      margin-top: 10px;
+      padding: 10px;
+      background: rgba(59, 130, 246, 0.2);
+      border-radius: 8px;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+    .output-resources-title {
+      font-size: 0.8rem;
+      color: #3b82f6;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+    .output-resources-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      margin-bottom: 3px;
+    }
+    .resource-input-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .resource-input-column {
+      flex: 1;
+    }
+    .resource-input-column label {
+      display: block;
+      font-size: 0.75rem;
+      color: #94a3b8;
+      margin-bottom: 4px;
+    }
   </style>
 </head>
 <body class="text-gray-100 antialiased min-h-screen">
@@ -728,17 +761,50 @@
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-300 mb-1">
-            <i class="fas fa-cubes mr-1"></i> Ressourcen
+            <i class="fas fa-cubes mr-1"></i> Benötigte Ressourcen (Input)
           </label>
-          <div class="resource-input-container">
-            <input type="text" id="newResourceName" class="flex-1 p-3 rounded-lg bg-gray-800/50 border border-gray-700 focus:border-red-500" placeholder="Ressourcenname"/>
-            <input type="number" id="newResourceAmount" class="w-20 p-3 rounded-lg bg-gray-800/50 border border-gray-700 focus:border-red-500" placeholder="Anzahl" min="1"/>
-            <button type="button" id="addResourceBtn" class="px-4 py-3 bg-red-600 hover:bg-red-500 rounded-lg btn font-medium">
-              <i class="fas fa-plus"></i>
-            </button>
+          <div class="resource-input-group">
+            <div class="resource-input-column">
+              <label>Ressourcenname</label>
+              <input type="text" id="newResourceName" class="p-3 rounded-lg bg-gray-800/50 border border-gray-700 w-full focus:border-red-500" placeholder="Ressourcenname"/>
+            </div>
+            <div class="resource-input-column">
+              <label>Anzahl</label>
+              <input type="number" id="newResourceAmount" class="p-3 rounded-lg bg-gray-800/50 border border-gray-700 w-full focus:border-red-500" placeholder="Anzahl" min="1"/>
+            </div>
+            <div class="resource-input-column">
+              <label>&nbsp;</label>
+              <button type="button" id="addResourceBtn" class="w-full px-4 py-3 bg-red-600 hover:bg-red-500 rounded-lg btn font-medium">
+                <i class="fas fa-plus"></i> Hinzufügen
+              </button>
+            </div>
           </div>
           <div id="resourcesList" class="resource-list">
-            <!-- Ressourcen werden hier dynamisch hinzugefügt -->
+            <!-- Benötigte Ressourcen werden hier dynamisch hinzugefügt -->
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-300 mb-1">
+            <i class="fas fa-box-open mr-1"></i> Erhaltene Ressourcen (Output)
+          </label>
+          <div class="resource-input-group">
+            <div class="resource-input-column">
+              <label>Ressourcenname</label>
+              <input type="text" id="newOutputResourceName" class="p-3 rounded-lg bg-gray-800/50 border border-gray-700 w-full focus:border-green-500" placeholder="Ressourcenname"/>
+            </div>
+            <div class="resource-input-column">
+              <label>Anzahl</label>
+              <input type="number" id="newOutputResourceAmount" class="p-3 rounded-lg bg-gray-800/50 border border-gray-700 w-full focus:border-green-500" placeholder="Anzahl" min="1"/>
+            </div>
+            <div class="resource-input-column">
+              <label>&nbsp;</label>
+              <button type="button" id="addOutputResourceBtn" class="w-full px-4 py-3 bg-green-600 hover:bg-green-500 rounded-lg btn font-medium">
+                <i class="fas fa-plus"></i> Hinzufügen
+              </button>
+            </div>
+          </div>
+          <div id="outputResourcesList" class="resource-list">
+            <!-- Erhaltene Ressourcen werden hier dynamisch hinzugefügt -->
           </div>
         </div>
         <div class="image-upload-container">
@@ -1215,17 +1281,9 @@
     let filteredWorkbenches = [];
     let tempCategories = [];
     let currentResources = [];
+    let currentOutputResources = [];
     const ADMIN_PASSWORD = '1101';
     let globalQuantity = 1;
-
-    // Ressourcen-Konvertierungsraten
-    const resourceConversionRates = {
-      'Holzstamm': { 'Holz': 10 }, // 1 Holzstamm = 10 Holz
-      'Eisenbarren': { 'Eisenerz': 5 }, // 1 Eisenbarren = 5 Eisenerz
-      'Goldbarren': { 'Golderz': 5 }, // 1 Goldbarren = 5 Golderz
-      'Diamant': { 'Diamanterz': 3 }, // 1 Diamant = 3 Diamanterz
-      'Leder': { 'Tierhaut': 2 } // 1 Leder = 2 Tierhaut
-    };
 
     // Utility
     function show(el) { 
@@ -1477,10 +1535,10 @@
              <img src="${workbench.imageUrl}" class="image-preview-small" alt="${workbench.name}">
            </div>` : '';
         
-        // Ressourcen für diese Werkbank
-        let resourcesHtml = '';
+        // Benötigte Ressourcen für diese Werkbank
+        let inputResourcesHtml = '';
         if (workbench.resources && workbench.resources.length > 0) {
-          resourcesHtml = `
+          inputResourcesHtml = `
             <div class="conversion-rates">
               <div class="conversion-title">Benötigte Ressourcen:</div>
               ${workbench.resources.map(resource => 
@@ -1493,40 +1551,64 @@
           `;
         }
         
+        // Erhaltene Ressourcen für diese Werkbank
+        let outputResourcesHtml = '';
+        if (workbench.outputResources && workbench.outputResources.length > 0) {
+          outputResourcesHtml = `
+            <div class="output-resources">
+              <div class="output-resources-title">Erhaltene Ressourcen:</div>
+              ${workbench.outputResources.map(resource => 
+                `<div class="output-resources-item">
+                   <span>${resource.name}:</span>
+                   <span>${resource.amount}</span>
+                 </div>`
+              ).join('')}
+            </div>
+          `;
+        }
+        
         // Berechnete Werte für diese Werkbank mit globaler Menge
         const totalTime = (workbench.time || 0) * globalQuantity;
-        const totalResources = workbench.resources ? 
+        const totalInputResources = workbench.resources ? 
           workbench.resources.map(resource => ({
             name: resource.name,
             amount: resource.amount * globalQuantity
           })) : [];
         
-        // Konvertierte Ressourcen anzeigen
-        let convertedResourcesHtml = '';
-        if (totalResources.length > 0) {
-          convertedResourcesHtml = `
+        const totalOutputResources = workbench.outputResources ? 
+          workbench.outputResources.map(resource => ({
+            name: resource.name,
+            amount: resource.amount * globalQuantity
+          })) : [];
+        
+        // Berechnete Input-Ressourcen anzeigen
+        let calculatedInputResourcesHtml = '';
+        if (totalInputResources.length > 0) {
+          calculatedInputResourcesHtml = `
             <div class="resource-conversion">
               <div class="resource-conversion-title">Benötigte Ressourcen (für ${globalQuantity}x):</div>
-              ${totalResources.map(resource => {
-                let conversionHtml = '';
-                if (resourceConversionRates[resource.name]) {
-                  const conversions = resourceConversionRates[resource.name];
-                  conversionHtml = Object.entries(conversions).map(([convertedResource, rate]) => 
-                    `<div class="resource-conversion-item">
-                       <span>${convertedResource}:</span>
-                       <span>${resource.amount * rate}</span>
-                     </div>`
-                  ).join('');
-                }
-                
-                return `
-                  <div class="conversion-item">
-                    <span>${resource.name}:</span>
-                    <span>${resource.amount}</span>
-                  </div>
-                  ${conversionHtml}
-                `;
-              }).join('')}
+              ${totalInputResources.map(resource => 
+                `<div class="resource-conversion-item">
+                   <span>${resource.name}:</span>
+                   <span>${resource.amount}</span>
+                 </div>`
+              ).join('')}
+            </div>
+          `;
+        }
+        
+        // Berechnete Output-Ressourcen anzeigen
+        let calculatedOutputResourcesHtml = '';
+        if (totalOutputResources.length > 0) {
+          calculatedOutputResourcesHtml = `
+            <div class="output-resources">
+              <div class="output-resources-title">Erhaltene Ressourcen (für ${globalQuantity}x):</div>
+              ${totalOutputResources.map(resource => 
+                `<div class="output-resources-item">
+                   <span>${resource.name}:</span>
+                   <span>${resource.amount}</span>
+                 </div>`
+              ).join('')}
             </div>
           `;
         }
@@ -1543,7 +1625,8 @@
             <div class="text-xs text-gray-400 mb-2">
               <i class="fas fa-folder mr-1"></i>${workbench.category}
             </div>
-            ${resourcesHtml}
+            ${inputResourcesHtml}
+            ${outputResourcesHtml}
             
             <!-- Berechnete Werte für globale Menge -->
             <div class="calculator-section">
@@ -1557,7 +1640,8 @@
                 <div class="result-range text-sm">${formatTime(totalTime)}</div>
               </div>
               
-              ${convertedResourcesHtml}
+              ${calculatedInputResourcesHtml}
+              ${calculatedOutputResourcesHtml}
             </div>
           </div>
         `;
@@ -1590,31 +1674,33 @@
 
     // Gesamtressourcen berechnen
     function calculateTotalResources() {
-      const totalResources = {};
+      const totalInputResources = {};
+      const totalOutputResources = {};
       
       workbenches.forEach(workbench => {
+        // Input-Ressourcen
         if (workbench.resources) {
           workbench.resources.forEach(resource => {
             const resourceName = resource.name;
             const resourceAmount = resource.amount * globalQuantity;
             
-            if (!totalResources[resourceName]) {
-              totalResources[resourceName] = 0;
+            if (!totalInputResources[resourceName]) {
+              totalInputResources[resourceName] = 0;
             }
-            totalResources[resourceName] += resourceAmount;
+            totalInputResources[resourceName] += resourceAmount;
           });
         }
-      });
-      
-      // Konvertierte Ressourcen hinzufügen
-      const convertedResources = {};
-      Object.entries(totalResources).forEach(([resourceName, amount]) => {
-        if (resourceConversionRates[resourceName]) {
-          Object.entries(resourceConversionRates[resourceName]).forEach(([convertedResource, rate]) => {
-            if (!convertedResources[convertedResource]) {
-              convertedResources[convertedResource] = 0;
+        
+        // Output-Ressourcen
+        if (workbench.outputResources) {
+          workbench.outputResources.forEach(resource => {
+            const resourceName = resource.name;
+            const resourceAmount = resource.amount * globalQuantity;
+            
+            if (!totalOutputResources[resourceName]) {
+              totalOutputResources[resourceName] = 0;
             }
-            convertedResources[convertedResource] += amount * rate;
+            totalOutputResources[resourceName] += resourceAmount;
           });
         }
       });
@@ -1623,19 +1709,25 @@
       const totalResourcesDisplay = document.getElementById('totalResourcesDisplay');
       const totalResourcesText = document.getElementById('totalResourcesText');
       
-      if (Object.keys(totalResources).length > 0) {
-        let resourcesText = 'Benötigte Ressourcen: ';
-        const resourceItems = [];
+      if (Object.keys(totalInputResources).length > 0 || Object.keys(totalOutputResources).length > 0) {
+        let resourcesText = '';
         
-        Object.entries(totalResources).forEach(([resourceName, amount]) => {
-          resourceItems.push(`${resourceName}: ${amount}`);
-        });
+        if (Object.keys(totalInputResources).length > 0) {
+          const inputItems = Object.entries(totalInputResources).map(([resourceName, amount]) => 
+            `Benötigt ${resourceName}: ${amount}`
+          );
+          resourcesText += inputItems.join(' | ');
+        }
         
-        Object.entries(convertedResources).forEach(([resourceName, amount]) => {
-          resourceItems.push(`${resourceName}: ${amount}`);
-        });
+        if (Object.keys(totalOutputResources).length > 0) {
+          if (resourcesText) resourcesText += ' | ';
+          const outputItems = Object.entries(totalOutputResources).map(([resourceName, amount]) => 
+            `Erhalten ${resourceName}: ${amount}`
+          );
+          resourcesText += outputItems.join(' | ');
+        }
         
-        totalResourcesText.textContent = resourceItems.join(' | ');
+        totalResourcesText.textContent = resourcesText;
         totalResourcesDisplay.classList.remove('hidden');
       } else {
         totalResourcesDisplay.classList.add('hidden');
@@ -1697,6 +1789,12 @@
     const addResourceBtn = document.getElementById('addResourceBtn');
     const resourcesList = document.getElementById('resourcesList');
 
+    // Output Ressourcen Elemente
+    const newOutputResourceName = document.getElementById('newOutputResourceName');
+    const newOutputResourceAmount = document.getElementById('newOutputResourceAmount');
+    const addOutputResourceBtn = document.getElementById('addOutputResourceBtn');
+    const outputResourcesList = document.getElementById('outputResourcesList');
+
     // Bild Upload
     const workbenchImage = document.getElementById('workbenchImage');
     const imagePreview = document.getElementById('imagePreview');
@@ -1717,7 +1815,7 @@
       }
     });
 
-    // Ressource hinzufügen
+    // Input-Ressource hinzufügen
     addResourceBtn.addEventListener('click', () => {
       const resourceName = newResourceName.value.trim();
       const resourceAmount = parseInt(newResourceAmount.value);
@@ -1725,32 +1823,46 @@
       if (resourceName && resourceAmount && resourceAmount > 0) {
         currentResources.push({
           name: resourceName,
-          amount: resourceAmount  // Nur noch amount statt min/max
+          amount: resourceAmount
         });
         renderResourcesList();
         newResourceName.value = '';
         newResourceAmount.value = '';
         newResourceName.focus();
-        showNotification('Ressource hinzugefügt', 'success');
+        showNotification('Benötigte Ressource hinzugefügt', 'success');
       } else {
         showNotification('Bitte füllen Sie alle Felder korrekt aus', 'error');
       }
     });
 
-    // Ressourcen mit Enter hinzufügen
-    newResourceName.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        addResourceBtn.click();
+    // Output-Ressource hinzufügen
+    addOutputResourceBtn.addEventListener('click', () => {
+      const resourceName = newOutputResourceName.value.trim();
+      const resourceAmount = parseInt(newOutputResourceAmount.value);
+      
+      if (resourceName && resourceAmount && resourceAmount > 0) {
+        currentOutputResources.push({
+          name: resourceName,
+          amount: resourceAmount
+        });
+        renderOutputResourcesList();
+        newOutputResourceName.value = '';
+        newOutputResourceAmount.value = '';
+        newOutputResourceName.focus();
+        showNotification('Erhaltene Ressource hinzugefügt', 'success');
+      } else {
+        showNotification('Bitte füllen Sie alle Felder korrekt aus', 'error');
       }
     });
 
-    // Ressourcen Liste rendern
+    // Input-Ressourcen Liste rendern
     function renderResourcesList() {
       resourcesList.innerHTML = '';
       currentResources.forEach((resource, index) => {
         const span = document.createElement('span');
         span.className = 'resource-tag flex items-center';
+        span.style.background = 'rgba(220, 38, 38, 0.2)';
+        span.style.color = '#dc2626';
         span.innerHTML = `
           ${resource.name}: ${resource.amount}
           <button type="button" class="ml-1 text-red-400 hover:text-red-300 remove-resource" data-index="${index}">
@@ -1766,7 +1878,35 @@
           const index = parseInt(this.getAttribute('data-index'));
           currentResources.splice(index, 1);
           renderResourcesList();
-          showNotification('Ressource entfernt', 'info');
+          showNotification('Benötigte Ressource entfernt', 'info');
+        });
+      });
+    }
+
+    // Output-Ressourcen Liste rendern
+    function renderOutputResourcesList() {
+      outputResourcesList.innerHTML = '';
+      currentOutputResources.forEach((resource, index) => {
+        const span = document.createElement('span');
+        span.className = 'resource-tag flex items-center';
+        span.style.background = 'rgba(34, 197, 94, 0.2)';
+        span.style.color = '#16a34a';
+        span.innerHTML = `
+          ${resource.name}: ${resource.amount}
+          <button type="button" class="ml-1 text-green-400 hover:text-green-300 remove-output-resource" data-index="${index}">
+            <i class="fas fa-times"></i>
+          </button>
+        `;
+        outputResourcesList.appendChild(span);
+      });
+      
+      // Event Listener für Löschen-Buttons
+      document.querySelectorAll('.remove-output-resource').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const index = parseInt(this.getAttribute('data-index'));
+          currentOutputResources.splice(index, 1);
+          renderOutputResourcesList();
+          showNotification('Erhaltene Ressource entfernt', 'info');
         });
       });
     }
@@ -1863,6 +2003,10 @@
       currentResources = workbench.resources ? [...workbench.resources] : [];
       renderResourcesList();
       
+      // Output-Ressourcen setzen
+      currentOutputResources = workbench.outputResources ? [...workbench.outputResources] : [];
+      renderOutputResourcesList();
+      
       // Bild setzen falls vorhanden
       if (workbench.imageUrl) {
         previewImage.src = workbench.imageUrl;
@@ -1887,7 +2031,9 @@
       workbenchForm.reset();
       workbenchKeyInput.value = '';
       currentResources = [];
+      currentOutputResources = [];
       renderResourcesList();
+      renderOutputResourcesList();
       imagePreview.classList.add('hidden');
       
       // Modal-Titel ändern
@@ -1901,7 +2047,9 @@
       hide(workbenchModal);
       workbenchForm.reset();
       currentResources = [];
+      currentOutputResources = [];
       renderResourcesList();
+      renderOutputResourcesList();
       imagePreview.classList.add('hidden');
     });
 
@@ -2008,7 +2156,9 @@
           if (modal === workbenchModal) {
             workbenchForm.reset();
             currentResources = [];
+            currentOutputResources = [];
             renderResourcesList();
+            renderOutputResourcesList();
             imagePreview.classList.add('hidden');
           }
           if (modal === categoriesModal) newCategoryName.value = '';
@@ -2053,6 +2203,7 @@
         time: totalTime,
         timeDisplay: `${minutes} ${seconds} ${milliseconds}`, // Für spätere Anzeige
         resources: [...currentResources],
+        outputResources: [...currentOutputResources],
         imageUrl: imageUrl,
         date: new Date().toISOString(),
         timestamp: Date.now()
@@ -2071,7 +2222,9 @@
         hide(workbenchModal);
         workbenchForm.reset();
         currentResources = [];
+        currentOutputResources = [];
         renderResourcesList();
+        renderOutputResourcesList();
         imagePreview.classList.add('hidden');
         showNotification(`Werkbank erfolgreich ${key ? 'aktualisiert' : 'hinzugefügt'}`, 'success');
       } else {
@@ -2101,17 +2254,22 @@
         return;
       }
       
-      const header = ['Name', 'Kategorie', 'Herstellungszeit (Sekunden)', 'Ressourcen'];
+      const header = ['Name', 'Kategorie', 'Herstellungszeit (Sekunden)', 'Benötigte Ressourcen', 'Erhaltene Ressourcen'];
       const rows = workbenches.map(wb => {
-        const resourcesText = wb.resources && wb.resources.length > 0 
+        const inputResourcesText = wb.resources && wb.resources.length > 0 
           ? wb.resources.map(r => `${r.name}: ${r.amount}`).join('; ')
-          : 'Keine Ressourcen';
+          : 'Keine benötigten Ressourcen';
+        
+        const outputResourcesText = wb.outputResources && wb.outputResources.length > 0 
+          ? wb.outputResources.map(r => `${r.name}: ${r.amount}`).join('; ')
+          : 'Keine erhaltenen Ressourcen';
         
         return [
           `"${wb.name}"`,
           `"${wb.category}"`,
           `"${wb.time || 0}"`,
-          `"${resourcesText.replace(/"/g, '""')}"`
+          `"${inputResourcesText.replace(/"/g, '""')}"`,
+          `"${outputResourcesText.replace(/"/g, '""')}"`
         ].join(';');
       });
       
