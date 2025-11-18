@@ -1473,8 +1473,7 @@
       } else {
         filteredWorkbenches = workbenches.filter(workbench => 
           workbench.name.toLowerCase().includes(searchTerm) || 
-          workbench.category.toLowerCase().includes(searchTerm) ||
-          workbench.description?.toLowerCase().includes(searchTerm)
+          workbench.category.toLowerCase().includes(searchTerm)
         );
       }
       
@@ -2035,7 +2034,7 @@
       } else if (tempCategories.includes(categoryName)) {
         showNotification('Kategorie existiert bereits', 'error');
       }
-    }
+    });
 
     // Kategorie entfernen
     categoriesList.addEventListener('click', (e) => {
