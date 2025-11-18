@@ -390,6 +390,36 @@
       font-size: 0.8rem;
       margin-bottom: 3px;
     }
+    .time-input-container {
+      display: flex;
+      gap: 8px;
+    }
+    .time-input {
+      flex: 1;
+    }
+    .time-input label {
+      display: block;
+      font-size: 0.75rem;
+      color: #94a3b8;
+      margin-bottom: 4px;
+    }
+    .image-upload-container {
+      margin-top: 12px;
+    }
+    .image-preview {
+      max-width: 100px;
+      max-height: 100px;
+      border-radius: 8px;
+      margin-top: 8px;
+      border: 1px solid rgba(220, 38, 38, 0.3);
+    }
+    .image-preview-small {
+      max-width: 50px;
+      max-height: 50px;
+      border-radius: 6px;
+      margin-right: 8px;
+      border: 1px solid rgba(220, 38, 38, 0.3);
+    }
   </style>
 </head>
 <body class="text-gray-100 antialiased min-h-screen">
@@ -610,9 +640,25 @@
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-300 mb-1">
-            <i class="fas fa-clock mr-1"></i> Herstellungszeit (Sekunden)
+            <i class="fas fa-clock mr-1"></i> Herstellungszeit
           </label>
-          <input type="number" id="workbenchTime" class="p-3 rounded-lg bg-gray-800/50 border border-gray-700 w-full focus:border-red-500" placeholder="z.B.: 120" required/>
+          <div class="time-input-container">
+            <div class="time-input">
+              <label>Minuten</label>
+              <input type="number" id="workbenchTimeMinutes" class="p-3 rounded-lg bg-gray-800/50 border border-gray-700 w-full focus:border-red-500" placeholder="0" min="0"/>
+            </div>
+            <div class="time-input">
+              <label>Sekunden</label>
+              <input type="number" id="workbenchTimeSeconds" class="p-3 rounded-lg bg-gray-800/50 border border-gray-700 w-full focus:border-red-500" placeholder="0" min="0" max="59"/>
+            </div>
+            <div class="time-input">
+              <label>Millisekunden</label>
+              <input type="number" id="workbenchTimeMilliseconds" class="p-3 rounded-lg bg-gray-800/50 border border-gray-700 w-full focus:border-red-500" placeholder="0" min="0" max="999"/>
+            </div>
+          </div>
+          <div class="text-xs text-gray-400 mt-1">
+            Format: Minuten Sekunden Millisekunden (z.B. 2 30 500 für 2 Minuten, 30 Sekunden, 500ms)
+          </div>
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-300 mb-1">
@@ -620,14 +666,22 @@
           </label>
           <div class="resource-input-container">
             <input type="text" id="newResourceName" class="flex-1 p-3 rounded-lg bg-gray-800/50 border border-gray-700 focus:border-red-500" placeholder="Ressourcenname"/>
-            <input type="number" id="newResourceMin" class="w-20 p-3 rounded-lg bg-gray-800/50 border border-gray-700 focus:border-red-500" placeholder="Min" min="1"/>
-            <input type="number" id="newResourceMax" class="w-20 p-3 rounded-lg bg-gray-800/50 border border-gray-700 focus:border-red-500" placeholder="Max" min="1"/>
+            <input type="number" id="newResourceAmount" class="w-20 p-3 rounded-lg bg-gray-800/50 border border-gray-700 focus:border-red-500" placeholder="Anzahl" min="1"/>
             <button type="button" id="addResourceBtn" class="px-4 py-3 bg-red-600 hover:bg-red-500 rounded-lg btn font-medium">
               <i class="fas fa-plus"></i>
             </button>
           </div>
           <div id="resourcesList" class="resource-list">
             <!-- Ressourcen werden hier dynamisch hinzugefügt -->
+          </div>
+        </div>
+        <div class="image-upload-container">
+          <label class="block text-sm font-medium text-gray-300 mb-1">
+            <i class="fas fa-image mr-1"></i> Bild hochladen (optional)
+          </label>
+          <input type="file" id="workbenchImage" accept="image/*" class="w-full p-3 rounded-lg bg-gray-800/50 border border-gray-700 focus:border-red-500"/>
+          <div id="imagePreview" class="hidden">
+            <img id="previewImage" class="image-preview" src="" alt="Vorschau">
           </div>
         </div>
         <div class="flex gap-3 pt-2">
@@ -1097,15 +1151,6 @@
     const ADMIN_PASSWORD = '1101';
     let userQuantities = {}; // Speichert die Mengenangaben des Benutzers
 
-    // Ressourcen-Konvertierungsraten
-    const resourceConversionRates = {
-      'Holzstamm': { 'Holz': 10 }, // 1 Holzstamm = 10 Holz
-      'Eisenbarren': { 'Eisenerz': 5 }, // 1 Eisenbarren = 5 Eisenerz
-      'Goldbarren': { 'Golderz': 5 }, // 1 Goldbarren = 5 Golderz
-      'Diamant': { 'Diamanterz': 3 }, // 1 Diamant = 3 Diamanterz
-      'Leder': { 'Tierhaut': 2 } // 1 Leder = 2 Tierhaut
-    };
-
     // Utility
     function show(el) { 
       el.classList.remove('hidden'); 
@@ -1114,6 +1159,26 @@
     function hide(el) { 
       el.classList.add('hidden'); 
       el.classList.remove('fade-in');
+    }
+
+    // Zeit in Sekunden umrechnen
+    function convertTimeToSeconds(minutes, seconds, milliseconds) {
+      return (parseInt(minutes) || 0) * 60 + (parseInt(seconds) || 0) + (parseInt(milliseconds) || 0) / 1000;
+    }
+
+    // Zeit formatieren für Anzeige
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      const ms = Math.round((seconds % 1) * 1000);
+      
+      if (mins > 0) {
+        return `${mins}min ${secs}s ${ms}ms`;
+      } else if (secs > 0) {
+        return `${secs}s ${ms}ms`;
+      } else {
+        return `${ms}ms`;
+      }
     }
 
     // Firebase Funktionen
@@ -1244,7 +1309,7 @@
         filteredWorkbenches = workbenches.filter(workbench => 
           workbench.name.toLowerCase().includes(searchTerm) || 
           workbench.category.toLowerCase().includes(searchTerm) ||
-          workbench.description.toLowerCase().includes(searchTerm)
+          workbench.description?.toLowerCase().includes(searchTerm)
         );
       }
       
@@ -1318,26 +1383,41 @@
         const el = document.createElement('div');
         el.className = 'resource-item p-4 rounded-lg bg-gray-800/50 border border-gray-700 hover:border-red-500/30 transition-all duration-200';
         
+        // Bild anzeigen falls vorhanden
+        const imageHtml = workbench.imageUrl ? 
+          `<div class="flex items-center mb-2">
+             <img src="${workbench.imageUrl}" class="image-preview-small" alt="${workbench.name}">
+           </div>` : '';
+        
         // Ressourcen für diese Werkbank
         let resourcesHtml = '';
         if (workbench.resources && workbench.resources.length > 0) {
-          resourcesHtml = workbench.resources.map(resource => 
-            `<span class="resource-tag">${resource.name} (${resource.min}-${resource.max})</span>`
-          ).join('');
+          resourcesHtml = `
+            <div class="conversion-rates">
+              <div class="conversion-title">Benötigte Ressourcen:</div>
+              ${workbench.resources.map(resource => 
+                `<div class="conversion-item">
+                   <span>${resource.name}:</span>
+                   <span>${resource.amount}</span>
+                 </div>`
+              ).join('')}
+            </div>
+          `;
         }
         
         el.innerHTML = `
           <div class="workbench-card">
+            ${imageHtml}
             <div class="flex justify-between items-start mb-2">
               <div class="font-semibold text-lg">${workbench.name}</div>
               <div class="px-2 py-1 bg-gray-700 text-xs rounded-full text-blue-400">
-                <i class="fas fa-clock mr-1"></i>${workbench.time} Sekunden
+                <i class="fas fa-clock mr-1"></i>${formatTime(workbench.time)}
               </div>
             </div>
             <div class="text-xs text-gray-400 mb-2">
               <i class="fas fa-folder mr-1"></i>${workbench.category}
             </div>
-            ${resourcesHtml ? `<div class="resource-list mb-3">${resourcesHtml}</div>` : ''}
+            ${resourcesHtml}
             
             <!-- Werkbank Rechner -->
             <div class="calculator-section">
@@ -1380,7 +1460,7 @@
           resultsContainer.innerHTML = '';
           
           // Zeitberechnung
-          const timePerWorkbench = parseInt(workbench.time) || 0;
+          const timePerWorkbench = parseFloat(workbench.time) || 0;
           const totalTime = timePerWorkbench * quantity;
           
           if (quantity > 0) {
@@ -1388,7 +1468,7 @@
             timeEl.className = 'result-item';
             timeEl.innerHTML = `
               <div class="flex-1 font-medium text-sm">Gesamtzeit</div>
-              <div class="result-range text-sm">${totalTime}s</div>
+              <div class="result-range text-sm">${formatTime(totalTime)}</div>
             `;
             resultsContainer.appendChild(timeEl);
           }
@@ -1401,41 +1481,24 @@
             return;
           }
           
+          // Ressourcen anzeigen
+          const resourcesDiv = document.createElement('div');
+          resourcesDiv.className = 'conversion-rates';
+          resourcesDiv.innerHTML = '<div class="conversion-title">Benötigte Ressourcen:</div>';
+          
           workbenchResources.forEach(resource => {
-            const minTotal = resource.min * quantity;
-            const maxTotal = resource.max * quantity;
+            const totalAmount = resource.amount * quantity;
             
-            const resultEl = document.createElement('div');
-            resultEl.className = 'result-item';
-            resultEl.innerHTML = `
-              <div class="flex-1 font-medium text-sm">${resource.name}</div>
-              <div class="result-range text-sm">${minTotal}-${maxTotal}</div>
+            const resourceEl = document.createElement('div');
+            resourceEl.className = 'conversion-item';
+            resourceEl.innerHTML = `
+              <span>${resource.name}:</span>
+              <span>${totalAmount}</span>
             `;
-            resultsContainer.appendChild(resultEl);
-            
-            // Konvertierungsraten anzeigen
-            if (resourceConversionRates[resource.name]) {
-              const conversions = resourceConversionRates[resource.name];
-              const conversionDiv = document.createElement('div');
-              conversionDiv.className = 'conversion-rates';
-              conversionDiv.innerHTML = '<div class="conversion-title">Konvertierung:</div>';
-              
-              Object.entries(conversions).forEach(([convertedResource, rate]) => {
-                const minConverted = minTotal * rate;
-                const maxConverted = maxTotal * rate;
-                
-                const conversionItem = document.createElement('div');
-                conversionItem.className = 'conversion-item';
-                conversionItem.innerHTML = `
-                  <span>${convertedResource}:</span>
-                  <span>${minConverted}-${maxConverted}</span>
-                `;
-                conversionDiv.appendChild(conversionItem);
-              });
-              
-              resultsContainer.appendChild(conversionDiv);
-            }
+            resourcesDiv.appendChild(resourceEl);
           });
+          
+          resultsContainer.appendChild(resourcesDiv);
           
           // Gesamtzeit neu berechnen
           calculateTotalTime();
@@ -1472,20 +1535,20 @@
       workbenches.forEach(workbench => {
         const quantity = userQuantities[workbench.key] || 0;
         if (quantity > 0) {
-          const timePerWorkbench = parseInt(workbench.time) || 0;
+          const timePerWorkbench = parseFloat(workbench.time) || 0;
           totalSeconds += timePerWorkbench * quantity;
         }
       });
       
       // Statistik-Karte aktualisieren
-      document.getElementById('totalTime').textContent = `${totalSeconds}s`;
+      document.getElementById('totalTime').textContent = `${formatTime(totalSeconds)}`;
       
       // Gesamtzeit-Anzeige aktualisieren
       const totalTimeDisplay = document.getElementById('totalTimeDisplay');
       const totalTimeText = document.getElementById('totalTimeText');
       
       if (totalSeconds > 0) {
-        totalTimeText.textContent = `Gesamtzeit: ${totalSeconds} Sekunden`;
+        totalTimeText.textContent = `Gesamtzeit: ${formatTime(totalSeconds)}`;
         totalTimeDisplay.classList.remove('hidden');
       } else {
         totalTimeDisplay.classList.add('hidden');
@@ -1543,27 +1606,43 @@
 
     // Ressourcen Elemente
     const newResourceName = document.getElementById('newResourceName');
-    const newResourceMin = document.getElementById('newResourceMin');
-    const newResourceMax = document.getElementById('newResourceMax');
+    const newResourceAmount = document.getElementById('newResourceAmount');
     const addResourceBtn = document.getElementById('addResourceBtn');
     const resourcesList = document.getElementById('resourcesList');
+
+    // Bild Upload
+    const workbenchImage = document.getElementById('workbenchImage');
+    const imagePreview = document.getElementById('imagePreview');
+    const previewImage = document.getElementById('previewImage');
+
+    // Bild Vorschau
+    workbenchImage.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          previewImage.src = e.target.result;
+          imagePreview.classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+      } else {
+        imagePreview.classList.add('hidden');
+      }
+    });
 
     // Ressource hinzufügen
     addResourceBtn.addEventListener('click', () => {
       const resourceName = newResourceName.value.trim();
-      const resourceMin = parseInt(newResourceMin.value);
-      const resourceMax = parseInt(newResourceMax.value);
+      const resourceAmount = parseInt(newResourceAmount.value);
       
-      if (resourceName && resourceMin && resourceMax && resourceMin <= resourceMax) {
+      if (resourceName && resourceAmount && resourceAmount > 0) {
         currentResources.push({
           name: resourceName,
-          min: resourceMin,
-          max: resourceMax
+          amount: resourceAmount  // Nur noch amount statt min/max
         });
         renderResourcesList();
         newResourceName.value = '';
-        newResourceMin.value = '';
-        newResourceMax.value = '';
+        newResourceAmount.value = '';
         newResourceName.focus();
         showNotification('Ressource hinzugefügt', 'success');
       } else {
@@ -1586,7 +1665,7 @@
         const span = document.createElement('span');
         span.className = 'resource-tag flex items-center';
         span.innerHTML = `
-          ${resource.name} (${resource.min}-${resource.max})
+          ${resource.name}: ${resource.amount}
           <button type="button" class="ml-1 text-red-400 hover:text-red-300 remove-resource" data-index="${index}">
             <i class="fas fa-times"></i>
           </button>
@@ -1637,7 +1716,7 @@
         tr.innerHTML = `
           <td class="p-3">${workbench.name}</td>
           <td class="p-3">${workbench.category}</td>
-          <td class="p-3">${workbench.time} Sekunden</td>
+          <td class="p-3">${formatTime(workbench.time)}</td>
           <td class="p-3">
             <div class="flex gap-2">
               <button class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-sm rounded-lg btn flex items-center gap-1 edit-workbench" data-key="${workbench.key}">
@@ -1680,12 +1759,30 @@
       // Formular mit Werkbank-Daten füllen
       document.getElementById('workbenchName').value = workbench.name;
       document.getElementById('workbenchCategory').value = workbench.category;
-      document.getElementById('workbenchTime').value = workbench.time;
+      
+      // Zeit zerlegen
+      const totalSeconds = workbench.time;
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = Math.floor(totalSeconds % 60);
+      const milliseconds = Math.round((totalSeconds % 1) * 1000);
+      
+      document.getElementById('workbenchTimeMinutes').value = minutes;
+      document.getElementById('workbenchTimeSeconds').value = seconds;
+      document.getElementById('workbenchTimeMilliseconds').value = milliseconds;
+      
       workbenchKeyInput.value = key;
       
       // Ressourcen setzen
       currentResources = workbench.resources ? [...workbench.resources] : [];
       renderResourcesList();
+      
+      // Bild setzen falls vorhanden
+      if (workbench.imageUrl) {
+        previewImage.src = workbench.imageUrl;
+        imagePreview.classList.remove('hidden');
+      } else {
+        imagePreview.classList.add('hidden');
+      }
       
       // Modal-Titel ändern
       workbenchModalTitle.innerHTML = '<i class="fas fa-edit mr-2"></i> Werkbank bearbeiten';
@@ -1704,6 +1801,7 @@
       workbenchKeyInput.value = '';
       currentResources = [];
       renderResourcesList();
+      imagePreview.classList.add('hidden');
       
       // Modal-Titel ändern
       workbenchModalTitle.innerHTML = '<i class="fas fa-plus mr-2"></i> Werkbank hinzufügen';
@@ -1717,6 +1815,7 @@
       workbenchForm.reset();
       currentResources = [];
       renderResourcesList();
+      imagePreview.classList.add('hidden');
     });
 
     // Modal für Kategorien verwalten
@@ -1823,6 +1922,7 @@
             workbenchForm.reset();
             currentResources = [];
             renderResourcesList();
+            imagePreview.classList.add('hidden');
           }
           if (modal === categoriesModal) newCategoryName.value = '';
         }
@@ -1845,15 +1945,28 @@
       
       const name = document.getElementById('workbenchName').value;
       const category = document.getElementById('workbenchCategory').value;
-      const time = document.getElementById('workbenchTime').value;
+      const minutes = document.getElementById('workbenchTimeMinutes').value || 0;
+      const seconds = document.getElementById('workbenchTimeSeconds').value || 0;
+      const milliseconds = document.getElementById('workbenchTimeMilliseconds').value || 0;
+      
+      const totalTime = convertTimeToSeconds(minutes, seconds, milliseconds);
+      
       const key = workbenchKeyInput.value;
+      
+      // Bild als Base64 speichern (für Demo-Zwecke)
+      let imageUrl = '';
+      if (previewImage.src) {
+        imageUrl = previewImage.src; // In einer echten App würden Sie das Bild hochladen
+      }
       
       // Werkbank-Objekt erstellen
       const workbenchData = {
         name,
         category,
-        time,
+        time: totalTime,
+        timeDisplay: `${minutes} ${seconds} ${milliseconds}`, // Für spätere Anzeige
         resources: [...currentResources],
+        imageUrl: imageUrl,
         date: new Date().toISOString(),
         timestamp: Date.now()
       };
@@ -1872,6 +1985,7 @@
         workbenchForm.reset();
         currentResources = [];
         renderResourcesList();
+        imagePreview.classList.add('hidden');
         showNotification(`Werkbank erfolgreich ${key ? 'aktualisiert' : 'hinzugefügt'}`, 'success');
       } else {
         showNotification(`Fehler beim ${key ? 'Aktualisieren' : 'Speichern'} der Werkbank!`, 'error');
@@ -1903,7 +2017,7 @@
       const header = ['Name', 'Kategorie', 'Herstellungszeit (Sekunden)', 'Ressourcen'];
       const rows = workbenches.map(wb => {
         const resourcesText = wb.resources && wb.resources.length > 0 
-          ? wb.resources.map(r => `${r.name} (${r.min}-${r.max})`).join('; ')
+          ? wb.resources.map(r => `${r.name}: ${r.amount}`).join('; ')
           : 'Keine Ressourcen';
         
         return [
