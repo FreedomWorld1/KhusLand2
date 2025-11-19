@@ -7,6 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
+    /* ALLE CSS-STYLES BLEIBEN GLEICH WIE VORHER */
     body { 
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
       background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
@@ -686,7 +687,7 @@
             </p>
           </div>
         </div>
-        <div class="flex items-center gap=2">
+        <div class="flex items-center gap-2">
           <button id="btnWorkbenches" class="btn px-3 py-2 bg-red-600 hover:bg-red-500 rounded-lg shadow-sm pulse-glow">
             <i class="fas fa-tools mr-1"></i> Produkte
           </button>
@@ -744,7 +745,7 @@
 
         <!-- ADMIN -->
         <div id="adminPanel" class="card p-5 shadow-soft hidden fade-in">
-          <h2 class="text-lg font-semibold mb-4 text-blue-400 flex items-center gap=2">
+          <h2 class="text-lg font-semibold mb-4 text-blue-400 flex items-center gap-2">
             <i class="fas fa-cog"></i>
             Adminbereich
           </h2>
@@ -1418,6 +1419,7 @@
       const secs = parseInt(seconds) || 0;
       const ms = parseInt(milliseconds) || 0;
       
+      // Korrekte Berechnung mit Millisekunden
       return (mins * 60) + secs + (ms / 1000);
     }
 
@@ -1434,8 +1436,45 @@
       
       if (hours > 0) parts.push(`${hours}h`);
       if (minutes > 0) parts.push(`${minutes}m`);
-      if (seconds > 0) parts.push(`${seconds}s`);
-      if (milliseconds > 0 && totalSeconds < 60) parts.push(`${milliseconds}ms`);
+      if (seconds > 0 || (minutes === 0 && hours === 0)) {
+        parts.push(`${seconds}s`);
+      }
+      if (milliseconds > 0 && totalSeconds < 10) {
+        parts.push(`${milliseconds}ms`);
+      }
+      
+      return parts.join(' ') || '0s';
+    }
+
+    // NEUE Funktion: Zeit in Millisekunden umrechnen für präzise Berechnung
+    function convertTimeToMilliseconds(minutes, seconds, milliseconds) {
+      const mins = parseInt(minutes) || 0;
+      const secs = parseInt(seconds) || 0;
+      const ms = parseInt(milliseconds) || 0;
+      
+      return (mins * 60 * 1000) + (secs * 1000) + ms;
+    }
+
+    // NEUE Funktion: Millisekunden in lesbares Format umwandeln
+    function formatTimeFromMilliseconds(totalMilliseconds) {
+      if (totalMilliseconds === 0) return "0s";
+      
+      const totalSeconds = totalMilliseconds / 1000;
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = Math.floor(totalSeconds % 60);
+      const milliseconds = Math.round(totalMilliseconds % 1000);
+      
+      let parts = [];
+      
+      if (hours > 0) parts.push(`${hours}h`);
+      if (minutes > 0) parts.push(`${minutes}m`);
+      if (seconds > 0 || (minutes === 0 && hours === 0)) {
+        parts.push(`${seconds}s`);
+      }
+      if (milliseconds > 0 && totalSeconds < 10) {
+        parts.push(`${milliseconds}ms`);
+      }
       
       return parts.join(' ') || '0s';
     }
@@ -1487,6 +1526,12 @@
       snapshot.forEach((childSnap) => {
         const data = childSnap.val();
         data.key = childSnap.key;
+        
+        // Stelle sicher, dass time als Zahl gespeichert ist
+        if (typeof data.time === 'string') {
+          data.time = parseFloat(data.time);
+        }
+        
         workbenches.push(data);
       });
       filteredWorkbenches = [...workbenches];
