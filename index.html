@@ -7,7 +7,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* ALLE CSS-STYLES BLEIBEN GLEICH WIE VORHER */
+    /* ALLE BISHERIGEN CSS-STYLES BLEIBEN GLEICH */
     body { 
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
       background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
@@ -123,6 +123,8 @@
       align-items: center;
       justify-content: center;
       z-index: 1000;
+      padding: 20px;
+      overflow-y: auto;
     }
     .category-input {
       display: flex;
@@ -633,6 +635,38 @@
       padding: 6px 10px;
       border-radius: 6px;
     }
+
+    /* NEUE STYLES FÜR SCROLLBARE MODALS */
+    .scrollable-modal {
+      max-height: 90vh;
+      overflow-y: auto;
+      width: 100%;
+      max-width: 600px;
+    }
+    
+    .scrollable-modal-content {
+      padding: 0;
+    }
+
+    /* Custom Scrollbar für Modals */
+    .modal-scrollbar::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    .modal-scrollbar::-webkit-scrollbar-track {
+      background: rgba(30, 41, 59, 0.5);
+      border-radius: 10px;
+      margin: 5px;
+    }
+    
+    .modal-scrollbar::-webkit-scrollbar-thumb {
+      background: #dc2626;
+      border-radius: 10px;
+    }
+    
+    .modal-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #b91c1c;
+    }
   </style>
 </head>
 <body class="text-gray-100 antialiased min-h-screen">
@@ -803,189 +837,193 @@
     </div>
   </div>
 
-  <!-- Modal für Produkt hinzufügen -->
+  <!-- Modal für Produkt hinzufügen - JETZT SCROLLBAR -->
   <div id="workbenchModal" class="modal-overlay hidden">
-    <div class="card p-6 m-4 max-w-md w-full shadow-soft">
-      <h3 class="text-lg font-semibold mb-4 text-red-400" id="workbenchModalTitle">
-        <i class="fas fa-plus mr-2"></i> Produkt hinzufügen
-      </h3>
-      <form id="workbenchForm" class="space-y-4">
-        <input type="hidden" id="workbenchKey">
-        <div>
-          <label class="block text-sm font-medium text-gray-300 mb-1">
-            <i class="fas fa-tag mr-1"></i> Name
-          </label>
-          <input type="text" id="workbenchName" class="p-3 rounded-lg bg-gray-800/50 border border-gray-700 w-full focus:border-red-500" required/>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-300 mb-1">
-            <i class="fas fa-folder mr-1"></i> Kategorie
-          </label>
-          <select id="workbenchCategory" class="p-3 rounded-lg bg-gray-800/50 border border-gray-700 w-full focus:border-red-500" required>
-            <!-- Kategorien werden dynamisch geladen -->
-          </select>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-300 mb-1">
-            <i class="fas fa-clock mr-1"></i> Herstellungszeit
-          </label>
-          <div class="time-input-container">
-            <div class="time-input">
-              <label>Minuten</label>
-              <input type="number" id="workbenchTimeMinutes" class="p-3 rounded-lg bg-gray-800/50 border border-gray-700 w-full focus:border-red-500" placeholder="0" min="0"/>
-            </div>
-            <div class="time-input">
-              <label>Sekunden</label>
-              <input type="number" id="workbenchTimeSeconds" class="p-3 rounded-lg bg-gray-800/50 border border-gray-700 w-full focus:border-red-500" placeholder="0" min="0" max="59"/>
-            </div>
-            <div class="time-input">
-              <label>Millisekunden</label>
-              <input type="number" id="workbenchTimeMilliseconds" class="p-3 rounded-lg bg-gray-800/50 border border-gray-700 w-full focus:border-red-500" placeholder="0" min="0" max="999"/>
-            </div>
+    <div class="scrollable-modal modal-scrollbar">
+      <div class="card p-6 shadow-soft">
+        <h3 class="text-lg font-semibold mb-4 text-red-400" id="workbenchModalTitle">
+          <i class="fas fa-plus mr-2"></i> Produkt hinzufügen
+        </h3>
+        <form id="workbenchForm" class="space-y-4">
+          <input type="hidden" id="workbenchKey">
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-1">
+              <i class="fas fa-tag mr-1"></i> Name
+            </label>
+            <input type="text" id="workbenchName" class="p-3 rounded-lg bg-gray-800/50 border border-gray-700 w-full focus:border-red-500" required/>
           </div>
-          <div class="text-xs text-gray-400 mt-1">
-            Format: Minuten Sekunden Millisekunden (z.B. 2 30 500 für 2 Minuten, 30 Sekunden, 500ms)
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-1">
+              <i class="fas fa-folder mr-1"></i> Kategorie
+            </label>
+            <select id="workbenchCategory" class="p-3 rounded-lg bg-gray-800/50 border border-gray-700 w-full focus:border-red-500" required>
+              <!-- Kategorien werden dynamisch geladen -->
+            </select>
           </div>
-        </div>
-        
-        <!-- Kiste für Input-Ressourcen -->
-        <div class="border border-gray-600 rounded-lg p-4">
-          <div class="text-center mb-3">
-            <div class="text-lg font-bold text-red-400">Benötigte Ressourcen</div>
-            <div class="text-sm text-gray-400" id="timeDisplay">Zeit: 0s</div>
-          </div>
-          
-          <div class="mb-4">
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-sm font-medium text-gray-300">Ressourcen hinzufügen</span>
-            </div>
-            <div class="resource-input-group">
-              <div class="resource-input-column">
-                <label>Ressourcenname</label>
-                <input type="text" id="newResourceName" class="p-3 rounded-lg bg-gray-800/50 border border-gray-700 w-full focus:border-red-500" placeholder="Ressourcenname"/>
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-1">
+              <i class="fas fa-clock mr-1"></i> Herstellungszeit
+            </label>
+            <div class="time-input-container">
+              <div class="time-input">
+                <label>Minuten</label>
+                <input type="number" id="workbenchTimeMinutes" class="p-3 rounded-lg bg-gray-800/50 border border-gray-700 w-full focus:border-red-500" placeholder="0" min="0"/>
               </div>
-              <div class="resource-input-column">
-                <label>Anzahl</label>
-                <input type="number" id="newResourceAmount" class="p-3 rounded-lg bg-gray-800/50 border border-gray-700 w-full focus:border-red-500" placeholder="Anzahl" min="1"/>
+              <div class="time-input">
+                <label>Sekunden</label>
+                <input type="number" id="workbenchTimeSeconds" class="p-3 rounded-lg bg-gray-800/50 border border-gray-700 w-full focus:border-red-500" placeholder="0" min="0" max="59"/>
               </div>
-              <div class="resource-input-column">
-                <label>&nbsp;</label>
-                <button type="button" id="addResourceBtn" class="w-full px-4 py-3 bg-red-600 hover:bg-red-500 rounded-lg btn font-medium">
-                  <i class="fas fa-plus"></i> Hinzufügen
-                </button>
+              <div class="time-input">
+                <label>Millisekunden</label>
+                <input type="number" id="workbenchTimeMilliseconds" class="p-3 rounded-lg bg-gray-800/50 border border-gray-700 w-full focus:border-red-500" placeholder="0" min="0" max="999"/>
               </div>
             </div>
-            <div id="resourcesList" class="resource-list">
-              <!-- Benötigte Ressourcen werden hier dynamisch hinzugefügt -->
+            <div class="text-xs text-gray-400 mt-1">
+              Format: Minuten Sekunden Millisekunden (z.B. 2 30 500 für 2 Minuten, 30 Sekunden, 500ms)
             </div>
           </div>
           
-          <div class="border-t border-gray-600 pt-3">
-            <div class="text-sm font-medium text-gray-300 mb-2">Benötigte Ressourcen:</div>
-            <div id="requiredResourcesDisplay" class="space-y-1">
-              <!-- Hier werden die benötigten Ressourcen angezeigt -->
+          <!-- Kiste für Input-Ressourcen -->
+          <div class="border border-gray-600 rounded-lg p-4">
+            <div class="text-center mb-3">
+              <div class="text-lg font-bold text-red-400">Benötigte Ressourcen</div>
+              <div class="text-sm text-gray-400" id="timeDisplay">Zeit: 0s</div>
             </div>
-          </div>
-        </div>
-        
-        <!-- Kiste für Output-Ressourcen -->
-        <div class="border border-gray-600 rounded-lg p-4">
-          <div class="text-center mb-3">
-            <div class="text-lg font-bold text-green-400">Erhaltene Ressourcen</div>
+            
+            <div class="mb-4">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-medium text-gray-300">Ressourcen hinzufügen</span>
+              </div>
+              <div class="resource-input-group">
+                <div class="resource-input-column">
+                  <label>Ressourcenname</label>
+                  <input type="text" id="newResourceName" class="p-3 rounded-lg bg-gray-800/50 border border-gray-700 w-full focus:border-red-500" placeholder="Ressourcenname"/>
+                </div>
+                <div class="resource-input-column">
+                  <label>Anzahl</label>
+                  <input type="number" id="newResourceAmount" class="p-3 rounded-lg bg-gray-800/50 border border-gray-700 w-full focus:border-red-500" placeholder="Anzahl" min="1"/>
+                </div>
+                <div class="resource-input-column">
+                  <label>&nbsp;</label>
+                  <button type="button" id="addResourceBtn" class="w-full px-4 py-3 bg-red-600 hover:bg-red-500 rounded-lg btn font-medium">
+                    <i class="fas fa-plus"></i> Hinzufügen
+                  </button>
+                </div>
+              </div>
+              <div id="resourcesList" class="resource-list">
+                <!-- Benötigte Ressourcen werden hier dynamisch hinzugefügt -->
+              </div>
+            </div>
+            
+            <div class="border-t border-gray-600 pt-3">
+              <div class="text-sm font-medium text-gray-300 mb-2">Benötigte Ressourcen:</div>
+              <div id="requiredResourcesDisplay" class="space-y-1">
+                <!-- Hier werden die benötigten Ressourcen angezeigt -->
+              </div>
+            </div>
           </div>
           
-          <div class="mb-4">
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-sm font-medium text-gray-300">Ressourcen hinzufügen</span>
+          <!-- Kiste für Output-Ressourcen -->
+          <div class="border border-gray-600 rounded-lg p-4">
+            <div class="text-center mb-3">
+              <div class="text-lg font-bold text-green-400">Erhaltene Ressourcen</div>
             </div>
-            <div class="resource-input-group">
-              <div class="resource-input-column">
-                <label>Ressourcenname</label>
-                <input type="text" id="newOutputResourceName" class="p-3 rounded-lg bg-gray-800/50 border border-gray-700 w-full focus:border-green-500" placeholder="Ressourcenname"/>
+            
+            <div class="mb-4">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-medium text-gray-300">Ressourcen hinzufügen</span>
               </div>
-              <div class="resource-input-column">
-                <label>Anzahl</label>
-                <input type="number" id="newOutputResourceAmount" class="p-3 rounded-lg bg-gray-800/50 border border-gray-700 w-full focus:border-green-500" placeholder="Anzahl" min="1"/>
+              <div class="resource-input-group">
+                <div class="resource-input-column">
+                  <label>Ressourcenname</label>
+                  <input type="text" id="newOutputResourceName" class="p-3 rounded-lg bg-gray-800/50 border border-gray-700 w-full focus:border-green-500" placeholder="Ressourcenname"/>
+                </div>
+                <div class="resource-input-column">
+                  <label>Anzahl</label>
+                  <input type="number" id="newOutputResourceAmount" class="p-3 rounded-lg bg-gray-800/50 border border-gray-700 w-full focus:border-green-500" placeholder="Anzahl" min="1"/>
+                </div>
+                <div class="resource-input-column">
+                  <label>&nbsp;</label>
+                  <button type="button" id="addOutputResourceBtn" class="w-full px-4 py-3 bg-green-600 hover:bg-green-500 rounded-lg btn font-medium">
+                    <i class="fas fa-plus"></i> Hinzufügen
+                  </button>
+                </div>
               </div>
-              <div class="resource-input-column">
-                <label>&nbsp;</label>
-                <button type="button" id="addOutputResourceBtn" class="w-full px-4 py-3 bg-green-600 hover:bg-green-500 rounded-lg btn font-medium">
-                  <i class="fas fa-plus"></i> Hinzufügen
-                </button>
+              <div id="outputResourcesList" class="resource-list">
+                <!-- Erhaltene Ressourcen werden hier dynamisch hinzugefügt -->
               </div>
             </div>
-            <div id="outputResourcesList" class="resource-list">
-              <!-- Erhaltene Ressourcen werden hier dynamisch hinzugefügt -->
+            
+            <div class="border-t border-gray-600 pt-3">
+              <div class="text-sm font-medium text-gray-300 mb-2">Erhaltene Ressourcen:</div>
+              <div id="outputResourcesDisplay" class="space-y-1">
+                <!-- Hier werden die erhaltenen Ressourcen angezeigt -->
+              </div>
             </div>
           </div>
           
-          <div class="border-t border-gray-600 pt-3">
-            <div class="text-sm font-medium text-gray-300 mb-2">Erhaltene Ressourcen:</div>
-            <div id="outputResourcesDisplay" class="space-y-1">
-              <!-- Hier werden die erhaltenen Ressourcen angezeigt -->
+          <div class="image-upload-container">
+            <label class="block text-sm font-medium text-gray-300 mb-1">
+              <i class="fas fa-image mr-1"></i> Bild hochladen (optional)
+            </label>
+            <input type="file" id="workbenchImage" accept="image/*" class="w-full p-3 rounded-lg bg-gray-800/50 border border-gray-700 focus:border-red-500"/>
+            <div id="imagePreview" class="hidden">
+              <img id="previewImage" class="image-preview" src="" alt="Vorschau">
             </div>
           </div>
-        </div>
-        
-        <div class="image-upload-container">
-          <label class="block text-sm font-medium text-gray-300 mb-1">
-            <i class="fas fa-image mr-1"></i> Bild hochladen (optional)
-          </label>
-          <input type="file" id="workbenchImage" accept="image/*" class="w-full p-3 rounded-lg bg-gray-800/50 border border-gray-700 focus:border-red-500"/>
-          <div id="imagePreview" class="hidden">
-            <img id="previewImage" class="image-preview" src="" alt="Vorschau">
+          <div class="flex gap-3 pt-2">
+            <button type="submit" class="flex-1 px-4 py-3 bg-red-600 hover:bg-red-500 rounded-lg btn font-medium flex items-center justify-center gap-2">
+              <i class="fas fa-save"></i>
+              Speichern
+            </button>
+            <button type="button" id="cancelWorkbench" class="px-4 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg btn font-medium flex items-center justify-center gap-2">
+              <i class="fas fa-times"></i>
+              Abbrechen
+            </button>
           </div>
-        </div>
-        <div class="flex gap-3 pt-2">
-          <button type="submit" class="flex-1 px-4 py-3 bg-red-600 hover:bg-red-500 rounded-lg btn font-medium flex items-center justify-center gap-2">
-            <i class="fas fa-save"></i>
-            Speichern
-          </button>
-          <button type="button" id="cancelWorkbench" class="px-4 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg btn font-medium flex items-center justify-center gap-2">
-            <i class="fas fa-times"></i>
-            Abbrechen
-          </button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   </div>
 
-  <!-- Modal für Kategorien verwalten -->
+  <!-- Modal für Kategorien verwalten - JETZT SCROLLBAR -->
   <div id="categoriesModal" class="modal-overlay hidden">
-    <div class="card p-6 m-4 max-w-md w-full shadow-soft">
-      <h3 class="text-lg font-semibold mb-4 text-purple-400">
-        <i class="fas fa-tags mr-2"></i> Kategorien verwalten
-      </h3>
-      <div class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-300 mb-1">
-            <i class="fas fa-plus mr-1"></i> Neue Kategorie
-          </label>
-          <div class="flex gap-2">
-            <input type="text" id="newCategoryName" class="flex-1 p-3 rounded-lg bg-gray-800/50 border border-gray-700 focus:border-purple-500" placeholder="Kategorie Name"/>
-            <button id="addCategoryBtn" class="px-4 py-3 bg-purple-600 hover:bg-purple-500 rounded-lg btn font-medium flex items-center justify-center gap-2">
-              <i class="fas fa-plus"></i>
-              Hinzufügen
+    <div class="scrollable-modal modal-scrollbar">
+      <div class="card p-6 shadow-soft">
+        <h3 class="text-lg font-semibold mb-4 text-purple-400">
+          <i class="fas fa-tags mr-2"></i> Kategorien verwalten
+        </h3>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-1">
+              <i class="fas fa-plus mr-1"></i> Neue Kategorie
+            </label>
+            <div class="flex gap-2">
+              <input type="text" id="newCategoryName" class="flex-1 p-3 rounded-lg bg-gray-800/50 border border-gray-700 focus:border-purple-500" placeholder="Kategorie Name"/>
+              <button id="addCategoryBtn" class="px-4 py-3 bg-purple-600 hover:bg-purple-500 rounded-lg btn font-medium flex items-center justify-center gap-2">
+                <i class="fas fa-plus"></i>
+                Hinzufügen
+              </button>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-300 mb-1">
+              <i class="fas fa-list mr-1"></i> Vorhandene Kategorien
+            </label>
+            <div id="categoriesList" class="space-y-2 max-h-40 overflow-y-auto">
+              <!-- Kategorien werden hier dynamisch geladen -->
+            </div>
+          </div>
+          <div class="flex gap-3 pt-2">
+            <button type="button" id="saveCategories" class="flex-1 px-4 py-3 bg-red-600 hover:bg-red-500 rounded-lg btn font-medium flex items-center justify-center gap-2">
+              <i class="fas fa-save"></i>
+              Speichern
+            </button>
+            <button type="button" id="cancelCategories" class="px-4 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg btn font-medium flex items-center justify-center gap-2">
+              <i class="fas fa-times"></i>
+              Abbrechen
             </button>
           </div>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-300 mb-1">
-            <i class="fas fa-list mr-1"></i> Vorhandene Kategorien
-          </label>
-          <div id="categoriesList" class="space-y-2 max-h-40 overflow-y-auto">
-            <!-- Kategorien werden hier dynamisch geladen -->
-          </div>
-        </div>
-        <div class="flex gap-3 pt-2">
-          <button type="button" id="saveCategories" class="flex-1 px-4 py-3 bg-red-600 hover:bg-red-500 rounded-lg btn font-medium flex items-center justify-center gap-2">
-            <i class="fas fa-save"></i>
-            Speichern
-          </button>
-          <button type="button" id="cancelCategories" class="px-4 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg btn font-medium flex items-center justify-center gap-2">
-            <i class="fas fa-times"></i>
-            Abbrechen
-          </button>
         </div>
       </div>
     </div>
@@ -1431,39 +1469,6 @@
       const minutes = Math.floor((totalSeconds % 3600) / 60);
       const seconds = Math.floor(totalSeconds % 60);
       const milliseconds = Math.round((totalSeconds % 1) * 1000);
-      
-      let parts = [];
-      
-      if (hours > 0) parts.push(`${hours}h`);
-      if (minutes > 0) parts.push(`${minutes}m`);
-      if (seconds > 0 || (minutes === 0 && hours === 0)) {
-        parts.push(`${seconds}s`);
-      }
-      if (milliseconds > 0 && totalSeconds < 10) {
-        parts.push(`${milliseconds}ms`);
-      }
-      
-      return parts.join(' ') || '0s';
-    }
-
-    // NEUE Funktion: Zeit in Millisekunden umrechnen für präzise Berechnung
-    function convertTimeToMilliseconds(minutes, seconds, milliseconds) {
-      const mins = parseInt(minutes) || 0;
-      const secs = parseInt(seconds) || 0;
-      const ms = parseInt(milliseconds) || 0;
-      
-      return (mins * 60 * 1000) + (secs * 1000) + ms;
-    }
-
-    // NEUE Funktion: Millisekunden in lesbares Format umwandeln
-    function formatTimeFromMilliseconds(totalMilliseconds) {
-      if (totalMilliseconds === 0) return "0s";
-      
-      const totalSeconds = totalMilliseconds / 1000;
-      const hours = Math.floor(totalSeconds / 3600);
-      const minutes = Math.floor((totalSeconds % 3600) / 60);
-      const seconds = Math.floor(totalSeconds % 60);
-      const milliseconds = Math.round(totalMilliseconds % 1000);
       
       let parts = [];
       
