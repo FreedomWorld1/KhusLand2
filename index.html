@@ -508,12 +508,12 @@
       margin-bottom: 4px;
     }
 
-    /* NEUE STYLES FÜR KLEINERE PRODUKT-KARTEN */
+    /* VERBESSERTE STYLES FÜR GRÖSSERE PRODUKT-KARTEN */
     .product-card {
       background: rgba(30, 41, 59, 0.7);
       border: 1px solid rgba(220, 38, 38, 0.3);
       border-radius: 12px;
-      padding: 12px;
+      padding: 16px;
       transition: all 0.3s ease;
     }
     .product-card:hover {
@@ -525,78 +525,78 @@
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
     .product-name {
-      font-size: 0.9rem;
+      font-size: 1.1rem; /* Größer gemacht */
       font-weight: 600;
       color: #f8fafc;
       line-height: 1.2;
     }
     .product-time {
-      font-size: 0.7rem;
+      font-size: 0.85rem; /* Größer gemacht */
       color: #dc2626;
       background: rgba(220, 38, 38, 0.1);
-      padding: 2px 6px;
+      padding: 4px 8px;
       border-radius: 8px;
       white-space: nowrap;
     }
     .product-category {
-      font-size: 0.7rem;
+      font-size: 0.85rem; /* Größer gemacht */
       color: #94a3b8;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
     .product-resource-box {
       background: rgba(30, 41, 59, 0.8);
       border: 1px solid rgba(220, 38, 38, 0.2);
       border-radius: 8px;
-      padding: 8px;
-      margin-bottom: 6px;
+      padding: 10px;
+      margin-bottom: 8px;
     }
     .product-resource-title {
-      font-size: 0.7rem;
+      font-size: 0.85rem; /* Größer gemacht */
       font-weight: 600;
       color: #dc2626;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
       text-align: center;
     }
     .product-resource-item {
       display: flex;
       justify-content: space-between;
-      font-size: 0.65rem;
-      margin-bottom: 2px;
+      font-size: 0.8rem; /* Größer gemacht */
+      margin-bottom: 4px;
     }
     .product-output-box {
       background: rgba(30, 41, 59, 0.8);
       border: 1px solid rgba(34, 197, 94, 0.2);
       border-radius: 8px;
-      padding: 8px;
+      padding: 10px;
     }
     .product-output-title {
-      font-size: 0.7rem;
+      font-size: 0.85rem; /* Größer gemacht */
       font-weight: 600;
       color: #22c55e;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
       text-align: center;
     }
     .product-output-item {
       display: flex;
       justify-content: space-between;
-      font-size: 0.65rem;
-      margin-bottom: 2px;
+      font-size: 0.8rem; /* Größer gemacht */
+      margin-bottom: 4px;
     }
     
-    /* NEUE STYLES FÜR MENGEN-STEUERUNG IN PRODUKT-KARTEN */
+    /* STYLES FÜR MENGEN-STEUERUNG IN PRODUKT-KARTEN */
     .product-quantity-controls {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      margin: 8px 0;
+      gap: 10px;
+      margin: 12px 0;
     }
     .product-quantity-btn {
-      width: 28px;
-      height: 28px;
+      width: 32px; /* Größer gemacht */
+      height: 32px; /* Größer gemacht */
       border-radius: 6px;
       background: rgba(220, 38, 38, 0.2);
       border: 1px solid rgba(220, 38, 38, 0.3);
@@ -606,7 +606,7 @@
       justify-content: center;
       cursor: pointer;
       transition: all 0.2s ease;
-      font-size: 0.8rem;
+      font-size: 1rem; /* Größer gemacht */
       font-weight: bold;
     }
     .product-quantity-btn:hover {
@@ -614,22 +614,22 @@
       transform: scale(1.05);
     }
     .product-quantity-display {
-      font-size: 0.8rem;
+      font-size: 1rem; /* Größer gemacht */
       font-weight: 600;
       color: #dc2626;
-      min-width: 40px;
+      min-width: 50px; /* Größer gemacht */
       text-align: center;
     }
     
-    /* NEUE STYLES FÜR ZEIT-ANZEIGE */
+    /* STYLES FÜR ZEIT-ANZEIGE */
     .product-time-display {
-      font-size: 0.8rem;
+      font-size: 0.9rem; /* Größer gemacht */
       color: #dc2626;
       font-weight: 600;
       text-align: center;
-      margin-top: 4px;
+      margin-top: 6px;
       background: rgba(220, 38, 38, 0.1);
-      padding: 4px 8px;
+      padding: 6px 10px;
       border-radius: 6px;
     }
   </style>
@@ -686,7 +686,7 @@
             </p>
           </div>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap=2">
           <button id="btnWorkbenches" class="btn px-3 py-2 bg-red-600 hover:bg-red-500 rounded-lg shadow-sm pulse-glow">
             <i class="fas fa-tools mr-1"></i> Produkte
           </button>
@@ -744,7 +744,7 @@
 
         <!-- ADMIN -->
         <div id="adminPanel" class="card p-5 shadow-soft hidden fade-in">
-          <h2 class="text-lg font-semibold mb-4 text-blue-400 flex items-center gap-2">
+          <h2 class="text-lg font-semibold mb-4 text-blue-400 flex items-center gap=2">
             <i class="fas fa-cog"></i>
             Adminbereich
           </h2>
@@ -850,13 +850,13 @@
         <!-- Kiste für Input-Ressourcen -->
         <div class="border border-gray-600 rounded-lg p-4">
           <div class="text-center mb-3">
-            <div class="text-lg font-bold text-red-400">Holz</div>
+            <div class="text-lg font-bold text-red-400">Benötigte Ressourcen</div>
             <div class="text-sm text-gray-400" id="timeDisplay">Zeit: 0s</div>
           </div>
           
           <div class="mb-4">
             <div class="flex items-center justify-between mb-2">
-              <span class="text-sm font-medium text-gray-300">Plus Menu</span>
+              <span class="text-sm font-medium text-gray-300">Ressourcen hinzufügen</span>
             </div>
             <div class="resource-input-group">
               <div class="resource-input-column">
@@ -890,12 +890,12 @@
         <!-- Kiste für Output-Ressourcen -->
         <div class="border border-gray-600 rounded-lg p-4">
           <div class="text-center mb-3">
-            <div class="text-lg font-bold text-green-400">Erhalt</div>
+            <div class="text-lg font-bold text-green-400">Erhaltene Ressourcen</div>
           </div>
           
           <div class="mb-4">
             <div class="flex items-center justify-between mb-2">
-              <span class="text-sm font-medium text-gray-300">Plus Menu</span>
+              <span class="text-sm font-medium text-gray-300">Ressourcen hinzufügen</span>
             </div>
             <div class="resource-input-group">
               <div class="resource-input-column">
@@ -1412,27 +1412,32 @@
       el.classList.remove('fade-in');
     }
 
-    // Zeit in Sekunden umrechnen
+    // KORRIGIERTE Zeit in Sekunden umrechnen (inklusive Millisekunden)
     function convertTimeToSeconds(minutes, seconds, milliseconds) {
-      return (parseInt(minutes) || 0) * 60 + (parseInt(seconds) || 0) + (parseInt(milliseconds) || 0) / 1000;
+      const mins = parseInt(minutes) || 0;
+      const secs = parseInt(seconds) || 0;
+      const ms = parseInt(milliseconds) || 0;
+      
+      return (mins * 60) + secs + (ms / 1000);
     }
 
-    // Zeit formatieren für Anzeige
-    function formatTime(seconds) {
-      const hours = Math.floor(seconds / 3600);
-      const minutes = Math.floor((seconds % 3600) / 60);
-      const secs = Math.floor(seconds % 60);
-      const ms = Math.round((seconds % 1) * 1000);
+    // KORRIGIERTE Zeit formatieren für Anzeige (inklusive Millisekunden)
+    function formatTime(totalSeconds) {
+      if (totalSeconds === 0) return "0s";
       
-      if (hours > 0) {
-        return `${hours}h ${minutes}m ${secs}s`;
-      } else if (minutes > 0) {
-        return `${minutes}m ${secs}s`;
-      } else if (secs > 0) {
-        return `${secs}s`;
-      } else {
-        return `${ms}ms`;
-      }
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = Math.floor(totalSeconds % 60);
+      const milliseconds = Math.round((totalSeconds % 1) * 1000);
+      
+      let parts = [];
+      
+      if (hours > 0) parts.push(`${hours}h`);
+      if (minutes > 0) parts.push(`${minutes}m`);
+      if (seconds > 0) parts.push(`${seconds}s`);
+      if (milliseconds > 0 && totalSeconds < 60) parts.push(`${milliseconds}ms`);
+      
+      return parts.join(' ') || '0s';
     }
 
     // Firebase Funktionen
@@ -1613,7 +1618,7 @@
       });
     }
 
-    // Produkte rendern - NEUE KLEINERE KARTEN MIT MENGEN-STEUERUNG UND ZEIT-BERECHNUNG
+    // VERBESSERTE Produkte rendern mit größerem Text
     function renderWorkbenches() {
       const workbenchesGrid = document.getElementById('workbenchesGrid');
       workbenchesGrid.innerHTML = '';
@@ -1622,7 +1627,7 @@
         workbenchesGrid.innerHTML = `
           <div class="col-span-full text-center py-8 text-gray-400">
             <i class="fas fa-boxes text-4xl mb-4 text-gray-600"></i>
-            <p>Keine Produkte gefunden.</p>
+            <p class="text-lg">Keine Produkte gefunden.</p>
             <p class="text-sm mt-2">Fügen Sie Produkte im Admin-Bereich hinzu oder ändern Sie Ihre Suchkriterien.</p>
           </div>
         `;
@@ -1635,7 +1640,7 @@
         
         // Bild anzeigen falls vorhanden
         const imageHtml = workbench.imageUrl ? 
-          `<div class="flex justify-center mb-2">
+          `<div class="flex justify-center mb-3">
              <img src="${workbench.imageUrl}" class="image-preview-small" alt="${workbench.name}">
            </div>` : '';
         
@@ -2081,7 +2086,7 @@
       document.getElementById('workbenchName').value = workbench.name;
       document.getElementById('workbenchCategory').value = workbench.category;
       
-      // Zeit zerlegen
+      // Zeit zerlegen (KORRIGIERT für Millisekunden)
       const totalSeconds = workbench.time || 0;
       const minutes = Math.floor(totalSeconds / 60);
       const seconds = Math.floor(totalSeconds % 60);
@@ -2291,6 +2296,7 @@
       const seconds = document.getElementById('workbenchTimeSeconds').value || 0;
       const milliseconds = document.getElementById('workbenchTimeMilliseconds').value || 0;
       
+      // KORRIGIERTE Zeitberechnung mit Millisekunden
       const totalTime = convertTimeToSeconds(minutes, seconds, milliseconds);
       
       const key = workbenchKeyInput.value;
