@@ -7,7 +7,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* Alle CSS-Stile bleiben gleich wie vorher */
     body { 
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
       background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
@@ -24,7 +23,568 @@
                   0 5px 10px rgba(0, 0, 0, 0.3),
                   inset 0 1px 0 rgba(255, 255, 255, 0.1); 
     }
-    /* ... alle anderen CSS-Stile bleiben unverändert ... */
+    .small-muted { 
+      color: #94a3b8; 
+      font-size: 0.85rem; 
+    }
+    .btn { 
+      transition: all 0.2s ease; 
+      font-size: 0.9rem; 
+      font-weight: 500;
+    }
+    .btn:hover { 
+      transform: translateY(-2px); 
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+    .hidden { 
+      display: none !important; 
+    }
+    input, select, textarea { 
+      transition: all 0.2s ease; 
+      font-size: 0.95rem; 
+    }
+    input:focus, select:focus, textarea:focus { 
+      outline: none; 
+      border-color: #dc2626; 
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.3); 
+    }
+    .active-link { 
+      background-color: #dc2626 !important; 
+      color: #fff !important; 
+      font-weight: 600; 
+    }
+    .gradient-text {
+      background: linear-gradient(90deg, #dc2626 0%, #ea580c 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .glass-effect {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(220, 38, 38, 0.1);
+    }
+    .fade-in {
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .pulse-glow {
+      animation: pulseGlow 2s infinite;
+    }
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 0 5px rgba(220, 38, 38, 0.5); }
+      50% { box-shadow: 0 0 20px rgba(220, 38, 38, 0.8); }
+      100% { box-shadow: 0 0 5px rgba(220, 38, 38, 0.5); }
+    }
+    .scrollbar-custom::-webkit-scrollbar {
+      width: 6px;
+    }
+    .scrollbar-custom::-webkit-scrollbar-track {
+      background: rgba(30, 41, 59, 0.5);
+      border-radius: 10px;
+    }
+    .scrollbar-custom::-webkit-scrollbar-thumb {
+      background: #dc2626;
+      border-radius: 10px;
+    }
+    .hamburger-container {
+      position: relative;
+      z-index: 1000;
+    }
+    .hamburger-menu {
+      z-index: 1001;
+    }
+    .category-btn {
+      transition: all 0.3s ease;
+    }
+    .category-btn.active {
+      background-color: #dc2626;
+      color: white;
+    }
+    .resource-item {
+      transition: all 0.2s ease;
+    }
+    .resource-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .category-input {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 10000;
+      padding: 12px 20px;
+      border-radius: 8px;
+      color: white;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      transform: translateX(150%);
+      transition: transform 0.3s ease;
+    }
+    .notification.show {
+      transform: translateX(0);
+    }
+    .notification.success {
+      background-color: #10b981;
+    }
+    .notification.error {
+      background-color: #ef4444;
+    }
+    .notification.info {
+      background-color: #3b82f6;
+    }
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .search-box {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(220, 38, 38, 0.2);
+      border-radius: 10px;
+      padding: 10px 15px;
+      margin-bottom: 15px;
+    }
+    .search-box input {
+      background: transparent;
+      border: none;
+      width: 100%;
+      color: white;
+      font-size: 0.95rem;
+    }
+    .search-box input::placeholder {
+      color: #94a3b8;
+    }
+    .search-box input:focus {
+      outline: none;
+      box-shadow: none;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .stat-card {
+      background: rgba(30, 41, 59, 0.6);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      border: 1px solid rgba(220, 38, 38, 0.1);
+    }
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin: 8px 0;
+    }
+    .stat-label {
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+    .access-badge {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 12px;
+      margin-left: 8px;
+    }
+    .access-permanent {
+      background-color: #10b981;
+      color: white;
+    }
+    .access-temporary {
+      background-color: #f59e0b;
+      color: black;
+    }
+    .access-expired {
+      background-color: #ef4444;
+      color: white;
+    }
+    .force-check-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 40px;
+      height: 40px;
+      background: #ef4444;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      cursor: pointer;
+      z-index: 1000;
+      opacity: 0.5;
+      transition: opacity 0.3s;
+    }
+    .force-check-btn:hover {
+      opacity: 1;
+    }
+    .resource-tag {
+      display: inline-flex;
+      align-items: center;
+      background: rgba(147, 51, 234, 0.2);
+      color: #a855f7;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      margin: 2px;
+    }
+    .resource-input-container {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .resource-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 8px;
+    }
+    .resource-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      padding: 8px;
+      background: rgba(220, 38, 38, 0.1);
+      border-radius: 8px;
+    }
+    .resource-range {
+      color: #dc2626;
+      font-weight: 600;
+    }
+    .quantity-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 12px 0;
+    }
+    .quantity-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      background: rgba(220, 38, 38, 0.2);
+      border: 1px solid rgba(220, 38, 38, 0.3);
+      color: #dc2626;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .quantity-btn:hover {
+      background: rgba(220, 38, 38, 0.3);
+      transform: scale(1.05);
+    }
+    .quantity-input {
+      width: 80px;
+      text-align: center;
+      padding: 6px 8px;
+      border-radius: 6px;
+      background: rgba(30, 41, 59, 0.5);
+      border: 1px solid rgba(220, 38, 38, 0.3);
+      color: #dc2626;
+      font-weight: 600;
+    }
+    .result-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      background: rgba(220, 38, 38, 0.1);
+      border-radius: 8px;
+      margin-bottom: 6px;
+      font-size: 0.9rem;
+    }
+    .result-range {
+      color: #dc2626;
+      font-weight: 600;
+    }
+    .calculator-section {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(220, 38, 38, 0.2);
+    }
+    .calculator-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #dc2626;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .total-time-display {
+      background: linear-gradient(135deg, #dc2626 0%, #ea580c 100%);
+      color: white;
+      padding: 12px 16px;
+      border-radius: 12px;
+      margin-top: 15px;
+      text-align: center;
+      font-weight: bold;
+      box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    }
+    .workbench-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+    @media (min-width: 768px) {
+      .workbench-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (min-width: 1024px) {
+      .workbench-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    .workbench-card {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      align-items: start;
+    }
+    .conversion-rates {
+      margin-top: 10px;
+      padding: 10px;
+      background: rgba(30, 41, 59, 0.5);
+      border-radius: 8px;
+      border: 1px solid rgba(220, 38, 38, 0.2);
+    }
+    .conversion-title {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-bottom: 5px;
+    }
+    .conversion-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      margin-bottom: 3px;
+    }
+    .time-input-container {
+      display: flex;
+      gap: 8px;
+    }
+    .time-input {
+      flex: 1;
+    }
+    .time-input label {
+      display: block;
+      font-size: 0.75rem;
+      color: #94a3b8;
+      margin-bottom: 4px;
+    }
+    .image-upload-container {
+      margin-top: 12px;
+    }
+    .image-preview {
+      max-width: 100px;
+      max-height: 100px;
+      border-radius: 8px;
+      margin-top: 8px;
+      border: 1px solid rgba(220, 38, 38, 0.3);
+    }
+    .image-preview-small {
+      max-width: 50px;
+      max-height: 50px;
+      border-radius: 6px;
+      margin-right: 8px;
+      border: 1px solid rgba(220, 38, 38, 0.3);
+    }
+    .global-quantity-input {
+      width: 120px;
+      text-align: center;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: rgba(30, 41, 59, 0.5);
+      border: 1px solid rgba(220, 38, 38, 0.3);
+      color: #dc2626;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+    .global-quantity-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding: 16px;
+      background: rgba(30, 41, 59, 0.6);
+      border-radius: 12px;
+      border: 1px solid rgba(220, 38, 38, 0.2);
+    }
+    .global-quantity-label {
+      font-weight: 600;
+      color: #dc2626;
+      font-size: 1.1rem;
+    }
+    .resource-conversion {
+      margin-top: 10px;
+      padding: 10px;
+      background: rgba(30, 41, 59, 0.5);
+      border-radius: 8px;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+    .resource-conversion-title {
+      font-size: 0.8rem;
+      color: #22c55e;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+    .resource-conversion-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      margin-bottom: 3px;
+    }
+    .total-resources-display {
+      background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+      color: white;
+      padding: 12px 16px;
+      border-radius: 12px;
+      margin-top: 15px;
+      font-weight: bold;
+      box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+    }
+    .output-resources {
+      margin-top: 10px;
+      padding: 10px;
+      background: rgba(59, 130, 246, 0.2);
+      border-radius: 8px;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+    .output-resources-title {
+      font-size: 0.8rem;
+      color: #3b82f6;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+    .output-resources-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      margin-bottom: 3px;
+    }
+    .resource-input-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .resource-input-column {
+      flex: 1;
+    }
+    .resource-input-column label {
+      display: block;
+      font-size: 0.75rem;
+      color: #94a3b8;
+      margin-bottom: 4px;
+    }
+
+    /* NEUE STYLES FÜR KLEINERE PRODUKT-KARTEN */
+    .product-card {
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid rgba(220, 38, 38, 0.3);
+      border-radius: 12px;
+      padding: 12px;
+      transition: all 0.3s ease;
+    }
+    .product-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(220, 38, 38, 0.2);
+      border-color: rgba(220, 38, 38, 0.5);
+    }
+    .product-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+    .product-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #f8fafc;
+      line-height: 1.2;
+    }
+    .product-time {
+      font-size: 0.7rem;
+      color: #dc2626;
+      background: rgba(220, 38, 38, 0.1);
+      padding: 2px 6px;
+      border-radius: 8px;
+      white-space: nowrap;
+    }
+    .product-category {
+      font-size: 0.7rem;
+      color: #94a3b8;
+      margin-bottom: 8px;
+    }
+    .product-resource-box {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(220, 38, 38, 0.2);
+      border-radius: 8px;
+      padding: 8px;
+      margin-bottom: 6px;
+    }
+    .product-resource-title {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #dc2626;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .product-resource-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.65rem;
+      margin-bottom: 2px;
+    }
+    .product-output-box {
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(34, 197, 94, 0.2);
+      border-radius: 8px;
+      padding: 8px;
+    }
+    .product-output-title {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #22c55e;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .product-output-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.65rem;
+      margin-bottom: 2px;
+    }
   </style>
 </head>
 <body class="text-gray-100 antialiased min-h-screen">
@@ -72,8 +632,7 @@
             <span class="text-white font-bold">⚒️</span>
           </div>
           <div>
-            <!-- KOKAIN WEGGEMACHT -->
-            <h1 class="text-2xl md:text-3xl font-bold gradient-text tracking-tight">Werkbank Manager</h1>
+            <h1 class="text-2xl md:text-3xl font-bold gradient-text tracking-tight">Kokain Werkbank Manager</h1>
             <p id="userInfo" class="text-sm text-gray-400">
               Eingeloggt als: <span id="username">Unbekannt</span>
               <span id="accessBadge" class="access-badge access-permanent hidden">Permanent</span>
@@ -117,7 +676,11 @@
             Meine Produkte
           </h2>
           
-          <!-- ANZAHL WEGGEMACHT - Globale Mengeneingabe entfernt -->
+          <!-- Globale Mengeneingabe -->
+          <div class="global-quantity-container">
+            <span class="global-quantity-label">Anzahl:</span>
+            <input type="number" id="globalQuantity" class="global-quantity-input" value="1" min="1">
+          </div>
           
           <!-- Suchfeld -->
           <div class="search-box">
@@ -429,7 +992,7 @@
     const notification = document.getElementById('notification');
     const accessBadge = document.getElementById('accessBadge');
     const forceCheckBtn = document.getElementById('forceCheckBtn');
-    // Global Quantity Input entfernt
+    const globalQuantityInput = document.getElementById('globalQuantity');
 
     // Notification System
     function showNotification(message, type = 'info', duration = 5000) {
@@ -798,6 +1361,7 @@
     let currentResources = [];
     let currentOutputResources = [];
     const ADMIN_PASSWORD = '1101';
+    let globalQuantity = 1;
 
     // Utility
     function show(el) { 
@@ -961,6 +1525,16 @@
       renderWorkbenches();
     });
 
+    // Globale Mengeneingabe
+    globalQuantityInput.addEventListener('input', () => {
+      globalQuantity = parseInt(globalQuantityInput.value) || 1;
+      if (globalQuantity < 1) {
+        globalQuantity = 1;
+        globalQuantityInput.value = 1;
+      }
+      renderWorkbenches();
+    });
+
     // Event Listener für Kategorie Buttons
     function setupCategoryFilters() {
       document.addEventListener('click', function(e) {
@@ -1007,7 +1581,7 @@
       });
     }
 
-    // Produkte rendern - KLEINERE KARTEN
+    // Produkte rendern - NEUE KLEINERE KARTEN
     function renderWorkbenches() {
       const workbenchesGrid = document.getElementById('workbenchesGrid');
       workbenchesGrid.innerHTML = '';
