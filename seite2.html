@@ -6,6 +6,7 @@
     <title>Meine Link-Seite</title>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
     <style>
         :root {
             --accent: #ffffff;
@@ -87,6 +88,55 @@
             background: white;
             border-radius: 50%;
             pointer-events: none;
+        }
+
+        /* Upload Bereich */
+        .upload-area {
+            border: 2px dashed rgba(255,255,255,0.3);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin: 15px 0;
+            background: rgba(255,255,255,0.05);
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover {
+            border-color: rgba(255,255,255,0.5);
+            background: rgba(255,255,255,0.08);
+        }
+
+        .upload-area.dragover {
+            border-color: #2e7dff;
+            background: rgba(46,125,255,0.1);
+        }
+
+        .upload-btn {
+            background: #2e7dff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 10px 0;
+            transition: all 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            background: #1a6de8;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-preview {
+            max-width: 200px;
+            max-height: 150px;
+            margin: 10px auto;
+            border-radius: 8px;
+            display: none;
         }
 
         /* dunkle overlay um text lesbar zu machen */
@@ -435,6 +485,28 @@
             color: white;
         }
 
+        .upload-status {
+            margin-top: 10px;
+            font-size: 14px;
+            color: var(--muted);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background: #2e7dff;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
         /* responsive tweaks */
         @media (max-width: 520px) {
             .name {
@@ -461,7 +533,7 @@
     <!-- Video Hintergrund -->
     <div class="video-wrap" aria-hidden="true">
         <video id="bgVideo" autoplay muted loop playsinline>
-            <source src="" type="video/mp4" id="videoSource">
+            <!-- Video wird dynamisch geladen -->
         </video>
     </div>
     
@@ -489,7 +561,7 @@
     <div class="container">
         <div class="card" id="profileCard">
             <div class="avatar" id="avatarWrap">
-                <img id="avatarImg" src="https://i.ibb.co/9cX7s0X/avatar-placeholder.png" alt="Avatar">
+                <img id="avatarImg" src="" alt="Avatar">
             </div>
 
             <div style="display:flex;align-items:center;gap:12px;flex-direction:column">
@@ -504,15 +576,7 @@
             </div>
 
             <div class="icons" id="socialIcons">
-                <a href="#" title="TikTok" data-key="tiktok" aria-label="TikTok" class="cursor-pointer">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M16 4h2v6a4 4 0 1 1-4-4h2V4z" fill="white" /></svg>
-                </a>
-                <a href="#" title="Instagram" data-key="instagram" aria-label="Instagram" class="cursor-pointer">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3.5" fill="white" /><path d="M16.5 3h-9A4.5 4.5 0 0 0 3 7.5v9A4.5 4.5 0 0 0 7.5 21h9a4.5 4.5 0 0 0 4.5-4.5v-9A4.5 4.5 0 0 0 16.5 3zm-4.5 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6z" fill="white"/></svg>
-                </a>
-                <a href="#" title="YouTube" data-key="youtube" aria-label="YouTube" class="cursor-pointer">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M10 15l5.19-3L10 9v6zm11.56-7.83c.13.47.22 1.1.28 1.9.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83-.25.9-.83 1.48-1.73 1.73-.47.13-1.33.22-2.65.28-1.3.07-2.49.1-3.59.1L12 19c-4.19 0-6.8-.16-7.83-.44-.9-.25-1.48-.83-1.73-1.73-.13-.47-.22-1.1-.28-1.9-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83.25-.9.83-1.48 1.73-1.73.47-.13 1.33-.22 2.65-.28 1.3-.07 2.49-.1 3.59-.1L12 5c4.19 0 6.8.16 7.83.44.9.25 1.48.83 1.73 1.73z" fill="white"/></svg>
-                </a>
+                <!-- Icons werden dynamisch geladen -->
             </div>
 
             <!-- Links Container -->
@@ -535,6 +599,37 @@
         <div class="modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
             <div class="modal-header">
                 <h2 id="settingsTitle">Einstellungen</h2>
+            </div>
+
+            <!-- Avatar Upload -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Profilbild hochladen</label>
+                    <div class="upload-area" id="avatarUploadArea">
+                        <p>Avatar Bild hier hinziehen oder klicken</p>
+                        <button class="upload-btn" onclick="document.getElementById('avatarFile').click()">Datei auswählen</button>
+                        <input type="file" id="avatarFile" class="file-input" accept="image/*">
+                        <img id="avatarPreview" class="upload-preview" alt="Vorschau">
+                        <div class="upload-status" id="avatarStatus"></div>
+                        <div class="progress-bar" id="avatarProgressBar" style="display:none">
+                            <div class="progress" id="avatarProgress"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Hintergrund Video hochladen</label>
+                    <div class="upload-area" id="videoUploadArea">
+                        <p>Video hier hinziehen oder klicken</p>
+                        <button class="upload-btn" onclick="document.getElementById('videoFile').click()">Datei auswählen</button>
+                        <input type="file" id="videoFile" class="file-input" accept="video/*">
+                        <video id="videoPreview" class="upload-preview" controls style="display:none"></video>
+                        <div class="upload-status" id="videoStatus"></div>
+                        <div class="progress-bar" id="videoProgressBar" style="display:none">
+                            <div class="progress" id="videoProgress"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="form-row">
@@ -573,32 +668,6 @@
                             </svg>
                         </span>
                         <input type="text" id="inBio" placeholder="Willkommen auf meiner Seite..." class="input-field">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Avatar Image URL</label>
-                    <div class="input-wrapper">
-                        <span class="input-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
-                            </svg>
-                        </span>
-                        <input type="text" id="inAvatar" placeholder="https://..." class="input-field">
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Hintergrund Video URL</label>
-                    <div class="input-wrapper">
-                        <span class="input-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
-                            </svg>
-                        </span>
-                        <input type="text" id="inVideo" placeholder="https://your-video.mp4" class="input-field">
                     </div>
                 </div>
 
@@ -643,9 +712,24 @@
                     </div>
                 </div>
             </div>
+
             <div class="form-row">
                 <div class="form-group">
-                    <button class="btn btn-success" id="addLinkBtn">Link hinzufügen</button>
+                    <label>Link Icon hochladen</label>
+                    <div class="upload-area" id="linkIconUploadArea">
+                        <p>Icon Bild hier hinziehen oder klicken</p>
+                        <button class="upload-btn" onclick="document.getElementById('linkIconFile').click()">Datei auswählen</button>
+                        <input type="file" id="linkIconFile" class="file-input" accept="image/*">
+                        <img id="linkIconPreview" class="upload-preview" alt="Icon Vorschau">
+                        <div class="upload-status" id="linkIconStatus"></div>
+                        <div class="progress-bar" id="linkIconProgressBar" style="display:none">
+                            <div class="progress" id="linkIconProgress"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <button class="btn btn-success" id="addLinkBtn" style="margin-top: 25px;">Link hinzufügen</button>
                 </div>
             </div>
 
@@ -678,6 +762,7 @@
         // Firebase initialisieren
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
+        const storage = firebase.storage();
 
         // DOM-Elemente
         const gear = document.getElementById('openSettings');
@@ -693,7 +778,6 @@
         const locationEl = document.getElementById('location');
         const avatarImg = document.getElementById('avatarImg');
         const bgVideo = document.getElementById('bgVideo');
-        const videoSource = document.getElementById('videoSource');
         const socialIcons = document.getElementById('socialIcons');
         const viewCountEl = document.getElementById('viewCount');
         const linksContainer = document.getElementById('linksContainer');
@@ -702,24 +786,46 @@
         const inName = document.getElementById('inName');
         const inBio = document.getElementById('inBio');
         const inLocation = document.getElementById('inLocation');
-        const inAvatar = document.getElementById('inAvatar');
-        const inVideo = document.getElementById('inVideo');
         const inShowIcons = document.getElementById('inShowIcons');
         const newLinkTitle = document.getElementById('newLinkTitle');
         const newLinkUrl = document.getElementById('newLinkUrl');
+
+        // Upload Elemente
+        const avatarFile = document.getElementById('avatarFile');
+        const avatarPreview = document.getElementById('avatarPreview');
+        const avatarStatus = document.getElementById('avatarStatus');
+        const avatarProgress = document.getElementById('avatarProgress');
+        const avatarProgressBar = document.getElementById('avatarProgressBar');
+
+        const videoFile = document.getElementById('videoFile');
+        const videoPreview = document.getElementById('videoPreview');
+        const videoStatus = document.getElementById('videoStatus');
+        const videoProgress = document.getElementById('videoProgress');
+        const videoProgressBar = document.getElementById('videoProgressBar');
+
+        const linkIconFile = document.getElementById('linkIconFile');
+        const linkIconPreview = document.getElementById('linkIconPreview');
+        const linkIconStatus = document.getElementById('linkIconStatus');
+        const linkIconProgress = document.getElementById('linkIconProgress');
+        const linkIconProgressBar = document.getElementById('linkIconProgressBar');
+
+        // Upload Areas für Drag & Drop
+        const avatarUploadArea = document.getElementById('avatarUploadArea');
+        const videoUploadArea = document.getElementById('videoUploadArea');
+        const linkIconUploadArea = document.getElementById('linkIconUploadArea');
+
+        // Aktueller Link Icon für neuen Link
+        let currentLinkIconUrl = '';
 
         // Default-Einstellungen
         const defaultSettings = {
             name: "Colin",
             bio: "Willkommen auf meiner Seite",
             location: "Deutschland",
-            avatar: "https://i.ibb.co/9cX7s0X/avatar-placeholder.png",
+            avatar: "",
             video: "",
             showIcons: true,
-            links: [
-                { title: "Mein YouTube Kanal", url: "https://youtube.com", icon: "https://cdn-icons-png.flaticon.com/512/1384/1384060.png" },
-                { title: "Instagram", url: "https://instagram.com", icon: "https://cdn-icons-png.flaticon.com/512/2111/2111463.png" }
-            ]
+            links: []
         };
 
         // Particle System
@@ -733,7 +839,6 @@
                 particle.style.animationDelay = `${Math.random() * 20}s`;
                 particle.style.animation = `float ${15 + Math.random() * 10}s infinite linear`;
                 
-                // Zufällige Größe und Opazität
                 const size = 2 + Math.random() * 4;
                 particle.style.width = `${size}px`;
                 particle.style.height = `${size}px`;
@@ -756,6 +861,137 @@
         `;
         document.head.appendChild(style);
 
+        // Datei Upload Funktion
+        function uploadFile(file, type, progressCallback) {
+            return new Promise((resolve, reject) => {
+                const timestamp = Date.now();
+                const fileName = `${type}_${timestamp}_${file.name}`;
+                const storageRef = storage.ref().child(fileName);
+                
+                const uploadTask = storageRef.put(file);
+                
+                uploadTask.on('state_changed',
+                    (snapshot) => {
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        if (progressCallback) progressCallback(progress);
+                    },
+                    (error) => {
+                        reject(error);
+                    },
+                    () => {
+                        uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                            resolve(downloadURL);
+                        });
+                    }
+                );
+            });
+        }
+
+        // Drag & Drop Handler
+        function setupDragAndDrop(uploadArea, fileInput, previewElement, type) {
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileSelect(files[0], type);
+                }
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleFileSelect(e.target.files[0], type);
+                }
+            });
+
+            function handleFileSelect(file, fileType) {
+                const validImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+                const validVideoTypes = ['video/mp4', 'video/webm', 'video/ogg'];
+                
+                if (fileType === 'avatar' || fileType === 'linkIcon') {
+                    if (!validImageTypes.includes(file.type)) {
+                        showStatus(fileType, 'Bitte wählen Sie ein gültiges Bildformat (JPEG, PNG, GIF, WebP)', 'error');
+                        return;
+                    }
+                    if (file.size > 5 * 1024 * 1024) {
+                        showStatus(fileType, 'Bild darf nicht größer als 5MB sein', 'error');
+                        return;
+                    }
+                } else if (fileType === 'video') {
+                    if (!validVideoTypes.includes(file.type)) {
+                        showStatus(fileType, 'Bitte wählen Sie ein gültiges Videoformat (MP4, WebM, OGG)', 'error');
+                        return;
+                    }
+                    if (file.size > 50 * 1024 * 1024) {
+                        showStatus(fileType, 'Video darf nicht größer als 50MB sein', 'error');
+                        return;
+                    }
+                }
+
+                // Vorschau anzeigen
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    if (fileType === 'avatar' || fileType === 'linkIcon') {
+                        previewElement.src = e.target.result;
+                        previewElement.style.display = 'block';
+                    } else if (fileType === 'video') {
+                        previewElement.src = e.target.result;
+                        previewElement.style.display = 'block';
+                    }
+                };
+                reader.readAsDataURL(file);
+
+                // Hochladen
+                showProgressBar(fileType, true);
+                uploadFile(file, fileType, (progress) => {
+                    updateProgressBar(fileType, progress);
+                }).then((downloadURL) => {
+                    showProgressBar(fileType, false);
+                    if (fileType === 'avatar') {
+                        avatarImg.src = downloadURL;
+                        showStatus(fileType, 'Avatar erfolgreich hochgeladen!', 'success');
+                    } else if (fileType === 'video') {
+                        bgVideo.src = downloadURL;
+                        bgVideo.load();
+                        bgVideo.play().catch(() => {});
+                        showStatus(fileType, 'Video erfolgreich hochgeladen!', 'success');
+                    } else if (fileType === 'linkIcon') {
+                        currentLinkIconUrl = downloadURL;
+                        showStatus(fileType, 'Icon erfolgreich hochgeladen!', 'success');
+                    }
+                    saveSettings();
+                }).catch((error) => {
+                    showProgressBar(fileType, false);
+                    showStatus(fileType, 'Fehler beim Hochladen: ' + error.message, 'error');
+                });
+            }
+        }
+
+        function showStatus(type, message, status) {
+            const statusElement = document.getElementById(`${type}Status`);
+            statusElement.textContent = message;
+            statusElement.style.color = status === 'success' ? '#2ed573' : '#ff4757';
+        }
+
+        function showProgressBar(type, show) {
+            const progressBar = document.getElementById(`${type}ProgressBar`);
+            progressBar.style.display = show ? 'block' : 'none';
+        }
+
+        function updateProgressBar(type, progress) {
+            const progressElement = document.getElementById(`${type}Progress`);
+            progressElement.style.width = `${progress}%`;
+        }
+
         // Einstellungen aus Firebase laden
         function loadSettings() {
             const settingsRef = database.ref('settings');
@@ -776,10 +1012,13 @@
             displayName.textContent = settings.name || "";
             bioText.textContent = settings.bio || "";
             locationEl.textContent = settings.location || "";
-            avatarImg.src = settings.avatar || defaultSettings.avatar;
+            
+            if (settings.avatar) {
+                avatarImg.src = settings.avatar;
+            }
             
             if (settings.video) {
-                videoSource.src = settings.video;
+                bgVideo.src = settings.video;
                 bgVideo.load();
                 bgVideo.play().catch(() => {});
             }
@@ -833,6 +1072,7 @@
                         </div>
                     </div>
                     <div>${link.url}</div>
+                    ${link.icon ? `<img src="${link.icon}" style="max-width: 50px; margin-top: 10px; border-radius: 5px;">` : ''}
                 `;
                 linksList.appendChild(linkItem);
             });
@@ -850,13 +1090,29 @@
             });
         }
 
+        // Einstellungen speichern
+        function saveSettings() {
+            const settingsRef = database.ref('settings');
+            settingsRef.once('value').then((snapshot) => {
+                const currentSettings = snapshot.val();
+                const settings = {
+                    name: inName.value || defaultSettings.name,
+                    bio: inBio.value || defaultSettings.bio,
+                    location: inLocation.value || defaultSettings.location,
+                    avatar: avatarImg.src || currentSettings.avatar || defaultSettings.avatar,
+                    video: bgVideo.src || currentSettings.video || defaultSettings.video,
+                    showIcons: inShowIcons.value === "1",
+                    links: currentSettings.links || defaultSettings.links
+                };
+                settingsRef.set(settings);
+            });
+        }
+
         // Formular mit Einstellungen füllen
         function fillSettingsForm(settings) {
             inName.value = settings.name || "";
             inBio.value = settings.bio || "";
             inLocation.value = settings.location || "";
-            inAvatar.value = settings.avatar || "";
-            inVideo.value = settings.video || "";
             inShowIcons.value = settings.showIcons ? "1" : "0";
         }
 
@@ -878,24 +1134,9 @@
         });
 
         btnSave.addEventListener('click', () => {
-            const settingsRef = database.ref('settings');
-            settingsRef.once('value').then((snapshot) => {
-                const currentSettings = snapshot.val();
-                const settings = {
-                    name: inName.value || defaultSettings.name,
-                    bio: inBio.value || defaultSettings.bio,
-                    location: inLocation.value || defaultSettings.location,
-                    avatar: inAvatar.value || defaultSettings.avatar,
-                    video: inVideo.value || defaultSettings.video,
-                    showIcons: inShowIcons.value === "1",
-                    links: currentSettings.links || defaultSettings.links
-                };
-                settingsRef.set(settings).then(() => {
-                    applySettingsToUI(settings);
-                    modal.style.display = "none";
-                    modal.setAttribute('aria-hidden', 'true');
-                });
-            });
+            saveSettings();
+            modal.style.display = "none";
+            modal.setAttribute('aria-hidden', 'true');
         });
 
         btnReset.addEventListener('click', () => {
@@ -924,12 +1165,15 @@
                 settings.links.push({
                     title: title,
                     url: url,
-                    icon: 'https://cdn-icons-png.flaticon.com/512/1006/1006771.png'
+                    icon: currentLinkIconUrl || 'https://cdn-icons-png.flaticon.com/512/1006/1006771.png'
                 });
                 
                 settingsRef.set(settings).then(() => {
                     newLinkTitle.value = '';
                     newLinkUrl.value = '';
+                    currentLinkIconUrl = '';
+                    linkIconPreview.style.display = 'none';
+                    linkIconStatus.textContent = '';
                     renderLinks(settings.links);
                 });
             });
@@ -965,6 +1209,11 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadSettings();
             createParticles();
+            
+            // Drag & Drop Setup
+            setupDragAndDrop(avatarUploadArea, avatarFile, avatarPreview, 'avatar');
+            setupDragAndDrop(videoUploadArea, videoFile, videoPreview, 'video');
+            setupDragAndDrop(linkIconUploadArea, linkIconFile, linkIconPreview, 'linkIcon');
         });
 
         // Globale Funktionen für Event Handler
