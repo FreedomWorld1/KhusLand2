@@ -1,416 +1,543 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Meine Deutsche Profilseite</title>
-    <style>
-        :root{
-            --accent: #ffffff;
-            --muted: rgba(255,255,255,0.85);
-            --glass: rgba(255,255,255,0.06);
-            --glass-strong: rgba(0,0,0,0.5);
-            --radius: 18px;
-            font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-        }
-
-        /* Seite / Video */
-        html,body{height:100%;margin:0;background:#000;color:var(--accent);}
-        .video-wrap{
-            position:fixed;inset:0;overflow:hidden;z-index:0;
-            display:flex;align-items:center;justify-content:center;
-        }
-        .video-wrap video{
-            min-width:100%;min-height:100%;object-fit:cover;filter:brightness(0.55) saturate(1.05);
-        }
-
-        /* dunkle overlay um text lesbar zu machen */
-        .overlay{
-            position:fixed;inset:0;background:linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.6) 80%);z-index:1;
-        }
-
-        /* Container für Inhalt */
-        .container{
-            position:relative;z-index:2;max-width:900px;margin:40px auto;padding:28px;display:flex;flex-direction:column;gap:18px;align-items:center;text-align:center;
-        }
-
-        /* settings gear top-right */
-        .gear{
-            position:fixed;top:18px;right:18px;z-index:5;width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));backdrop-filter:blur(6px);cursor:pointer;
-            box-shadow:0 6px 18px rgba(0,0,0,0.45);
-        }
-        .gear svg{width:24px;height:24px;fill:var(--accent);opacity:0.95}
-
-        /* Profil-Karte */
-        .card{
-            width:100%;max-width:760px;padding:22px;border-radius:20px;background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
-            box-shadow:0 8px 40px rgba(0,0,0,0.6);backdrop-filter:blur(6px);
-            display:flex;flex-direction:column;align-items:center;gap:14px;
-        }
-
-        .avatar{
-            width:86px;height:86px;border-radius:16px;overflow:hidden;border:2px solid rgba(255,255,255,0.12);
-            display:flex;align-items:center;justify-content:center;background:var(--glass);
-        }
-        .avatar img{width:100%;height:100%;object-fit:cover;display:block}
-
-        .name{font-size:36px;font-weight:700;letter-spacing:0.6px;color:var(--accent);text-shadow:0 6px 30px rgba(0,0,0,0.6);}
-        .diamond{width:34px;height:34px;margin-top:-6px;opacity:0.95}
-
-        .bio{font-size:18px;color:var(--muted);max-width:80%;line-height:1.4}
-        .meta-row{display:flex;gap:10px;align-items:center;color:var(--muted);font-size:15px}
-
-        /* Social icons */
-        .icons{display:flex;gap:14px;margin-top:8px}
-        .icons a{width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;text-decoration:none;color:var(--accent);box-shadow:0 6px 20px rgba(0,0,0,0.45)}
-
-        /* großer Button (Roblox) */
-        .big-button{
-            margin-top:12px;padding:12px 22px;border-radius:40px;background:rgba(255,255,255,0.06);display:inline-flex;align-items:center;gap:12px;color:var(--accent);min-width:240px;justify-content:center;font-weight:600;border:1px solid rgba(255,255,255,0.03);
-        }
-        .big-button img{width:36px;height:36px;border-radius:8px;object-fit:cover}
-
-        .views{position:absolute;left:20px;bottom:18px;color:var(--muted);display:flex;gap:8px;align-items:center;z-index:3}
-
-        /* Einstellungen Modal */
-        .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:10}
-        .modal{width:92%;max-width:760px;background:linear-gradient(180deg,#0b0b0b,#0f0f10);border-radius:14px;padding:20px;color:var(--muted);box-shadow:0 14px 60px rgba(0,0,0,0.7)}
-        .modal h2{color:var(--accent);margin:0 0 10px 0}
-        .form-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
-        .form-row label{flex:1 1 200px;display:flex;flex-direction:column;font-size:13px}
-        .form-row input[type="text"], .form-row textarea{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--accent);min-width:0}
-        .form-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:8px}
-        .btn{padding:10px 12px;border-radius:10px;border:0;cursor:pointer;font-weight:600}
-        .btn.primary{background:#2e7dff;color:#fff}
-        .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
-
-        /* Checkliste */
-        .checklist {
-            list-style: none;
-            padding: 0;
-            margin: 15px 0;
-            text-align: left;
-            width: 100%;
-            max-width: 300px;
-        }
-        
-        .checklist li {
-            margin: 10px 0;
-            display: flex;
-            align-items: center;
-            font-size: 16px;
-        }
-        
-        .checklist input[type="checkbox"] {
-            margin-right: 10px;
-            width: 18px;
-            height: 18px;
-        }
-        
-        .checklist .checked {
-            color: #4CAF50;
-        }
-        
-        .checklist .unchecked {
-            color: var(--muted);
-        }
-        
-        .emoji {
-            margin-left: 8px;
-            font-size: 18px;
-        }
-
-        /* responsive tweaks */
-        @media (max-width:520px){
-            .name{font-size:28px}
-            .bio{font-size:15px}
-            .avatar{width:74px;height:74px}
-            .gear{width:46px;height:46px}
-        }
-    </style>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="preload" as="image" href="https://assets.guns.lol/guns_logo_no_background_cropped.png"/>
+    <link rel="preload" as="image" href="https://assets.guns.lol/gradient_background.png"/>
+    <link rel="preload" as="image" href="https://assets.guns.lol/dashboard.png"/>
+    <link rel="preload" as="image" href="https://assets.guns.lol/profile_showcase.png"/>
+    <link rel="stylesheet" href="https://guns.lol/_next/static/css/cdeae98f92368413.css" data-precedence="next"/>
+    <link rel="stylesheet" href="https://guns.lol/_next/static/css/a351d21c79e1da59.css" data-precedence="next"/>
+    <link rel="preload" as="script" fetchPriority="low" href="https://guns.lol/_next/static/chunks/webpack-28f085f523a1f577.js"/>
+    <script src="https://guns.lol/_next/static/chunks/4bd1b696-100b9d70ed4e49c1.js" async></script>
+    <script src="https://guns.lol/_next/static/chunks/1255-ecaa16943547460c.js" async></script>
+    <script src="https://guns.lol/_next/static/chunks/main-app-b4448e2fc4f92087.js" async></script>
+    <script src="https://guns.lol/_next/static/chunks/app/layout-f38aaa8413ba086e.js" async></script>
+    <script src="https://guns.lol/_next/static/chunks/2619-024c323f8ca0f6aa.js" async></script>
+    <script src="https://guns.lol/_next/static/chunks/app/not-found-58a5610cd6183850.js" async></script>
+    <script src="https://guns.lol/_next/static/chunks/1490-b8a6fa1fb73e6590.js" async></script>
+    <script src="https://guns.lol/_next/static/chunks/4920-6a450b13b24a0fce.js" async></script>
+    <script src="https://guns.lol/_next/static/chunks/6393-a222ea7236660bf2.js" async></script>
+    <script src="https://guns.lol/_next/static/chunks/1287-9aedd3fd1e8a6cd1.js" async></script>
+    <script src="https://guns.lol/_next/static/chunks/3628-9771784089c64f2f.js" async></script>
+    <script src="https://guns.lol/_next/static/chunks/8109-32c37436652711a4.js" async></script>
+    <script src="https://guns.lol/_next/static/chunks/2749-198eaba4a796e885.js" async></script>
+    <script src="https://guns.lol/_next/static/chunks/2984-231e2a58af79a837.js" async></script>
+    <script src="https://guns.lol/_next/static/chunks/app/page-b2d50f70ead5f06a.js" async></script>
+    <link rel="preload" href="https://sa.guns.lol/latest.js" as="script"/>
+    <link rel="apple-touch-icon" sizes="180x180" href="https://assets.guns.lol/favicon/apple-touch-icon.png"/>
+    <link rel="icon" type="image/png" sizes="32x32" href="https://assets.guns.lol/favicon/favicon-32x32.png"/>
+    <link rel="icon" type="image/png" sizes="16x16" href="https://assets.guns.lol/favicon/favicon-16x16.png"/>
+    <link rel="manifest" href="https://assets.guns.lol/favicon/site.webmanifest"/>
+    <meta name="referrer" content="strict-origin-when-cross-origin"/>
+    <meta name="theme-color" content="#573362"/>
+    <title>guns.lol | Home</title>
+    <meta name="description" content="guns.lol is your go-to for modern, feature-rich biolinks and fast, secure file hosting."/>
+    <meta name="application-name" content="guns.lol"/>
+    <meta name="generator" content="guns.lol"/>
+    <meta name="robots" content="index, follow"/>
+    <meta property="og:title" content="guns.lol | Home"/>
+    <meta property="og:description" content="guns.lol is your go-to for modern, feature-rich biolinks and fast, secure file hosting."/>
+    <meta property="og:url" content="https://guns.lol"/>
+    <meta property="og:image" content="https://assets.guns.lol/guns_banner_embed.png"/>
+    <meta property="og:type" content="website"/>
+    <meta name="twitter:card" content="summary_large_image"/>
+    <meta name="twitter:site" content="@gunsdotlol"/>
+    <meta name="twitter:creator" content="@gunsdotlol"/>
+    <meta name="twitter:title" content="guns.lol | Home"/>
+    <meta name="twitter:description" content="guns.lol is your go-to for modern, feature-rich biolinks and fast, secure file hosting."/>
+    <meta name="twitter:image" content="https://assets.guns.lol/guns_banner_embed.png"/>
+    <link href="https://assets.guns.lol/fonts/X6XYTKIVDUW7GZTZPZNN4EUM5KH54KHF.css" rel="stylesheet"/>
+    <script id="ld-org" type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "guns.lol",
+        "url": "https://guns.lol",
+        "logo": "https://assets.guns.lol/guns_logo_no_background_cropped.png",
+        "sameAs": [
+            "https://x.com/gunsdotlol",
+            "https://tiktok.com/@guns.lol",
+            "https://discord.gg/guns"
+        ]
+    }
+    </script>
+    <script src="https://guns.lol/_next/static/chunks/polyfills-42372ed130431b0a.js" nomodule></script>
 </head>
 <body>
-
-<!-- video hintergrund -->
-<div class="video-wrap" aria-hidden="true">
-    <!-- Standard-Videolink: ersetze durch eigene MP4/WebM URL oder lokales File -->
-    <video id="bgVideo" autoplay muted loop playsinline>
-        <source src="https://cdn.pixabay.com/vimeo/393803141/party-37325.mp4?width=1280&hash=..." type="video/mp4">
-        <!-- Falls Nutzer kein Video hat: Poster-Image -->
-    </video>
-</div>
-<div class="overlay" aria-hidden="true"></div>
-
-<!-- Settings Gear (oben rechts) -->
-<div class="gear" id="openSettings" title="Einstellungen">
-    <!-- Zahnrad-SVG -->
-    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19.14,12.94c0.04-0.31,0.06-0.63,0.06-0.94s-0.02-0.63-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61l-1.92-3.32c-0.11-0.2-0.35-0.28-0.56-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.5,2.81c-0.03-0.22-0.22-0.38-0.44-0.38h-3.13c-0.22,0-0.41,0.16-0.44,0.38L9.02,4.49c-0.59,0.24-1.12,0.56-1.62,0.94L5.01,4.47c-0.21-0.08-0.45,0.02-0.56,0.22L2.53,8.01c-0.11,0.2-0.06,0.47,0.12,0.61L4.68,10.2C4.63,10.51,4.61,10.83,4.61,11.14s0.02,0.63,0.06,0.94L2.64,13.66c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.11,0.2,0.35,0.28,0.56,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.37,1.68c0.03,0.22,0.22,0.38,0.44,0.38h3.13c0.22,0,0.41-0.16,0.44-0.38l0.37-1.68c0.59-0.24,1.12-0.56,1.62-0.94l2.39,0.96c0.21,0.08,0.45-0.02,0.56-0.22l1.92-3.32c0.11-0.2,0.06-0.47-0.12-0.61L19.14,12.94zM12,15.6c-1.98,0-3.6-1.62-3.6-3.6s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
-</div>
-
-<!-- Hauptcontainer -->
-<div class="container">
-    <div class="card" id="profileCard">
-        <div class="avatar" id="avatarWrap">
-            <img id="avatarImg" src="https://i.ibb.co/9cX7s0X/avatar-placeholder.png" alt="Avatar">
-        </div>
-
-        <div style="display:flex;align-items:center;gap:12px;flex-direction:column">
-            <div class="diamond" aria-hidden="true">
-                <!-- kleines Diamant-SVG -->
-                <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="white" opacity="0.95"/></svg>
-            </div>
-            <div class="name" id="displayName">Colin</div>
-            <div class="bio" id="bioText">Willkommen auf meiner Seite. Hier findest du alles über:</div>
-            
-            <!-- Checkliste -->
-            <ul class="checklist">
-                <li>
-                    <input type="checkbox" id="item1" checked disabled>
-                    <label for="item1" class="checked">Deutschland</label>
-                </li>
-                <li>
-                    <input type="checkbox" id="item2" checked disabled>
-                    <label for="item2" class="checked">💬 💮 💯</label>
-                </li>
-            </ul>
-            
-            <div class="meta-row"><span id="location">Deutschland</span></div>
-        </div>
-
-        <div class="icons" id="socialIcons">
-            <!-- einfache Platzhalter-Icons (TikTok, Roblox, Discord, RobloxSquare) -->
-            <a href="#" title="TikTok" data-key="tiktok" aria-label="TikTok">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M16 4h2v6a4 4 0 1 1-4-4h2V4z" fill="white" /></svg>
-            </a>
-            <a href="#" title="Roblox" data-key="roblox" aria-label="Roblox">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect width="20" height="20" x="2" y="2" rx="4" fill="white" transform="rotate(18 12 12)"/></svg>
-            </a>
-            <a href="#" title="Discord" data-key="discord" aria-label="Discord">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M8 9.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm8 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z" fill="white" /></svg>
-            </a>
-        </div>
-
-        <div class="big-button" id="ctaButton" role="button" tabindex="0">
-            <img src="https://i.ibb.co/0F7t9g2/roblox-icon.png" alt="Roblox">
-            <span id="ctaLabel">Roblox</span>
-        </div>
-
-        <div style="position:relative;width:100%;height:8px"></div>
+    <div hidden="">
+        <!--$-->
+        <!--/$-->
     </div>
-</div>
-
-<!-- views -->
-<div class="views" aria-hidden="true">
-    <svg width="18" height="12" viewBox="0 0 24 24" fill="none" style="opacity:0.9"><path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8z" fill="white"/></svg>
-    <div id="viewCount">6</div>
-</div>
-
-<!-- Einstellungen Modal -->
-<div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
-        <h2 id="settingsTitle">Einstellungen</h2>
-
-        <div class="form-row">
-            <label>Seiten-Pseudonym (Name)
-                <input type="text" id="inName" placeholder="z.B. Colin">
-            </label>
-
-            <label>Beschreibung (Bio)
-                <textarea id="inBio" rows="2" placeholder="Willkommen auf meiner Seite..."></textarea>
-            </label>
-        </div>
-
-        <div class="form-row">
-            <label>Standort
-                <input type="text" id="inLocation" placeholder="Deutschland">
-            </label>
-            <label>Avatar Image URL
-                <input type="text" id="inAvatar" placeholder="https://...">
-            </label>
-        </div>
-
-        <div class="form-row">
-            <label>Hintergrund Video URL
-                <input type="text" id="inVideo" placeholder="https://your-video.mp4">
-            </label>
-            <label>CTA-Text
-                <input type="text" id="inCTA" placeholder="Roblox">
-            </label>
-        </div>
-
-        <div class="form-row">
-            <label>Social Icons anzeigen?
-                <select id="inShowIcons">
-                    <option value="1">Ja</option>
-                    <option value="0">Nein</option>
-                </select>
-            </label>
-
-            <label>View Count
-                <input type="text" id="inViews" placeholder="6">
-            </label>
-        </div>
-
-        <div style="display:flex;gap:10px;align-items:center;justify-content:space-between">
-            <div style="font-size:13px;color:rgba(255,255,255,0.6)">Passwort zum Öffnen: <strong>110121</strong></div>
-            <div class="form-actions">
-                <button class="btn ghost" id="btnReset">Zurücksetzen</button>
-                <button class="btn primary" id="btnSave">Speichern</button>
-                <button class="btn ghost" id="btnClose">Schließen</button>
+    <div class="qYBeZG_86918fe8a95d61d4ace7 false">
+        <div class="mRlZm3_cf4432728e397251682c false">
+            <div class="rcL3xW_a595d4a12b210752c52a absolute h-full w-full"></div>
+            <a href="index.html">
+                <div class="jQG5WL_108f1c78f7f7afb59221">
+                    <div class="bx0GX0_4b8345438d5861a6917b">
+                        <img src="https://assets.guns.lol/guns_logo_no_background_cropped.png" alt=""/>
+                        <h1>guns<span>.</span>lol</h1>
+                    </div>
+                </div>
+            </a>
+            <div class="vWlY05_eac8474e6418b25c2e65">
+                <a target="_blank" href="https://help.guns.lol">Help Center</a>
+                <a target="_blank" href="https://discord.gg/guns">Discord</a>
+                <a href="https://guns.lol/pricing">Pricing</a>
+                <a href="https://guns.lol/login">Login</a>
+                <a href="https://guns.lol/register?ref=header">Sign Up Free</a>
+            </div>
+            <div class="jU2yY3_f03bea3a7f1687a7e084">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24">
+                    <path d="M3,6H21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                    <path d="M3,12H21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                    <path d="M3,18H21" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+                </svg>
+            </div>
+            <div class="m3W5zG_1310cf097723212dfeec">
+                <div class="flex flex-col gap-[10px]">
+                    <a target="_blank" href="https://help.guns.lol">Help Center</a>
+                    <a target="_blank" href="https://discord.gg/guns">Discord</a>
+                    <a href="https://guns.lol/pricing">Pricing</a>
+                </div>
+                <div class="flex flex-col gap-[10px]">
+                    <a href="https://guns.lol/login">Login</a>
+                    <a href="https://guns.lol/register?ref=header">Sign Up Free</a>
+                </div>
             </div>
         </div>
     </div>
-</div>
-
-<script>
-/*
-  Einstellungen: Passwort geschützt (vom Nutzer angegeben)
-  Passwort (statisch): 110121
-*/
-const SETTINGS_PASSWORD = "110121";
-
-/* DOM-Elemente */
-const gear = document.getElementById('openSettings');
-const modal = document.getElementById('modalBackdrop');
-const btnClose = document.getElementById('btnClose');
-const btnSave = document.getElementById('btnSave');
-const btnReset = document.getElementById('btnReset');
-
-const displayName = document.getElementById('displayName');
-const bioText = document.getElementById('bioText');
-const locationEl = document.getElementById('location');
-const avatarImg = document.getElementById('avatarImg');
-const bgVideo = document.getElementById('bgVideo');
-const socialIcons = document.getElementById('socialIcons');
-const ctaLabel = document.getElementById('ctaLabel');
-const viewCountEl = document.getElementById('viewCount');
-
-const inName = document.getElementById('inName');
-const inBio = document.getElementById('inBio');
-const inLocation = document.getElementById('inLocation');
-const inAvatar = document.getElementById('inAvatar');
-const inVideo = document.getElementById('inVideo');
-const inShowIcons = document.getElementById('inShowIcons');
-const inCTA = document.getElementById('inCTA');
-const inViews = document.getElementById('inViews');
-
-/* Default-Einstellungen */
-const defaultSettings = {
-    name: "Colin",
-    bio: "Willkommen auf meiner Seite. Hier findest du alles über:",
-    location: "Deutschland",
-    avatar: "https://i.ibb.co/9cX7s0X/avatar-placeholder.png",
-    video: bgVideo.querySelector('source') ? bgVideo.querySelector('source').src : "",
-    showIcons: true,
-    cta: "Roblox",
-    views: "6"
-};
-
-/* Läd Einstellungen aus localStorage */
-function loadSettings(){
-    let s = localStorage.getItem('profileSettings');
-    if(!s){
-        s = JSON.stringify(defaultSettings);
-        localStorage.setItem('profileSettings', s);
-    }
-    const settings = JSON.parse(s);
-    applySettingsToUI(settings);
-    fillSettingsForm(settings);
-}
-
-/* Überträgt Settings auf sichtbare Seite */
-function applySettingsToUI(settings){
-    displayName.textContent = settings.name || "";
-    bioText.textContent = settings.bio || "";
-    locationEl.textContent = settings.location || "";
-    avatarImg.src = settings.avatar || defaultSettings.avatar;
-    ctaLabel.textContent = settings.cta || "Roblox";
-    viewCountEl.textContent = settings.views || "0";
-    if(settings.video){
-        // Tausche Video-Source
-        const src = settings.video;
-        if(bgVideo.querySelector('source')){
-            bgVideo.querySelector('source').src = src;
-            bgVideo.load();
-            bgVideo.play().catch(()=>{});
-        } else {
-            const s = document.createElement('source');
-            s.src = src; s.type = "video/mp4";
-            bgVideo.appendChild(s);
-            bgVideo.load(); bgVideo.play().catch(()=>{});
-        }
-    }
-    socialIcons.style.display = settings.showIcons ? "flex" : "none";
-}
-
-/* Füllt das Formular mit aktuellen Settings */
-function fillSettingsForm(settings){
-    inName.value = settings.name || "";
-    inBio.value = settings.bio || "";
-    inLocation.value = settings.location || "";
-    inAvatar.value = settings.avatar || "";
-    inVideo.value = settings.video || "";
-    inShowIcons.value = settings.showIcons ? "1":"0";
-    inCTA.value = settings.cta || "Roblox";
-    inViews.value = settings.views || "0";
-}
-
-/* Öffnen der Einstellungen - erst Passwort abfragen */
-gear.addEventListener('click', async () => {
-    const pw = prompt("Bitte Passwort eingeben, um Einstellungen zu öffnen:");
-    if(pw === null) return; // abgebrochen
-    if(pw === SETTINGS_PASSWORD){
-        // korrekt -> modal öffnen
-        modal.style.display = "flex";
-        modal.setAttribute('aria-hidden','false');
-    } else {
-        alert("Falsches Passwort.");
-    }
-});
-
-/* Schliessen */
-btnClose.addEventListener('click', ()=>{ modal.style.display = "none"; modal.setAttribute('aria-hidden','true'); });
-
-/* Speichern */
-btnSave.addEventListener('click', () => {
-    const settings = {
-        name: inName.value || defaultSettings.name,
-        bio: inBio.value || defaultSettings.bio,
-        location: inLocation.value || defaultSettings.location,
-        avatar: inAvatar.value || defaultSettings.avatar,
-        video: inVideo.value || defaultSettings.video,
-        showIcons: inShowIcons.value === "1",
-        cta: inCTA.value || defaultSettings.cta,
-        views: inViews.value || defaultSettings.views
-    };
-    localStorage.setItem('profileSettings', JSON.stringify(settings));
-    applySettingsToUI(settings);
-    modal.style.display = "none";
-    modal.setAttribute('aria-hidden','true');
-});
-
-/* Reset auf Standard */
-btnReset.addEventListener('click', ()=>{
-    if(!confirm("Auf Standard-Einstellungen zurücksetzen?")) return;
-    localStorage.removeItem('profileSettings');
-    loadSettings();
-    alert("Zurückgesetzt.");
-});
-
-/* Klick auf CTA (nur Demo) */
-document.getElementById('ctaButton').addEventListener('click', ()=>{
-    alert("CTA gedrückt – hier könntest du z.B. zu Roblox oder einem externen Link weiterleiten.");
-});
-
-/* Init */
-loadSettings();
-
-/* Optional: Escape-Taste schließt Modal */
-window.addEventListener('keydown', (e)=>{
-    if(e.key === "Escape" && modal.style.display === "flex"){
-        modal.style.display = "none";modal.setAttribute('aria-hidden','true');
-    }
-});
-</script>
+    <div class="kNQYbW_c4cce677023391b27b75">
+        <div class="cFBXc5_7fc44358244cf027039b">
+            <img class="hW3a2Y_9b5f9fdd7556b10dbb7d" draggable="false" src="https://assets.guns.lol/gradient_background.png" alt=""/>
+            <div class="o0BY9t_d4b6e2c5ee09847933b9 e1bpW1_e2c5c9fec87eef9d5f2e">
+                <div class="m0W0wZ_ac3722ee7d31dacb33de">
+                    <h1>Everything you want, right here.</h1>
+                    <p>guns.lol is your go-to for modern, feature-rich biolinks and fast, secure file hosting. Everything you need — right here.</p>
+                </div>
+                <div class="by5S90_f536d057ba05e53f9268">
+                    <a class="eYanl3_e8d9a0e03c75ecfba3b8" href="https://guns.lol/register?ref=landing_page_hero">Sign Up for Free</a>
+                    <a class="deWnat_974cbbf1929057731914" href="https://guns.lol/pricing">View Pricing</a>
+                </div>
+            </div>
+            <div class="hnYOw3_561542c92e0dd0eabe2c e1bpW1_e2c5c9fec87eef9d5f2e">
+                <img src="https://assets.guns.lol/dashboard.png" alt=""/>
+                <img src="https://assets.guns.lol/profile_showcase.png" alt=""/>
+            </div>
+        </div>
+    </div>
+    <div style="opacity:0;transform:translateY(-80px) scale(0.8)">
+        <div class="aY52UN_b2eb058881b5cc58b04d e1bpW1_e2c5c9fec87eef9d5f2e">
+            <div class="nX5c1c_9471b512f7a85bd9f855">
+                <h1>Over <span>1,150,000</span> people use guns.lol — What are you waiting for?</h1>
+                <h3>Create feature-rich, customizable and modern link-in-bio pages, along with fast and secure file hosting, all with guns.lol</h3>
+                <div class="sGyNbN_d308715452c37b8deae1">
+                    <div class="cJY3lY_d31b4f3c725674343d82">
+                        <div class="mUGYw5_2a191671545cad5153e3">
+                            <h1>41,200,000+</h1>
+                            <span>Profile Views</span>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+                            <path fill="currentColor" d="M12 9a3 3 0 0 0-3 3a3 3 0 0 0 3 3a3 3 0 0 0 3-3a3 3 0 0 0-3-3m0 8a5 5 0 0 1-5-5a5 5 0 0 1 5-5a5 5 0 0 1 5 5a5 5 0 0 1-5 5m0-12.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5"></path>
+                        </svg>
+                    </div>
+                    <div class="cJY3lY_d31b4f3c725674343d82">
+                        <div class="mUGYw5_2a191671545cad5153e3">
+                            <h1>1,150,000+</h1>
+                            <span>Users</span>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+                            <path fill="currentColor" d="M14 19.5c0-2 1.1-3.8 2.7-4.7c-1.3-.5-2.9-.8-4.7-.8c-4.4 0-8 1.8-8 4v2h10zm5.5-3.5c-1.9 0-3.5 1.6-3.5 3.5s1.6 3.5 3.5 3.5s3.5-1.6 3.5-3.5s-1.6-3.5-3.5-3.5M16 8c0 2.2-1.8 4-4 4s-4-1.8-4-4s1.8-4 4-4s4 1.8 4 4"></path>
+                        </svg>
+                    </div>
+                    <div class="cJY3lY_d31b4f3c725674343d82">
+                        <div class="mUGYw5_2a191671545cad5153e3">
+                            <h1>510,000+</h1>
+                            <span>File Uploads</span>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+                            <path fill="currentColor" d="M15 1H4c-1.1 0-2 .9-2 2v13c0 .55.45 1 1 1s1-.45 1-1V4c0-.55.45-1 1-1h10c.55 0 1-.45 1-1s-.45-1-1-1m.59 4.59l4.83 4.83c.37.37.58.88.58 1.41V21c0 1.1-.9 2-2 2H7.99C6.89 23 6 22.1 6 21l.01-14c0-1.1.89-2 1.99-2h6.17c.53 0 1.04.21 1.42.59M15 12h4.5L14 6.5V11c0 .55.45 1 1 1"></path>
+                        </svg>
+                    </div>
+                    <div class="cJY3lY_d31b4f3c725674343d82">
+                        <div class="mUGYw5_2a191671545cad5153e3">
+                            <h1>34,400+</h1>
+                            <span>Subscribers</span>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 512 512">
+                            <path fill="currentColor" d="M121.72 32a4 4 0 0 0-3.72 5.56l2.3 5.43l40.7 94.9a4 4 0 0 0 6.88.82L243 38.4a4 4 0 0 0-3.2-6.4Zm298.21 26.06l-41.28 96.37a4 4 0 0 0 3.68 5.57h101a4 4 0 0 0 3.4-6.11L427 57.53a4 4 0 0 0-7.07.53M85 57.57l-59.71 96.32a4 4 0 0 0 3.4 6.11h101a4 4 0 0 0 3.67-5.58L92 58.1a4 4 0 0 0-7-.53M393.27 32H267.82a1.94 1.94 0 0 0-1.56 3.11l79.92 106.46a1.94 1.94 0 0 0 3.34-.4L391.6 43l3.4-8.34a1.92 1.92 0 0 0-1.7-2.66ZM239 448l-89.43-253.49A3.78 3.78 0 0 0 146 192H25.7a3.72 3.72 0 0 0-2.95 6l216 279.81a5.06 5.06 0 0 0 6.39 1.37a5 5 0 0 0 2.39-6.08Zm247.3-256H366a3.75 3.75 0 0 0-3.54 2.51l-98.2 278.16a5.21 5.21 0 0 0 2.42 6.31a5.22 5.22 0 0 0 6.61-1.39L489.25 198a3.72 3.72 0 0 0-2.95-6M259.2 78.93l56 74.67a4 4 0 0 1-3.2 6.4H200a4 4 0 0 1-3.2-6.4l56-74.67a4 4 0 0 1 6.4 0m-7 310.31l-67.7-191.91a4 4 0 0 1 3.77-5.33h135.46a4 4 0 0 1 3.77 5.33l-67.73 191.91a4 4 0 0 1-7.54 0Z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-col items-center mt-16">
+                <h1 class="m-0 mb-2 font-normal text-white text-xl">Claim your profile and create an account in minutes!</h1>
+                <div class="flex items-center mt-1 gap-[10px]">
+                    <div class="yYcGVH_63bd2ffbaaab52036024">
+                        <div class="qd5m03_35ff4eb32525fa36a41f undefined">
+                            <span class="p0eLGn_d9fbd6f756fbddad4214 !absolute">
+                                <h1>guns.lol/</h1>
+                            </span>
+                            <input autoCorrect="false" type="text" placeholder="username" class="bXLGb5_ab48f37a4f92e9274dd7 !pl-[83px]" value=""/>
+                        </div>
+                    </div>
+                    <a class="yYa3Wc_59706808c7d7864ef9f9" href="https://guns.lol/register?claim=&ref=landing_page">Claim Now</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div style="opacity:0;transform:translateY(-80px) scale(0.8)">
+        <div class="vba0Zy_5506968e4f5b42800c34">
+            <h1 class="lyxYlk_21a5c4568e7fa7817af8">Explore our exclusive plans and join <span>34,400+</span> subscribers</h1>
+            <div class="hyYXB1_d8f92d8a982673309631">
+                <div class="oNFNja_c41d05e109fe05e25259">
+                    <h1 class="u4wnby_ebfdb0b943f248fcb16e">Free</h1>
+                    <div class="olcWbn_bc96de87717a4747cdad">
+                        <h1>0€<span>/Lifetime</span></h1>
+                    </div>
+                    <h3>For beginners, link all your socials in one place.</h3>
+                    <div class="qSZ1BY_666cd117a531ab8e9635">
+                        <span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="6.43 7.43 11.15 8.57">
+                                <path fill="currentColor" d="m10 13.6l5.9-5.9q.275-.275.7-.275t.7.275q.275.275.275.7t-.275.7l-6.6 6.6q-.3.3-.7.3t-.7-.3l-2.6-2.6q-.275-.275-.275-.7t.275-.7q.275-.275.7-.275t.7.275z"></path>
+                            </svg> Basic Customization
+                        </span>
+                        <span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="6.43 7.43 11.15 8.57">
+                                <path fill="currentColor" d="m10 13.6l5.9-5.9q.275-.275.7-.275t.7.275q.275.275.275.7t-.275.7l-6.6 6.6q-.3.3-.7.3t-.7-.3l-2.6-2.6q-.275-.275-.275-.7t.275-.7q.275-.275.7-.275t.7.275z"></path>
+                            </svg> Profile Analytics
+                        </span>
+                        <span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="6.43 7.43 11.15 8.57">
+                                <path fill="currentColor" d="m10 13.6l5.9-5.9q.275-.275.7-.275t.7.275q.275.275.275.7t-.275.7l-6.6 6.6q-.3.3-.7.3t-.7-.3l-2.6-2.6q-.275-.275-.275-.7t.275-.7q.275-.275.7-.275t.7.275z"></path>
+                            </svg> Basic Effects
+                        </span>
+                        <span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="6.43 7.43 11.15 8.57">
+                                <path fill="currentColor" d="m10 13.6l5.9-5.9q.275-.275.7-.275t.7.275q.275.275.275.7t-.275.7l-6.6 6.6q-.3.3-.7.3t-.7-.3l-2.6-2.6q-.275-.275-.275-.7t.275-.7q.275-.275.7-.275t.7.275z"></path>
+                            </svg> Add Your Socials
+                        </span>
+                    </div>
+                    <a class="ojY3N1_12622b6f7428b128b4c0" href="https://guns.lol/register?ref=landing_page_pricing">Get Started</a>
+                </div>
+                <div class="o5lNR0_d40702eafd48597c74ca">
+                    <h1 class="rNYYWw_08e9d714109f269ae65d">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 512 512">
+                            <path fill="currentColor" d="M121.72 32a4 4 0 0 0-3.72 5.56l2.3 5.43l40.7 94.9a4 4 0 0 0 6.88.82L243 38.4a4 4 0 0 0-3.2-6.4Zm298.21 26.06l-41.28 96.37a4 4 0 0 0 3.68 5.57h101a4 4 0 0 0 3.4-6.11L427 57.53a4 4 0 0 0-7.07.53M85 57.57l-59.71 96.32a4 4 0 0 0 3.4 6.11h101a4 4 0 0 0 3.67-5.58L92 58.1a4 4 0 0 0-7-.53M393.27 32H267.82a1.94 1.94 0 0 0-1.56 3.11l79.92 106.46a1.94 1.94 0 0 0 3.34-.4L391.6 43l3.4-8.34a1.92 1.92 0 0 0-1.7-2.66ZM239 448l-89.43-253.49A3.78 3.78 0 0 0 146 192H25.7a3.72 3.72 0 0 0-2.95 6l216 279.81a5.06 5.06 0 0 0 6.39 1.37a5 5 0 0 0 2.39-6.08Zm247.3-256H366a3.75 3.75 0 0 0-3.54 2.51l-98.2 278.16a5.21 5.21 0 0 0 2.42 6.31a5.22 5.22 0 0 0 6.61-1.39L489.25 198a3.72 3.72 0 0 0-2.95-6M259.2 78.93l56 74.67a4 4 0 0 1-3.2 6.4H200a4 4 0 0 1-3.2-6.4l56-74.67a4 4 0 0 1 6.4 0m-7 310.31l-67.7-191.91a4 4 0 0 1 3.77-5.33h135.46a4 4 0 0 1 3.77 5.33l-67.73 191.91a4 4 0 0 1-7.54 0Z"></path>
+                        </svg> Premium
+                    </h1>
+                    <div class="olcWbn_bc96de87717a4747cdad">
+                        <h1>6,99€<span>/Lifetime</span></h1>
+                        <span class="mdU03w_8e9c6777adffad382e42">Pay once. Keep it forever.</span>
+                    </div>
+                    <h3>The perfect plan to discover your creativity & unlock more features.</h3>
+                    <div class="qSZ1BY_666cd117a531ab8e9635">
+                        <span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="6.43 7.43 11.15 8.57">
+                                <path fill="currentColor" d="m10 13.6l5.9-5.9q.275-.275.7-.275t.7.275q.275.275.275.7t-.275.7l-6.6 6.6q-.3.3-.7.3t-.7-.3l-2.6-2.6q-.275-.275-.275-.7t.275-.7q.275-.275.7-.275t.7.275z"></path>
+                            </svg> Exclusive Badge
+                        </span>
+                        <span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="6.43 7.43 11.15 8.57">
+                                <path fill="currentColor" d="m10 13.6l5.9-5.9q.275-.275.7-.275t.7.275q.275.275.275.7t-.275.7l-6.6 6.6q-.3.3-.7.3t-.7-.3l-2.6-2.6q-.275-.275-.275-.7t.275-.7q.275-.275.7-.275t.7.275z"></path>
+                            </svg> Profile Layouts
+                        </span>
+                        <span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="6.43 7.43 11.15 8.57">
+                                <path fill="currentColor" d="m10 13.6l5.9-5.9q.275-.275.7-.275t.7.275q.275.275.275.7t-.275.7l-6.6 6.6q-.3.3-.7.3t-.7-.3l-2.6-2.6q-.275-.275-.275-.7t.275-.7q.275-.275.7-.275t.7.275z"></path>
+                            </svg> Custom Fonts
+                        </span>
+                        <span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="6.43 7.43 11.15 8.57">
+                                <path fill="currentColor" d="m10 13.6l5.9-5.9q.275-.275.7-.275t.7.275q.275.275.275.7t-.275.7l-6.6 6.6q-.3.3-.7.3t-.7-.3l-2.6-2.6q-.275-.275-.275-.7t.275-.7q.275-.275.7-.275t.7.275z"></path>
+                            </svg> Typewriter Animation
+                        </span>
+                        <span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="6.43 7.43 11.15 8.57">
+                                <path fill="currentColor" d="m10 13.6l5.9-5.9q.275-.275.7-.275t.7.275q.275.275.275.7t-.275.7l-6.6 6.6q-.3.3-.7.3t-.7-.3l-2.6-2.6q-.275-.275-.275-.7t.275-.7q.275-.275.7-.275t.7.275z"></path>
+                            </svg> Special Profile Effects
+                        </span>
+                        <span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="6.43 7.43 11.15 8.57">
+                                <path fill="currentColor" d="m10 13.6l5.9-5.9q.275-.275.7-.275t.7.275q.275.275.275.7t-.275.7l-6.6 6.6q-.3.3-.7.3t-.7-.3l-2.6-2.6q-.275-.275-.275-.7t.275-.7q.275-.275.7-.275t.7.275z"></path>
+                            </svg> Advanced Customization
+                        </span>
+                        <span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="6.43 7.43 11.15 8.57">
+                                <path fill="currentColor" d="m10 13.6l5.9-5.9q.275-.275.7-.275t.7.275q.275.275.275.7t-.275.7l-6.6 6.6q-.3.3-.7.3t-.7-.3l-2.6-2.6q-.275-.275-.275-.7t.275-.7q.275-.275.7-.275t.7.275z"></path>
+                            </svg> Metadata & SEO Customization
+                        </span>
+                    </div>
+                    <a class="ojY3N1_12622b6f7428b128b4c0 mt-[60px]" href="https://guns.lol/pricing">Learn More</a>
+                    <div class="kbjncc_67bde1bac08f8f30a1eb">
+                        <span class="r0X5bx_0a72ffa519d679e7b08f">Most Popular</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="jeVZYX_6acc29e89fbff335ef08">
+        <div class="mcGcwR_7c8b5d6c57040cc09d02">
+            <style>
+                .mantine-Accordion-control {
+                    background-color: #101010!important;
+                    border: 2px solid #151515;
+                    padding: 8px;
+                    margin-top: 17px;
+                    transition: 0.4s!important;
+                }
+                .mantine-Accordion-control:hover {
+                    background-color: #da69ff46 !important;
+                    border: 2px solid #da69ff46;
+                }
+                .mantine-Accordion-content {
+                    margin-top: 10px;
+                    text-align: left;
+                    padding-left: 10px;
+                    color: #bababa;
+                    font-size: 19px;
+                }
+            </style>
+            <h1 class="cQtbW3_f073a4f540ea2c64f725">Frequently Asked Questions</h1>
+            <div class="mantine-1avyp1d" data-accordion="true">
+                <div class="mantine-Accordion-item mantine-1h0npq1">
+                    <button class="mantine-UnstyledButton-root mantine-Accordion-control mantine-hp9ccp" type="button" data-accordion-control="true" aria-expanded="false" aria-controls="mantine-_R_rlflb_-panel-What is guns.lol?" id="mantine-_R_rlflb_-control-What is guns.lol?">
+                        <span class="mantine-p2utts mantine-Accordion-chevron">
+                            <svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:1rem;height:1rem">
+                                <path d="M3.13523 6.15803C3.3241 5.95657 3.64052 5.94637 3.84197 6.13523L7.5 9.56464L11.158 6.13523C11.3595 5.94637 11.6759 5.95657 11.8648 6.15803C12.0536 6.35949 12.0434 6.67591 11.842 6.86477L7.84197 10.6148C7.64964 10.7951 7.35036 10.7951 7.15803 10.6148L3.15803 6.86477C2.95657 6.67591 2.94637 6.35949 3.13523 6.15803Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path>
+                            </svg>
+                        </span>
+                        <span class="mantine-gm39d mantine-Accordion-label">What is guns.lol?</span>
+                    </button>
+                    <div class="mantine-Accordion-panel mantine-140jman" style="box-sizing:border-box;display:none;height:0;overflow:hidden" aria-hidden="true" role="region" id="mantine-_R_rlflb_-panel-What is guns.lol?" aria-labelledby="mantine-_R_rlflb_-control-What is guns.lol?">
+                        <div style="opacity:0;transition:opacity 200ms ease">
+                            <div class="mantine-731ldn mantine-Accordion-content">guns.lol is a platform that provides modern and feature-rich bio links, as well as secure file hosting services.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mantine-Accordion-item mantine-1h0npq1">
+                    <button class="mantine-UnstyledButton-root mantine-Accordion-control mantine-hp9ccp" type="button" data-accordion-control="true" aria-expanded="false" aria-controls="mantine-_R_rlflb_-panel-Is guns.lol free to use?" id="mantine-_R_rlflb_-control-Is guns.lol free to use?">
+                        <span class="mantine-p2utts mantine-Accordion-chevron">
+                            <svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:1rem;height:1rem">
+                                <path d="M3.13523 6.15803C3.3241 5.95657 3.64052 5.94637 3.84197 6.13523L7.5 9.56464L11.158 6.13523C11.3595 5.94637 11.6759 5.95657 11.8648 6.15803C12.0536 6.35949 12.0434 6.67591 11.842 6.86477L7.84197 10.6148C7.64964 10.7951 7.35036 10.7951 7.15803 10.6148L3.15803 6.86477C2.95657 6.67591 2.94637 6.35949 3.13523 6.15803Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path>
+                            </svg>
+                        </span>
+                        <span class="mantine-gm39d mantine-Accordion-label">Is guns.lol free to use?</span>
+                    </button>
+                    <div class="mantine-Accordion-panel mantine-140jman" style="box-sizing:border-box;display:none;height:0;overflow:hidden" aria-hidden="true" role="region" id="mantine-_R_rlflb_-panel-Is guns.lol free to use?" aria-labelledby="mantine-_R_rlflb_-control-Is guns.lol free to use?">
+                        <div style="opacity:0;transition:opacity 200ms ease">
+                            <div class="mantine-731ldn mantine-Accordion-content">Yes, guns.lol is completely free to use. However, we also offer a Premium package with exclusive features.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mantine-Accordion-item mantine-1h0npq1">
+                    <button class="mantine-UnstyledButton-root mantine-Accordion-control mantine-hp9ccp" type="button" data-accordion-control="true" aria-expanded="false" aria-controls="mantine-_R_rlflb_-panel-What can I do with guns.lol?" id="mantine-_R_rlflb_-control-What can I do with guns.lol?">
+                        <span class="mantine-p2utts mantine-Accordion-chevron">
+                            <svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:1rem;height:1rem">
+                                <path d="M3.13523 6.15803C3.3241 5.95657 3.64052 5.94637 3.84197 6.13523L7.5 9.56464L11.158 6.13523C11.3595 5.94637 11.6759 5.95657 11.8648 6.15803C12.0536 6.35949 12.0434 6.67591 11.842 6.86477L7.84197 10.6148C7.64964 10.7951 7.35036 10.7951 7.15803 10.6148L3.15803 6.86477C2.95657 6.67591 2.94637 6.35949 3.13523 6.15803Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path>
+                            </svg>
+                        </span>
+                        <span class="mantine-gm39d mantine-Accordion-label">What can I do with guns.lol?</span>
+                    </button>
+                    <div class="mantine-Accordion-panel mantine-140jman" style="box-sizing:border-box;display:none;height:0;overflow:hidden" aria-hidden="true" role="region" id="mantine-_R_rlflb_-panel-What can I do with guns.lol?" aria-labelledby="mantine-_R_rlflb_-control-What can I do with guns.lol?">
+                        <div style="opacity:0;transition:opacity 200ms ease">
+                            <div class="mantine-731ldn mantine-Accordion-content">With guns.lol, you can connect all your social media links in one place, making it easier to share your online presence with others.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mantine-Accordion-item mantine-1h0npq1">
+                    <button class="mantine-UnstyledButton-root mantine-Accordion-control mantine-hp9ccp" type="button" data-accordion-control="true" aria-expanded="false" aria-controls="mantine-_R_rlflb_-panel-Is guns.lol safe to use?" id="mantine-_R_rlflb_-control-Is guns.lol safe to use?">
+                        <span class="mantine-p2utts mantine-Accordion-chevron">
+                            <svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:1rem;height:1rem">
+                                <path d="M3.13523 6.15803C3.3241 5.95657 3.64052 5.94637 3.84197 6.13523L7.5 9.56464L11.158 6.13523C11.3595 5.94637 11.6759 5.95657 11.8648 6.15803C12.0536 6.35949 12.0434 6.67591 11.842 6.86477L7.84197 10.6148C7.64964 10.7951 7.35036 10.7951 7.15803 10.6148L3.15803 6.86477C2.95657 6.67591 2.94637 6.35949 3.13523 6.15803Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path>
+                            </svg>
+                        </span>
+                        <span class="mantine-gm39d mantine-Accordion-label">Is guns.lol safe to use?</span>
+                    </button>
+                    <div class="mantine-Accordion-panel mantine-140jman" style="box-sizing:border-box;display:none;height:0;overflow:hidden" aria-hidden="true" role="region" id="mantine-_R_rlflb_-panel-Is guns.lol safe to use?" aria-labelledby="mantine-_R_rlflb_-control-Is guns.lol safe to use?">
+                        <div style="opacity:0;transition:opacity 200ms ease">
+                            <div class="mantine-731ldn mantine-Accordion-content">Absolutely. We've earned the trust of over 1,150,000 users who rely on us to manage their online presence securely.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mantine-Accordion-item mantine-1h0npq1">
+                    <button class="mantine-UnstyledButton-root mantine-Accordion-control mantine-hp9ccp" type="button" data-accordion-control="true" aria-expanded="false" aria-controls="mantine-_R_rlflb_-panel-How long does it take to set up a guns.lol profile?" id="mantine-_R_rlflb_-control-How long does it take to set up a guns.lol profile?">
+                        <span class="mantine-p2utts mantine-Accordion-chevron">
+                            <svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:1rem;height:1rem">
+                                <path d="M3.13523 6.15803C3.3241 5.95657 3.64052 5.94637 3.84197 6.13523L7.5 9.56464L11.158 6.13523C11.3595 5.94637 11.6759 5.95657 11.8648 6.15803C12.0536 6.35949 12.0434 6.67591 11.842 6.86477L7.84197 10.6148C7.64964 10.7951 7.35036 10.7951 7.15803 10.6148L3.15803 6.86477C2.95657 6.67591 2.94637 6.35949 3.13523 6.15803Z" fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"></path>
+                            </svg>
+                        </span>
+                        <span class="mantine-gm39d mantine-Accordion-label">How long does it take to set up a guns.lol profile?</span>
+                    </button>
+                    <div class="mantine-Accordion-panel mantine-140jman" style="box-sizing:border-box;display:none;height:0;overflow:hidden" aria-hidden="true" role="region" id="mantine-_R_rlflb_-panel-How long does it take to set up a guns.lol profile?" aria-labelledby="mantine-_R_rlflb_-control-How long does it take to set up a guns.lol profile?">
+                        <div style="opacity:0;transition:opacity 200ms ease">
+                            <div class="mantine-731ldn mantine-Accordion-content">Setting up your guns.lol profile is quick and easy. Simply create an account and start customizing your profile immediately.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="n0NL5Y_e44bc347f7762492c3dd">
+            <div class="vBQbuZ_7eff586a62d0567763ad">
+                <div class="nnl9Ne_224496141fd058b59c31">
+                    <h1>Everything you want, right here.</h1>
+                    <h3>Join over 1,150,000+ people using guns.lol and become part of our large community</h3>
+                    <div class="xNZQXY_222aa2f15b7c49bb5f86">
+                        <div class="yYcGVH_63bd2ffbaaab52036024">
+                            <div class="qd5m03_35ff4eb32525fa36a41f undefined">
+                                <span class="p0eLGn_d9fbd6f756fbddad4214 !absolute">
+                                    <h1>guns.lol/</h1>
+                                </span>
+                                <input autoCorrect="false" type="text" placeholder="username" class="bXLGb5_ab48f37a4f92e9274dd7 !pl-[83px]" value=""/>
+                            </div>
+                        </div>
+                        <a class="yYa3Wc_59706808c7d7864ef9f9" href="https://guns.lol/register?claim=&ref=guns_footer_banner">Claim Now</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="aBbYcX_11488d8fdeeaec86121f">
+            <div class="wtbZw3_c4f9605dfb7bfd61bda8">
+                <div class="awX5Zn_c2209afb7377a293f153">
+                    <div class="t1FubG_39766aa023ef0b6c3f2a">
+                        <img src="https://assets.guns.lol/guns_logo_no_background_cropped.png" alt=""/>
+                        <h1>guns<span>.</span>lol</h1>
+                        <a href="https://status.guns.lol" target="_blank" style="text-decoration:none">
+                            <span class="u2V3Wb_01ef97bda7a4f0562a86">
+                                <span class="i9YZ0y_68f95693759b4f62d07c">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 12 12">
+                                        <path fill="currentColor" d="M1 6a5 5 0 1 1 10 0A5 5 0 0 1 1 6m7.354-.896a.5.5"></path>
+                                    </svg>
+                                </span> System Status
+                            </span>
+                        </a>
+                    </div>
+                    <span>Create feature-rich, customizable and modern link-in-bio pages with guns.lol.</span>
+                    <div class="im03N2_3f627a96815c838c8b5c">
+                        <a href="https://discord.gg/guns" target="_blank">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+                                <path fill="currentColor" d="M19.27 5.33C17.94 4.71 16.5 4.26 15 4a.09.09 0 0 0-.07.03c-.18.33-.39.76-.53 1.09a16.09 16.09 0 0 0-4.8 0c-.14-.34-.35-.76-.54-1.09c-.01-.02-.04-.03-.07-.03c-1.5.26-2.93.71-4.27 1.33c-.01 0-.02.01-.03.02c-2.72 4.07-3.47 8.03-3.1 11.95c0 .02.01.04.03.05c1.8 1.32 3.53 2.12 5.24 2.65c.03.01.06 0 .07-.02c.4-.55.76-1.13 1.07-1.74c.02-.04 0-.08-.04-.09c-.57-.22-1.11-.48-1.64-.78c-.04-.02-.04-.08-.01-.11c.11-.08.22-.17.33-.25c.02-.02.05-.02.07-.01c3.44 1.57 7.15 1.57 10.55 0c.02-.01.05-.01.07.01c.11.09.22.17.33.26c.04.03.04.09-.01.11c-.52.31-1.07.56-1.64.78c-.04.01-.05.06-.04.09c.32.61.68 1.19 1.07 1.74c.03.01.06.02.09.01c1.72-.53 3.45-1.33 5.25-2.65c.02-.01.03-.03.03-.05c.44-4.53-.73-8.46-3.1-11.95c-.01-.01-.02-.02-.04-.02M8.52 14.91c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.84 2.12-1.89 2.12m6.97 0c-1.03 0-1.89-.95-1.89-2.12s.84-2.12 1.89-2.12c1.06 0 1.9.96 1.89 2.12c0 1.17-.83 2.12-1.89 2.12"></path>
+                            </svg>
+                        </a>
+                        <a href="https://tiktok.com/@guns.lol" target="_blank">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+                                <path fill="currentColor" d="M16.6 5.82s.51.5 0 0A4.278 4.278 0 0 1 15.54 3h-3.09v12.4a2.592 2.592 0 0 1-2.59 2.5c-1.42 0-2.6-1.16-2.6-2.6c0-1.72 1.66-3.01 3.37-2.48V9.66c-3.45-.46-6.47 2.22-6.47 5.64c0 3.33 2.76 5.7 5.69 5.7c3.14 0 5.69-2.55 5.69-5.7V9.01a7.35 7.35 0 0 0 4.3 1.38V7.3s-1.88.09-3.24-1.48"></path>
+                            </svg>
+                        </a>
+                        <a href="https://x.com/gunsdotlol" target="_blank">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+                                <path fill="currentColor" d="M18.205 2.25h3.308l-7.227 8.26l8.502 11.24H16.13l-5.214-6.817L4.95 21.75H1.64l7.73-8.835L1.215 2.25H8.04l4.713 6.231zm-1.161 17.52h1.833L7.045 4.126H5.078z"></path>
+                            </svg>
+                        </a>
+                        <a href="https://t.me/gunsbio" target="_blank">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+                                <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2m4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19c-.14.75-.42 1-.68 1.03c-.58.05-1.02-.38-1.58-.75c-.88-.58-1.38-.94-2.23-1.5c-.99-.65-.35-1.01.22-1.59c.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02c-.09.02-1.49.95-4.22 2.79c-.4.27-.76.41-1.08.4c-.36-.01-1.04-.2-1.55-.37c-.63-.2-1.12-.31-1.08-.66c.02-.18.27-.36.74-.55c2.92-1.27 4.86-2.11 5.83-2.51c2.78-1.16 3.35-1.36 3.73-1.36c.08 0 .27.02.39.12c.1.08.13.19.14.27c-.01.06.01.24 0 .38"></path>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                <span>Copyright © 2025 guns.lol - All Rights Reserved.</span>
+            </div>
+            <div class="ehBdX9_159425b61f1319305bd8">
+                <div class="ptlYG9_ab03d75e2afa7f00e640">
+                    <div class="oyuLlX_b28d308e4f98fc7c0e94">
+                        <h1>General</h1>
+                        <div class="bNx5GV_2c7a712c2dc7120a88dd">
+                            <a href="https://guns.lol/login">Login</a>
+                            <a href="https://guns.lol/register?ref=footer">Sign Up</a>
+                            <a href="https://guns.lol/pricing">Pricing</a>
+                            <a target="_blank" href="https://status.guns.lol">Website Status</a>
+                        </div>
+                    </div>
+                    <div class="oyuLlX_b28d308e4f98fc7c0e94">
+                        <h1>Resources</h1>
+                        <div class="bNx5GV_2c7a712c2dc7120a88dd">
+                            <a target="_blank" href="https://help.guns.lol">Help Center</a>
+                            <a target="_blank" href="https://help.guns.lol/changelog">Changelog</a>
+                            <a href="https://guns.lol/account/redeem">Redeem Code</a>
+                            <a target="_blank" href="https://salad.com/store/rewards/773aded6-552a-46f0-acc9-99324ca32efe">Salad.com Product</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="ptlYG9_ab03d75e2afa7f00e640">
+                    <div class="oyuLlX_b28d308e4f98fc7c0e94">
+                        <h1>Contact</h1>
+                        <div class="bNx5GV_2c7a712c2dc7120a88dd">
+                            <a target="_blank" href="https://discord.gg/guns">Discord Server</a>
+                            <a href="https://guns.lol/cdn-cgi/l/email-protection#44323633332c31370423312a377a383b38">Support Email</a>
+                            <a href="https://guns.lol/cdn-cgi/l/email-protection#bdd8cfc9d3d4dfc9c9fddac8d3ce93d1d2d1">Business Email</a>
+                            <a href="https://guns.lol/cdn-cgi/l/email-protection#5e323b3d3b361e392b302d70323536">Legal Email</a>
+                        </div>
+                    </div>
+                    <div class="oyuLlX_b28d308e4f98fc7c0e94">
+                        <h1>Legal</h1>
+                        <div class="bNx5GV_2c7a712c2dc7120a88dd">
+                            <a href="https://guns.lol/terms">Terms of Service</a>
+                            <a href="https://guns.lol/privacy">Privacy Policy</a>
+                            <a href="https://guns.lol/terms/copyright">Copyright Policy</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--$-->
+    <!--/$-->
+    <script data-cfasync="false" src="https://guns.lol/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+    <script src="https://guns.lol/_next/static/chunks/webpack-28f085f523a1f577.js" id="_R_" async></script>
+    <script>
+        (self.__next_f = self.__next_f || []).push([0])
+    </script>
+    <script>
+        self.__next_f.push([1, "1:\"$Sreact.fragment\"\n2:I[41402,[\"7177\",\"static/chunks/app/layout-f38aaa8413ba086e.js\"],\"\"]\n3:I[98123,[\"7177\",\"static/chunks/app/layout-f38aaa8413ba086e.js\"],\"default\"]\n4:I[9766,[],\"\"]\n5:I[98924,[],\"\"]\n6:I[52619,[\"2619\",\"static/chunks/2619-024c323f8ca0f6aa.js\",\"4345\",\"static/chunks/app/not-found-58a5610cd6183850.js\"],\"\"]\n8:I[24431,[],\"OutletBoundary\"]\na:I[15278,[],\"AsyncMetadataOutlet\"]\nc:I[24431,[],\"ViewportBoundary\"]\ne:I[24431,[],\"MetadataBoundary\"]\nf:\"$Sreact.suspense\"\n11:I[57150,[],\"\"]\n:HL[\"/_next/static/css/cdeae98f92368413.css\",\"style\"]\n:HL[\"/_next/static/css/a351d21c79e1da59.css\",\"style\"]\n"])
+    </script>
+    <script>
+        self.__next_f.push([1, "0:{\"P\":null,\"b\":\"BCihhTxsEXtCnjyl-noEI\",\"p\":\"\",\"c\":[\"\",\"\"],\"i\":false,\"f\":[[[\"\",{\"children\":[\"__PAGE__\",{}]},\"$undefined\",\"$undefined\",true],[\"\",[\"$\",\"$1\",\"c\",{\"children\":[[[\"$\",\"link\",\"0\",{\"rel\":\"stylesheet\",\"href\":\"/_next/static/css/cdeae98f92368413.css\",\"precedence\":\"next\",\"crossOrigin\":\"$undefined\",\"nonce\":\"$undefined\"}]],[\"$\",\"html\",null,{\"lang\":\"en\",\"children\":[[\"$\",\"head\",null,{\"children\":[[\"$\",\"link\",null,{\"href\":\"https://assets.guns.lol/fonts/X6XYTKIVDUW7GZTZPZNN4EUM5KH54KHF.css\",\"rel\":\"stylesheet\"}],[\"$\",\"$L2\",null,{\"src\":\"https://sa.guns.lol/latest.js\",\"id\":\"_sa\"}],[\"$\",\"link\",null,{\"rel\":\"apple-touch-icon\",\"sizes\":\"180x180\",\"href\":\"https://assets.guns.lol/favicon/apple-touch-icon.png\"}],[\"$\",\"link\",null,{\"rel\":\"icon\",\"type\":\"image/png\",\"sizes\":\"32x32\",\"href\":\"https://assets.guns.lol/favicon/favicon-32x32.png\"}],[\"$\",\"link\",null,{\"rel\":\"icon\",\"type\":\"image/png\",\"sizes\":\"16x16\",\"href\":\"https://assets.guns.lol/favicon/favicon-16x16.png\"}],[\"$\",\"link\",null,{\"rel\":\"manifest\",\"href\":\"https://assets.guns.lol/favicon/site.webmanifest\"}],[\"$\",\"meta\",null,{\"name\":\"referrer\",\"content\":\"strict-origin-when-cross-origin\"}],[\"$\",\"script\",null,{\"id\":\"ld-org\",\"type\":\"application/ld+json\",\"dangerouslySetInnerHTML\":{\"__html\":\"{\\\"@context\\\":\\\"https://schema.org\\\",\\\"@type\\\":\\\"Organization\\\",\\\"name\\\":\\\"guns.lol\\\",\\\"url\\\":\\\"https://guns.lol\\\",\\\"logo\\\":\\\"https://assets.guns.lol/guns_logo_no_background_cropped.png\\\",\\\"sameAs\\\":[\\\"https://x.com/gunsdotlol\\\",\\\"https://tiktok.com/@guns.lol\\\",\\\"https://discord.gg/guns\\\"]}\"}}]]}],[\"$\",\"body\",null,{\"children\":[[\"$\",\"$L3\",null,{}],[\"$\",\"$L4\",null,{\"parallelRouterKey\":\"children\",\"error\":\"$undefined\",\"errorStyles\":\"$undefined\",\"errorScripts\":\"$undefined\",\"template\":[\"$\",\"$L5\",null,{}],\"templateStyles\":\"$undefined\",\"templateScripts\":\"$undefined\",\"notFound\":[[\"$\",\"div\",null,{\"className\":\"c5nZul_acae7ef2ade572800706\",\"children\":[\"$\",\"div\",null,{\"className\":\"eIzBNN_2a483bfff065871e1e78\",\"children\":[[\"$\",\"svg\",null,{\"xmlns\":\"http://www.w3.org/2000/svg\",\"width\":\"1em\",\"height\":\"1em\",\"viewBox\":\"0 0 24 24\",\"children\":[\"$\",\"path\",null,{\"fill\":\"currentColor\",\"d\":\"M13 2v14.5h-2V2zm-2 17h2.004v2.004H11z\"}]}],[\"$\",\"h1\",null,{\"children\":\"We couldn't find this page.\"}],[\"$\",\"h3\",null,{\"children\":\"The page you are looking for doesn't exist.\"}],[\"$\",\"div\",null,{\"className\":\"lRYNnl_1091dd5bbcca39b5f847\",\"children\":[\"$\",\"$L6\",null,{\"href\":\"/\",\"children\":\"Go Home\"}]}]]}]}],[[\"$\",\"link\",\"0\",{\"rel\":\"stylesheet\",\"href\":\"/_next/static/css/40bb763088faef03.css\",\"precedence\":\"next\",\"crossOrigin\":\"$undefined\",\"nonce\":\"$undefined\"}]]],\"forbidden\":\"$undefined\",\"unauthorized\":\"$undefined\"}]]}]]}]]}],{\"children\":[\"__PAGE__\",[\"$\",\"$1\",\"c\",{\"children\":[\"$L7\",[[\"$\",\"link\",\"0\",{\"rel\":\"stylesheet\",\"href\":\"/_next/static/css/a351d21c79e1da59.css\",\"precedence\":\"next\",\"crossOrigin\":\"$undefined\",\"nonce\":\"$undefined\"}]],[\"$\",\"$L8\",null,{\"children\":[\"$L9\",[\"$\",\"$La\",null,{\"promise\":\"$@b\"}]]}]]}],{},null,false]},null,false],[\"$\",\"$1\",\"h\",{\"children\":[null,[[\"$\",\"$Lc\",null,{\"children\":\"$Ld\"}],null],[\"$\",\"$Le\",null,{\"children\":[\"$\",\"div\",null,{\"hidden\":true,\"children\":[\"$\",\"$f\",null,{\"fallback\":null,\"children\":\"$L10\"}]}]}]]}],false]],\"m\":\"$undefined\",\"G\":[\"$11\",[]],\"s\":false,\"S\":false}\n"])
+    </script>
+    <script>
+        self.__next_f.push([1, "d:[[\"$\",\"meta\",\"0\",{\"charSet\":\"utf-8\"}],[\"$\",\"meta\",\"1\",{\"name\":\"viewport\",\"content\":\"width=device-width, initial-scale=1\"}],[\"$\\",\"meta\",\"2\",{\"name\":\"theme-color\",\"content\":\"#573362\"}]]\n9:null\n"])
+    </script>
+    <script>
+        self.__next_f.push([1, "b:{\"metadata\":[[\"$\",\"title\",\"0\",{\"children\":\"guns.lol | Home\"}],[\"$\",\"meta\",\"1\",{\"name\":\"description\",\"content\":\"guns.lol is your go-to for modern, feature-rich biolinks and fast, secure file hosting.\"}],[\"$\",\"meta\",\"2\",{\"name\":\"application-name\",\"content\":\"guns.lol\"}],[\"$\",\"meta\",\"3\",{\"name\":\"generator\",\"content\":\"guns.lol\"}],[\"$\",\"meta\",\"4\",{\"name\":\"robots\",\"content\":\"index, follow\"}],[\"$\",\"meta\",\"5\",{\"property\":\"og:title\",\"content\":\"guns.lol | Home\"}],[\"$\",\"meta\",\"6\",{\"property\":\"og:description\",\"content\":\"guns.lol is your go-to for modern, feature-rich biolinks and fast, secure file hosting.\"}],[\"$\",\"meta\",\"7\",{\"property\":\"og:url\",\"content\":\"https://guns.lol\"}],[\"$\",\"meta\",\"8\",{\"property\":\"og:image\",\"content\":\"https://assets.guns.lol/guns_banner_embed.png\"}],[\"$\",\"meta\",\"9\",{\"property\":\"og:type\",\"content\":\"website\"}],[\"$\",\"meta\",\"10\",{\"name\":\"twitter:card\",\"content\":\"summary_large_image\"}],[\"$\",\"meta\",\"11\",{\"name\":\"twitter:site\",\"content\":\"@gunsdotlol\"}],[\"$\",\"meta\",\"12\",{\"name\":\"twitter:creator\",\"content\":\"@gunsdotlol\"}],[\"$\",\"meta\",\"13\",{\"name\":\"twitter:title\",\"content\":\"guns.lol | Home\"}],[\"$\",\"meta\",\"14\",{\"name\":\"twitter:description\",\"content\":\"guns.lol is your go-to for modern, feature-rich biolinks and fast, secure file hosting.\"}],[\"$\",\"meta\",\"15\",{\"name\":\"twitter:image\",\"content\":\"https://assets.guns.lol/guns_banner_embed.png\"}]],\"error\":null,\"digest\":\"$undefined\"}\n"])
+    </script>
+    <script>
+        self.__next_f.push([1, "10:\"$b:metadata\"\n"])
+    </script>
+    <script>
+        self.__next_f.push([1, "12:I[25057,[\"2619\",\"static/chunks/2619-024c323f8ca0f6aa.js\",\"1490\",\"static/chunks/1490-b8a6fa1fb73e6590.js\",\"4920\",\"static/chunks/4920-6a450b13b24a0fce.js\",\"6393\",\"static/chunks/6393-a222ea7236660bf2.js\",\"1287\",\"static/chunks/1287-9aedd3fd1e8a6cd1.js\",\"3628\",\"static/chunks/3628-9771784089c64f2f.js\",\"8109\",\"static/chunks/8109-32c37436652711a4.js\",\"2749\",\"static/chunks/2749-198eaba4a796e885.js\",\"2984\",\"static/chunks/2984-231e2a58af79a837.js\",\"8974\",\"static/chunks/app/page-b2d50f70ead5f06a.js\"],\"default\"]\n7:[\"$\",\"$L12\",null,{\"data\":{\"tokenData\":{\"error\":\"Unauthorized\"},\"statsData\":{\"views\":41203739,\"users\":1152946,\"uploads\":513008,\"premium\":34411}}}]\n"])
+    </script>
+    <script>
+        (function() {
+            function c() {
+                var b = a.contentDocument || a.contentWindow.document;
+                if (b) {
+                    var d = b.createElement('script');
+                    d.innerHTML = "window.__CF$cv$params={r:'9a12cc740c7cc33c',t:'MTc2MzU4NzcyMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";
+                    b.getElementsByTagName('head')[0].appendChild(d)
+                }
+            }
+            if (document.body) {
+                var a = document.createElement('iframe');
+                a.height = 1;
+                a.width = 1;
+                a.style.position = 'absolute';
+                a.style.top = 0;
+                a.style.left = 0;
+                a.style.border = 'none';
+                a.style.visibility = 'hidden';
+                document.body.appendChild(a);
+                if ('loading' !== document.readyState) c();
+                else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c);
+                else {
+                    var e = document.onreadystatechange || function() {};
+                    document.onreadystatechange = function(b) {
+                        e(b);
+                        'loading' !== document.readyState && (document.onreadystatechange = e, c())
+                    }
+                }
+            }
+        })();
+    </script>
 </body>
 </html>
