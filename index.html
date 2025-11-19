@@ -620,6 +620,18 @@
       min-width: 40px;
       text-align: center;
     }
+    
+    /* NEUE STYLES FÜR ZEIT-ANZEIGE */
+    .product-time-display {
+      font-size: 0.8rem;
+      color: #dc2626;
+      font-weight: 600;
+      text-align: center;
+      margin-top: 4px;
+      background: rgba(220, 38, 38, 0.1);
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
   </style>
 </head>
 <body class="text-gray-100 antialiased min-h-screen">
@@ -1407,12 +1419,15 @@
 
     // Zeit formatieren für Anzeige
     function formatTime(seconds) {
-      const mins = Math.floor(seconds / 60);
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
       const secs = Math.floor(seconds % 60);
       const ms = Math.round((seconds % 1) * 1000);
       
-      if (mins > 0) {
-        return `${mins}m ${secs}s`;
+      if (hours > 0) {
+        return `${hours}h ${minutes}m ${secs}s`;
+      } else if (minutes > 0) {
+        return `${minutes}m ${secs}s`;
       } else if (secs > 0) {
         return `${secs}s`;
       } else {
@@ -1598,7 +1613,7 @@
       });
     }
 
-    // Produkte rendern - NEUE KLEINERE KARTEN MIT MENGEN-STEUERUNG
+    // Produkte rendern - NEUE KLEINERE KARTEN MIT MENGEN-STEUERUNG UND ZEIT-BERECHNUNG
     function renderWorkbenches() {
       const workbenchesGrid = document.getElementById('workbenchesGrid');
       workbenchesGrid.innerHTML = '';
@@ -1624,7 +1639,7 @@
              <img src="${workbench.imageUrl}" class="image-preview-small" alt="${workbench.name}">
            </div>` : '';
         
-        // Mengen-Steuerung für jede Karte
+        // Mengen-Steuerung für jede Karte mit Zeit-Berechnung
         const quantityControls = `
           <div class="product-quantity-controls">
             <button class="product-quantity-btn decrease-btn" data-key="${workbench.key}">
@@ -1634,6 +1649,9 @@
             <button class="product-quantity-btn increase-btn" data-key="${workbench.key}">
               <i class="fas fa-plus"></i>
             </button>
+          </div>
+          <div class="product-time-display" id="time-${workbench.key}">
+            Gesamtzeit: ${formatTime(workbench.time || 0)}
           </div>
         `;
         
@@ -1708,24 +1726,42 @@
       });
     }
 
-    // Menge erhöhen
+    // Menge erhöhen und Zeit berechnen
     function increaseQuantity(key) {
       const quantityDisplay = document.getElementById(`quantity-${key}`);
       let currentQuantity = parseInt(quantityDisplay.textContent.replace('x', '')) || 1;
       currentQuantity++;
       quantityDisplay.textContent = `${currentQuantity}x`;
+      
+      // Zeit entsprechend der Menge berechnen
+      updateTimeForQuantity(key, currentQuantity);
       updateResourceQuantities(key, currentQuantity);
     }
 
-    // Menge verringern
+    // Menge verringern und Zeit berechnen
     function decreaseQuantity(key) {
       const quantityDisplay = document.getElementById(`quantity-${key}`);
       let currentQuantity = parseInt(quantityDisplay.textContent.replace('x', '')) || 1;
       if (currentQuantity > 1) {
         currentQuantity--;
         quantityDisplay.textContent = `${currentQuantity}x`;
+        
+        // Zeit entsprechend der Menge berechnen
+        updateTimeForQuantity(key, currentQuantity);
         updateResourceQuantities(key, currentQuantity);
       }
+    }
+
+    // Zeit basierend auf Menge aktualisieren
+    function updateTimeForQuantity(key, multiplier) {
+      const workbench = workbenches.find(w => w.key === key);
+      if (!workbench) return;
+      
+      const timeDisplay = document.getElementById(`time-${key}`);
+      const baseTime = workbench.time || 0;
+      const totalTime = baseTime * multiplier;
+      
+      timeDisplay.textContent = `Gesamtzeit: ${formatTime(totalTime)}`;
     }
 
     // Ressourcen-Mengen aktualisieren
