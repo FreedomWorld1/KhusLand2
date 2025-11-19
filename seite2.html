@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Meine Deutsche Profilseite</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meine Link-Seite</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <style>
-        :root{
+        :root {
             --accent: #ffffff;
             --muted: rgba(255,255,255,0.85);
             --glass: rgba(255,255,255,0.06);
@@ -14,483 +16,959 @@
             font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
         }
 
-        /* Seite / Video */
-        html,body{height:100%;margin:0;background:#000;color:var(--accent);}
-        .video-wrap{
-            position:fixed;inset:0;overflow:hidden;z-index:0;
-            display:flex;align-items:center;justify-content:center;
+        /* Cursor Styles */
+        * {
+            cursor: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgdmlld0JveD0iMCAwIDMyIDMyIj48Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjIiLz48L3N2Zz4='), auto;
         }
-        .video-wrap video{
-            min-width:100%;min-height:100%;object-fit:cover;filter:brightness(0.55) saturate(1.05);
+
+        .cursor-pointer {
+            cursor: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgdmlld0JveD0iMCAwIDMyIDMyIj48cGF0aCBkPSJNMTIgMjBsLTQgNG00IDBsOC04IiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0ibm9uZSIvPjwvc3ZnPg=='), pointer;
+        }
+
+        /* Seite / Video */
+        html, body {
+            height: 100%;
+            margin: 0;
+            background: #000;
+            color: var(--accent);
+            overflow-x: hidden;
+        }
+
+        .video-wrap {
+            position: fixed;
+            inset: 0;
+            overflow: hidden;
+            z-index: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .video-wrap video {
+            min-width: 100%;
+            min-height: 100%;
+            object-fit: cover;
+            filter: brightness(0.55) saturate(1.05);
+        }
+
+        /* Audio Control */
+        .audio-control {
+            position: fixed;
+            top: 18px;
+            left: 18px;
+            z-index: 5;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+            backdrop-filter: blur(6px);
+            cursor: pointer;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.45);
+        }
+
+        /* Particle Effects */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            pointer-events: none;
         }
 
         /* dunkle overlay um text lesbar zu machen */
-        .overlay{
-            position:fixed;inset:0;background:linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.6) 80%);z-index:1;
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.6) 80%);
+            z-index: 1;
         }
 
         /* Container für Inhalt */
-        .container{
-            position:relative;z-index:2;max-width:900px;margin:40px auto;padding:28px;display:flex;flex-direction:column;gap:18px;align-items:center;text-align:center;
+        .container {
+            position: relative;
+            z-index: 2;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            align-items: center;
+            text-align: center;
         }
 
         /* settings gear top-right */
-        .gear{
-            position:fixed;top:18px;right:18px;z-index:5;width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));backdrop-filter:blur(6px);cursor:pointer;
-            box-shadow:0 6px 18px rgba(0,0,0,0.45);
-        }
-        .gear svg{width:24px;height:24px;fill:var(--accent);opacity:0.95}
-
-        /* Profil-Karte */
-        .card{
-            width:100%;max-width:760px;padding:22px;border-radius:20px;background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
-            box-shadow:0 8px 40px rgba(0,0,0,0.6);backdrop-filter:blur(6px);
-            display:flex;flex-direction:column;align-items:center;gap:14px;
-        }
-
-        .avatar{
-            width:86px;height:86px;border-radius:16px;overflow:hidden;border:2px solid rgba(255,255,255,0.12);
-            display:flex;align-items:center;justify-content:center;background:var(--glass);
-        }
-        .avatar img{width:100%;height:100%;object-fit:cover;display:block}
-
-        .name{font-size:36px;font-weight:700;letter-spacing:0.6px;color:var(--accent);text-shadow:0 6px 30px rgba(0,0,0,0.6);}
-        .diamond{width:34px;height:34px;margin-top:-6px;opacity:0.95}
-
-        .bio{font-size:18px;color:var(--muted);max-width:80%;line-height:1.4}
-        .meta-row{display:flex;gap:10px;align-items:center;color:var(--muted);font-size:15px}
-
-        /* Social icons */
-        .icons{display:flex;gap:14px;margin-top:8px}
-        .icons a{width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;text-decoration:none;color:var(--accent);box-shadow:0 6px 20px rgba(0,0,0,0.45)}
-
-        /* großer Button (Roblox) */
-        .big-button{
-            margin-top:12px;padding:12px 22px;border-radius:40px;background:rgba(255,255,255,0.06);display:inline-flex;align-items:center;gap:12px;color:var(--accent);min-width:240px;justify-content:center;font-weight:600;border:1px solid rgba(255,255,255,0.03);
-        }
-        .big-button img{width:36px;height:36px;border-radius:8px;object-fit:cover}
-
-        .views{position:absolute;left:20px;bottom:18px;color:var(--muted);display:flex;gap:8px;align-items:center;z-index:3}
-
-        /* Modernes Einstellungen Modal */
-        .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:10}
-        .modal{width:92%;max-width:760px;background:linear-gradient(180deg,#0b0b0b,#0f0f10);border-radius:14px;padding:20px;color:var(--muted);box-shadow:0 14px 60px rgba(0,0,0,0.7)}
-        .modal-header{display:flex;justify-content:center;margin-bottom:20px;padding-bottom:15px;border-bottom:1px solid rgba(255,255,255,0.1)}
-        .modal h2{color:var(--accent);margin:0;font-size:24px;font-weight:600}
-        
-        .form-row{display:flex;gap:15px;margin-bottom:15px;flex-wrap:wrap}
-        .form-group{flex:1;min-width:250px}
-        .form-group label{display:block;margin-bottom:8px;font-size:14px;font-weight:500;color:var(--muted)}
-        
-        .input-wrapper{position:relative;display:flex;align-items:center}
-        .input-icon{position:absolute;left:12px;color:var(--muted);z-index:1}
-        .input-field{width:100%;padding:12px 12px 12px 40px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:var(--accent);font-size:14px;transition:all 0.2s}
-        .input-field:focus{outline:none;border-color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.08)}
-        
-        .form-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:15px;border-top:1px solid rgba(255,255,255,0.1)}
-        .btn{padding:10px 20px;border-radius:8px;border:none;cursor:pointer;font-weight:600;font-size:14px;transition:all 0.2s}
-        .btn.primary{background:#2e7dff;color:#fff}
-        .btn.primary:hover{background:#1a6de8}
-        .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.1);color:var(--muted)}
-        .btn.ghost:hover{background:rgba(255,255,255,0.05)}
-        
-        .password-wrapper{position:relative;width:100%}
-        .password-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;z-index:2}
-
-        /* Checkliste */
-        .checklist {
-            list-style: none;
-            padding: 0;
-            margin: 15px 0;
-            text-align: left;
-            width: 100%;
-            max-width: 300px;
-        }
-        
-        .checklist li {
-            margin: 10px 0;
+        .gear {
+            position: fixed;
+            top: 18px;
+            right: 18px;
+            z-index: 5;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
-            font-size: 16px;
+            justify-content: center;
+            background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+            backdrop-filter: blur(6px);
+            cursor: pointer;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.45);
         }
-        
-        .checklist input[type="checkbox"] {
-            margin-right: 10px;
-            width: 18px;
-            height: 18px;
+
+        .gear svg {
+            width: 24px;
+            height: 24px;
+            fill: var(--accent);
+            opacity: 0.95;
         }
-        
-        .checklist .checked {
-            color: #4CAF50;
+
+        /* Profil-Karte */
+        .card {
+            width: 100%;
+            max-width: 760px;
+            padding: 22px;
+            border-radius: 20px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+            box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+            backdrop-filter: blur(6px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
         }
-        
-        .checklist .unchecked {
+
+        .avatar {
+            width: 86px;
+            height: 86px;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 2px solid rgba(255,255,255,0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--glass);
+        }
+
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .name {
+            font-size: 36px;
+            font-weight: 700;
+            letter-spacing: 0.6px;
+            color: var(--accent);
+            text-shadow: 0 6px 30px rgba(0,0,0,0.6);
+        }
+
+        .diamond {
+            width: 34px;
+            height: 34px;
+            margin-top: -6px;
+            opacity: 0.95;
+        }
+
+        .bio {
+            font-size: 18px;
+            color: var(--muted);
+            max-width: 80%;
+            line-height: 1.4;
+        }
+
+        .meta-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            color: var(--muted);
+            font-size: 15px;
+        }
+
+        /* Link Buttons */
+        .links-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .link-button {
+            padding: 16px 24px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.06);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.03);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(6px);
+        }
+
+        .link-button:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .link-button img {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            object-fit: cover;
+        }
+
+        /* Social icons */
+        .icons {
+            display: flex;
+            gap: 14px;
+            margin-top: 8px;
+        }
+
+        .icons a {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: var(--accent);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.45);
+            transition: all 0.3s ease;
+        }
+
+        .icons a:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-2px);
+        }
+
+        .views {
+            position: absolute;
+            left: 20px;
+            bottom: 18px;
+            color: var(--muted);
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            z-index: 3;
+        }
+
+        /* Modernes Einstellungen Modal */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .modal {
+            width: 92%;
+            max-width: 760px;
+            max-height: 90vh;
+            overflow-y: auto;
+            background: linear-gradient(180deg,#0b0b0b,#0f0f10);
+            border-radius: 14px;
+            padding: 20px;
+            color: var(--muted);
+            box-shadow: 0 14px 60px rgba(0,0,0,0.7);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .modal h2 {
+            color: var(--accent);
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
             color: var(--muted);
         }
-        
-        .emoji {
-            margin-left: 8px;
-            font-size: 18px;
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 12px;
+            color: var(--muted);
+            z-index: 1;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px 12px 12px 40px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05);
+            color: var(--accent);
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.08);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .btn.primary {
+            background: #2e7dff;
+            color: #fff;
+        }
+
+        .btn.primary:hover {
+            background: #1a6de8;
+        }
+
+        .btn.ghost {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--muted);
+        }
+
+        .btn.ghost:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .link-item {
+            background: rgba(255,255,255,0.03);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .link-item-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .link-item-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .btn-danger {
+            background: #ff4757;
+            color: white;
+        }
+
+        .btn-success {
+            background: #2ed573;
+            color: white;
         }
 
         /* responsive tweaks */
-        @media (max-width:520px){
-            .name{font-size:28px}
-            .bio{font-size:15px}
-            .avatar{width:74px;height:74px}
-            .gear{width:46px;height:46px}
-            .form-group{min-width:100%}
+        @media (max-width: 520px) {
+            .name {
+                font-size: 28px;
+            }
+            .bio {
+                font-size: 15px;
+            }
+            .avatar {
+                width: 74px;
+                height: 74px;
+            }
+            .gear, .audio-control {
+                width: 46px;
+                height: 46px;
+            }
+            .form-group {
+                min-width: 100%;
+            }
         }
     </style>
 </head>
 <body>
-
-<!-- video hintergrund -->
-<div class="video-wrap" aria-hidden="true">
-    <!-- Standard-Videolink: ersetze durch eigene MP4/WebM URL oder lokales File -->
-    <video id="bgVideo" autoplay muted loop playsinline>
-        <source src="https://cdn.pixabay.com/vimeo/393803141/party-37325.mp4?width=1280&hash=..." type="video/mp4">
-        <!-- Falls Nutzer kein Video hat: Poster-Image -->
-    </video>
-</div>
-<div class="overlay" aria-hidden="true"></div>
-
-<!-- Settings Gear (oben rechts) -->
-<div class="gear" id="openSettings" title="Einstellungen">
-    <!-- Zahnrad-SVG -->
-    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19.14,12.94c0.04-0.31,0.06-0.63,0.06-0.94s-0.02-0.63-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61l-1.92-3.32c-0.11-0.2-0.35-0.28-0.56-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.5,2.81c-0.03-0.22-0.22-0.38-0.44-0.38h-3.13c-0.22,0-0.41,0.16-0.44,0.38L9.02,4.49c-0.59,0.24-1.12,0.56-1.62,0.94L5.01,4.47c-0.21-0.08-0.45,0.02-0.56,0.22L2.53,8.01c-0.11,0.2-0.06,0.47,0.12,0.61L4.68,10.2C4.63,10.51,4.61,10.83,4.61,11.14s0.02,0.63,0.06,0.94L2.64,13.66c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.11,0.2,0.35,0.28,0.56,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.37,1.68c0.03,0.22,0.22,0.38,0.44,0.38h3.13c0.22,0,0.41-0.16,0.44-0.38l0.37-1.68c0.59-0.24,1.12-0.56,1.62-0.94l2.39,0.96c0.21,0.08,0.45-0.02,0.56-0.22l1.92-3.32c0.11-0.2,0.06-0.47-0.12-0.61L19.14,12.94zM12,15.6c-1.98,0-3.6-1.62-3.6-3.6s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
-</div>
-
-<!-- Hauptcontainer -->
-<div class="container">
-    <div class="card" id="profileCard">
-        <div class="avatar" id="avatarWrap">
-            <img id="avatarImg" src="https://i.ibb.co/9cX7s0X/avatar-placeholder.png" alt="Avatar">
-        </div>
-
-        <div style="display:flex;align-items:center;gap:12px;flex-direction:column">
-            <div class="diamond" aria-hidden="true">
-                <!-- kleines Diamant-SVG -->
-                <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="white" opacity="0.95"/></svg>
-            </div>
-            <div class="name" id="displayName">Colin</div>
-            <div class="bio" id="bioText">Willkommen auf meiner Seite. Hier findest du alles über:</div>
-            
-            <!-- Checkliste -->
-            <ul class="checklist">
-                <li>
-                    <input type="checkbox" id="item1" checked disabled>
-                    <label for="item1" class="checked">Deutschland</label>
-                </li>
-                <li>
-                    <input type="checkbox" id="item2" checked disabled>
-                    <label for="item2" class="checked">💬 💮 💯</label>
-                </li>
-            </ul>
-            
-            <div class="meta-row"><span id="location">Deutschland</span></div>
-        </div>
-
-        <div class="icons" id="socialIcons">
-            <!-- einfache Platzhalter-Icons (TikTok, Roblox, Discord, RobloxSquare) -->
-            <a href="#" title="TikTok" data-key="tiktok" aria-label="TikTok">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M16 4h2v6a4 4 0 1 1-4-4h2V4z" fill="white" /></svg>
-            </a>
-            <a href="#" title="Roblox" data-key="roblox" aria-label="Roblox">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect width="20" height="20" x="2" y="2" rx="4" fill="white" transform="rotate(18 12 12)"/></svg>
-            </a>
-            <a href="#" title="Discord" data-key="discord" aria-label="Discord">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M8 9.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm8 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z" fill="white" /></svg>
-            </a>
-        </div>
-
-        <div class="big-button" id="ctaButton" role="button" tabindex="0">
-            <img src="https://i.ibb.co/0F7t9g2/roblox-icon.png" alt="Roblox">
-            <span id="ctaLabel">Roblox</span>
-        </div>
-
-        <div style="position:relative;width:100%;height:8px"></div>
+    <!-- Video Hintergrund -->
+    <div class="video-wrap" aria-hidden="true">
+        <video id="bgVideo" autoplay muted loop playsinline>
+            <source src="" type="video/mp4" id="videoSource">
+        </video>
     </div>
-</div>
+    
+    <!-- Audio Control -->
+    <div class="audio-control cursor-pointer" id="audioControl" title="Ton ein/aus">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+        </svg>
+    </div>
+    
+    <!-- Particle Effects -->
+    <div class="particles" id="particles"></div>
+    
+    <!-- Overlay -->
+    <div class="overlay" aria-hidden="true"></div>
 
-<!-- views -->
-<div class="views" aria-hidden="true">
-    <svg width="18" height="12" viewBox="0 0 24 24" fill="none" style="opacity:0.9"><path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8z" fill="white"/></svg>
-    <div id="viewCount">6</div>
-</div>
+    <!-- Settings Gear -->
+    <div class="gear cursor-pointer" id="openSettings" title="Einstellungen">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M19.14,12.94c0.04-0.31,0.06-0.63,0.06-0.94s-0.02-0.63-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61l-1.92-3.32c-0.11-0.2-0.35-0.28-0.56-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.5,2.81c-0.03-0.22-0.22-0.38-0.44-0.38h-3.13c-0.22,0-0.41,0.16-0.44,0.38L9.02,4.49c-0.59,0.24-1.12,0.56-1.62,0.94L5.01,4.47c-0.21-0.08-0.45,0.02-0.56,0.22L2.53,8.01c-0.11,0.2-0.06,0.47,0.12,0.61L4.68,10.2C4.63,10.51,4.61,10.83,4.61,11.14s0.02,0.63,0.06,0.94L2.64,13.66c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.11,0.2,0.35,0.28,0.56,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.37,1.68c0.03,0.22,0.22,0.38,0.44,0.38h3.13c0.22,0,0.41-0.16,0.44-0.38l0.37-1.68c0.59-0.24,1.12-0.56,1.62-0.94l2.39,0.96c0.21,0.08,0.45-0.02,0.56-0.22l1.92-3.32c0.11-0.2,0.06-0.47-0.12-0.61L19.14,12.94zM12,15.6c-1.98,0-3.6-1.62-3.6-3.6s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+        </svg>
+    </div>
 
-<!-- Modernes Einstellungen Modal -->
-<div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
-        <div class="modal-header">
-            <h2 id="settingsTitle">Einstellungen</h2>
-        </div>
-
-        <div class="form-row">
-            <div class="form-group">
-                <label>Seiten-Pseudonym (Name)</label>
-                <div class="input-wrapper">
-                    <span class="input-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                        </svg>
-                    </span>
-                    <input type="text" id="inName" placeholder="z.B. Colin" class="input-field">
-                </div>
+    <!-- Hauptcontainer -->
+    <div class="container">
+        <div class="card" id="profileCard">
+            <div class="avatar" id="avatarWrap">
+                <img id="avatarImg" src="https://i.ibb.co/9cX7s0X/avatar-placeholder.png" alt="Avatar">
             </div>
 
-            <div class="form-group">
-                <label>Standort</label>
-                <div class="input-wrapper">
-                    <span class="input-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5z"/>
-                        </svg>
-                    </span>
-                    <input type="text" id="inLocation" placeholder="Deutschland" class="input-field">
+            <div style="display:flex;align-items:center;gap:12px;flex-direction:column">
+                <div class="diamond" aria-hidden="true">
+                    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="white" opacity="0.95"/>
+                    </svg>
                 </div>
-            </div>
-        </div>
-
-        <div class="form-row">
-            <div class="form-group">
-                <label>Beschreibung (Bio)</label>
-                <div class="input-wrapper">
-                    <span class="input-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
-                        </svg>
-                    </span>
-                    <input type="text" id="inBio" placeholder="Willkommen auf meiner Seite..." class="input-field">
-                </div>
+                <div class="name" id="displayName">Colin</div>
+                <div class="bio" id="bioText">Willkommen auf meiner Seite</div>
+                <div class="meta-row"><span id="location">Deutschland</span></div>
             </div>
 
-            <div class="form-group">
-                <label>CTA-Text</label>
-                <div class="input-wrapper">
-                    <span class="input-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 6h-3v2h3c.55 0 1 .45 1 1s-.45 1-1 1h-3v2h3c.55 0 1 .45 1 1s-.45 1-1 1h-4c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1h4c.55 0 1 .45 1 1s-.45 1-1 1z"/>
-                        </svg>
-                    </span>
-                    <input type="text" id="inCTA" placeholder="Roblox" class="input-field">
-                </div>
-            </div>
-        </div>
-
-        <div class="form-row">
-            <div class="form-group">
-                <label>Avatar Image URL</label>
-                <div class="input-wrapper">
-                    <span class="input-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
-                        </svg>
-                    </span>
-                    <input type="text" id="inAvatar" placeholder="https://..." class="input-field">
-                </div>
+            <div class="icons" id="socialIcons">
+                <a href="#" title="TikTok" data-key="tiktok" aria-label="TikTok" class="cursor-pointer">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M16 4h2v6a4 4 0 1 1-4-4h2V4z" fill="white" /></svg>
+                </a>
+                <a href="#" title="Instagram" data-key="instagram" aria-label="Instagram" class="cursor-pointer">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3.5" fill="white" /><path d="M16.5 3h-9A4.5 4.5 0 0 0 3 7.5v9A4.5 4.5 0 0 0 7.5 21h9a4.5 4.5 0 0 0 4.5-4.5v-9A4.5 4.5 0 0 0 16.5 3zm-4.5 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6z" fill="white"/></svg>
+                </a>
+                <a href="#" title="YouTube" data-key="youtube" aria-label="YouTube" class="cursor-pointer">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M10 15l5.19-3L10 9v6zm11.56-7.83c.13.47.22 1.1.28 1.9.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83-.25.9-.83 1.48-1.73 1.73-.47.13-1.33.22-2.65.28-1.3.07-2.49.1-3.59.1L12 19c-4.19 0-6.8-.16-7.83-.44-.9-.25-1.48-.83-1.73-1.73-.13-.47-.22-1.1-.28-1.9-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83.25-.9.83-1.48 1.73-1.73.47-.13 1.33-.22 2.65-.28 1.3-.07 2.49-.1 3.59-.1L12 5c4.19 0 6.8.16 7.83.44.9.25 1.48.83 1.73 1.73z" fill="white"/></svg>
+                </a>
             </div>
 
-            <div class="form-group">
-                <label>Hintergrund Video URL</label>
-                <div class="input-wrapper">
-                    <span class="input-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
-                        </svg>
-                    </span>
-                    <input type="text" id="inVideo" placeholder="https://your-video.mp4" class="input-field">
-                </div>
+            <!-- Links Container -->
+            <div class="links-container" id="linksContainer">
+                <!-- Links werden hier dynamisch eingefügt -->
             </div>
-        </div>
-
-        <div class="form-row">
-            <div class="form-group">
-                <label>Social Icons anzeigen?</label>
-                <div class="input-wrapper">
-                    <span class="input-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/>
-                        </svg>
-                    </span>
-                    <select id="inShowIcons" class="input-field">
-                        <option value="1">Ja</option>
-                        <option value="0">Nein</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label>View Count</label>
-                <div class="input-wrapper">
-                    <span class="input-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
-                        </svg>
-                    </span>
-                    <input type="text" id="inViews" placeholder="6" class="input-field">
-                </div>
-            </div>
-        </div>
-
-        <div class="form-actions">
-            <div style="font-size:13px;color:rgba(255,255,255,0.6);flex:1">Passwort zum Öffnen: <strong>110121</strong></div>
-            <button class="btn ghost" id="btnReset">Zurücksetzen</button>
-            <button class="btn primary" id="btnSave">Speichern</button>
-            <button class="btn ghost" id="btnClose">Schließen</button>
         </div>
     </div>
-</div>
 
-<script>
-/*
-  Einstellungen: Passwort geschützt (vom Nutzer angegeben)
-  Passwort (statisch): 110121
-*/
-const SETTINGS_PASSWORD = "110121";
+    <!-- Views -->
+    <div class="views" aria-hidden="true">
+        <svg width="18" height="12" viewBox="0 0 24 24" fill="none" style="opacity:0.9">
+            <path d="M12 5c-7 0-11 7-11 7s4 7 11 7 11-7 11-7-4-7-11-7zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8z" fill="white"/>
+        </svg>
+        <div id="viewCount">0</div>
+    </div>
 
-/* DOM-Elemente */
-const gear = document.getElementById('openSettings');
-const modal = document.getElementById('modalBackdrop');
-const btnClose = document.getElementById('btnClose');
-const btnSave = document.getElementById('btnSave');
-const btnReset = document.getElementById('btnReset');
+    <!-- Modernes Einstellungen Modal -->
+    <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+            <div class="modal-header">
+                <h2 id="settingsTitle">Einstellungen</h2>
+            </div>
 
-const displayName = document.getElementById('displayName');
-const bioText = document.getElementById('bioText');
-const locationEl = document.getElementById('location');
-const avatarImg = document.getElementById('avatarImg');
-const bgVideo = document.getElementById('bgVideo');
-const socialIcons = document.getElementById('socialIcons');
-const ctaLabel = document.getElementById('ctaLabel');
-const viewCountEl = document.getElementById('viewCount');
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Seiten-Pseudonym (Name)</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                            </svg>
+                        </span>
+                        <input type="text" id="inName" placeholder="z.B. Colin" class="input-field">
+                    </div>
+                </div>
 
-const inName = document.getElementById('inName');
-const inBio = document.getElementById('inBio');
-const inLocation = document.getElementById('inLocation');
-const inAvatar = document.getElementById('inAvatar');
-const inVideo = document.getElementById('inVideo');
-const inShowIcons = document.getElementById('inShowIcons');
-const inCTA = document.getElementById('inCTA');
-const inViews = document.getElementById('inViews');
+                <div class="form-group">
+                    <label>Standort</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5z"/>
+                            </svg>
+                        </span>
+                        <input type="text" id="inLocation" placeholder="Deutschland" class="input-field">
+                    </div>
+                </div>
+            </div>
 
-/* Default-Einstellungen */
-const defaultSettings = {
-    name: "Colin",
-    bio: "Willkommen auf meiner Seite. Hier findest du alles über:",
-    location: "Deutschland",
-    avatar: "https://i.ibb.co/9cX7s0X/avatar-placeholder.png",
-    video: bgVideo.querySelector('source') ? bgVideo.querySelector('source').src : "",
-    showIcons: true,
-    cta: "Roblox",
-    views: "6"
-};
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Beschreibung (Bio)</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+                            </svg>
+                        </span>
+                        <input type="text" id="inBio" placeholder="Willkommen auf meiner Seite..." class="input-field">
+                    </div>
+                </div>
 
-/* Läd Einstellungen aus localStorage */
-function loadSettings(){
-    let s = localStorage.getItem('profileSettings');
-    if(!s){
-        s = JSON.stringify(defaultSettings);
-        localStorage.setItem('profileSettings', s);
-    }
-    const settings = JSON.parse(s);
-    applySettingsToUI(settings);
-    fillSettingsForm(settings);
-}
+                <div class="form-group">
+                    <label>Avatar Image URL</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                            </svg>
+                        </span>
+                        <input type="text" id="inAvatar" placeholder="https://..." class="input-field">
+                    </div>
+                </div>
+            </div>
 
-/* Überträgt Settings auf sichtbare Seite */
-function applySettingsToUI(settings){
-    displayName.textContent = settings.name || "";
-    bioText.textContent = settings.bio || "";
-    locationEl.textContent = settings.location || "";
-    avatarImg.src = settings.avatar || defaultSettings.avatar;
-    ctaLabel.textContent = settings.cta || "Roblox";
-    viewCountEl.textContent = settings.views || "0";
-    if(settings.video){
-        // Tausche Video-Source
-        const src = settings.video;
-        if(bgVideo.querySelector('source')){
-            bgVideo.querySelector('source').src = src;
-            bgVideo.load();
-            bgVideo.play().catch(()=>{});
-        } else {
-            const s = document.createElement('source');
-            s.src = src; s.type = "video/mp4";
-            bgVideo.appendChild(s);
-            bgVideo.load(); bgVideo.play().catch(()=>{});
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Hintergrund Video URL</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
+                            </svg>
+                        </span>
+                        <input type="text" id="inVideo" placeholder="https://your-video.mp4" class="input-field">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Social Icons anzeigen?</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/>
+                            </svg>
+                        </span>
+                        <select id="inShowIcons" class="input-field">
+                            <option value="1">Ja</option>
+                            <option value="0">Nein</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Link Management -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Neuen Link hinzufügen</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                            </svg>
+                        </span>
+                        <input type="text" id="newLinkTitle" placeholder="Link Titel" class="input-field">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>&nbsp;</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+                            </svg>
+                        </span>
+                        <input type="text" id="newLinkUrl" placeholder="https://..." class="input-field">
+                    </div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <button class="btn btn-success" id="addLinkBtn">Link hinzufügen</button>
+                </div>
+            </div>
+
+            <div id="linksList">
+                <!-- Links werden hier dynamisch angezeigt -->
+            </div>
+
+            <div class="form-actions">
+                <div style="font-size:13px;color:rgba(255,255,255,0.6);flex:1">Passwort zum Öffnen: <strong>110121</strong></div>
+                <button class="btn ghost" id="btnReset">Zurücksetzen</button>
+                <button class="btn primary" id="btnSave">Speichern</button>
+                <button class="btn ghost" id="btnClose">Schließen</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Konfiguration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCw4nadHCIRcouTJJoQ3ElToiVVFr5Rufo",
+            authDomain: "khusland-b7d13.firebaseapp.com",
+            databaseURL: "https://khusland-b7d13-default-rtdb.firebaseio.com",
+            projectId: "khusland-b7d13",
+            storageBucket: "khusland-b7d13.firebasestorage.app",
+            messagingSenderId: "69573193613",
+            appId: "1:69573193613:web:86c4d839281b1e343cd7c4",
+            measurementId: "G-JSCWR4207G"
+        };
+
+        // Firebase initialisieren
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // DOM-Elemente
+        const gear = document.getElementById('openSettings');
+        const modal = document.getElementById('modalBackdrop');
+        const btnClose = document.getElementById('btnClose');
+        const btnSave = document.getElementById('btnSave');
+        const btnReset = document.getElementById('btnReset');
+        const audioControl = document.getElementById('audioControl');
+        const addLinkBtn = document.getElementById('addLinkBtn');
+
+        const displayName = document.getElementById('displayName');
+        const bioText = document.getElementById('bioText');
+        const locationEl = document.getElementById('location');
+        const avatarImg = document.getElementById('avatarImg');
+        const bgVideo = document.getElementById('bgVideo');
+        const videoSource = document.getElementById('videoSource');
+        const socialIcons = document.getElementById('socialIcons');
+        const viewCountEl = document.getElementById('viewCount');
+        const linksContainer = document.getElementById('linksContainer');
+        const linksList = document.getElementById('linksList');
+
+        const inName = document.getElementById('inName');
+        const inBio = document.getElementById('inBio');
+        const inLocation = document.getElementById('inLocation');
+        const inAvatar = document.getElementById('inAvatar');
+        const inVideo = document.getElementById('inVideo');
+        const inShowIcons = document.getElementById('inShowIcons');
+        const newLinkTitle = document.getElementById('newLinkTitle');
+        const newLinkUrl = document.getElementById('newLinkUrl');
+
+        // Default-Einstellungen
+        const defaultSettings = {
+            name: "Colin",
+            bio: "Willkommen auf meiner Seite",
+            location: "Deutschland",
+            avatar: "https://i.ibb.co/9cX7s0X/avatar-placeholder.png",
+            video: "",
+            showIcons: true,
+            links: [
+                { title: "Mein YouTube Kanal", url: "https://youtube.com", icon: "https://cdn-icons-png.flaticon.com/512/1384/1384060.png" },
+                { title: "Instagram", url: "https://instagram.com", icon: "https://cdn-icons-png.flaticon.com/512/2111/2111463.png" }
+            ]
+        };
+
+        // Particle System
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                particle.style.animationDelay = `${Math.random() * 20}s`;
+                particle.style.animation = `float ${15 + Math.random() * 10}s infinite linear`;
+                
+                // Zufällige Größe und Opazität
+                const size = 2 + Math.random() * 4;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.opacity = 0.3 + Math.random() * 0.7;
+                
+                particlesContainer.appendChild(particle);
+            }
         }
-    }
-    socialIcons.style.display = settings.showIcons ? "flex" : "none";
-}
 
-/* Füllt das Formular mit aktuellen Settings */
-function fillSettingsForm(settings){
-    inName.value = settings.name || "";
-    inBio.value = settings.bio || "";
-    inLocation.value = settings.location || "";
-    inAvatar.value = settings.avatar || "";
-    inVideo.value = settings.video || "";
-    inShowIcons.value = settings.showIcons ? "1":"0";
-    inCTA.value = settings.cta || "Roblox";
-    inViews.value = settings.views || "0";
-}
+        // CSS für Particle Animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes float {
+                0% { transform: translateY(0) translateX(0); }
+                25% { transform: translateY(-20px) translateX(10px); }
+                50% { transform: translateY(-40px) translateX(0); }
+                75% { transform: translateY(-20px) translateX(-10px); }
+                100% { transform: translateY(0) translateX(0); }
+            }
+        `;
+        document.head.appendChild(style);
 
-/* Öffnen der Einstellungen - erst Passwort abfragen */
-gear.addEventListener('click', async () => {
-    const pw = prompt("Bitte Passwort eingeben, um Einstellungen zu öffnen:");
-    if(pw === null) return; // abgebrochen
-    if(pw === SETTINGS_PASSWORD){
-        // korrekt -> modal öffnen
-        modal.style.display = "flex";
-        modal.setAttribute('aria-hidden','false');
-    } else {
-        alert("Falsches Passwort.");
-    }
-});
+        // Einstellungen aus Firebase laden
+        function loadSettings() {
+            const settingsRef = database.ref('settings');
+            settingsRef.once('value').then((snapshot) => {
+                let settings = snapshot.val();
+                if (!settings) {
+                    settings = defaultSettings;
+                    settingsRef.set(settings);
+                }
+                applySettingsToUI(settings);
+                fillSettingsForm(settings);
+                renderLinks(settings.links);
+            });
+        }
 
-/* Schliessen */
-btnClose.addEventListener('click', ()=>{ modal.style.display = "none"; modal.setAttribute('aria-hidden','true'); });
+        // Einstellungen auf UI anwenden
+        function applySettingsToUI(settings) {
+            displayName.textContent = settings.name || "";
+            bioText.textContent = settings.bio || "";
+            locationEl.textContent = settings.location || "";
+            avatarImg.src = settings.avatar || defaultSettings.avatar;
+            
+            if (settings.video) {
+                videoSource.src = settings.video;
+                bgVideo.load();
+                bgVideo.play().catch(() => {});
+            }
+            
+            socialIcons.style.display = settings.showIcons ? "flex" : "none";
+            
+            // View Count erhöhen und speichern
+            incrementViewCount();
+        }
 
-/* Speichern */
-btnSave.addEventListener('click', () => {
-    const settings = {
-        name: inName.value || defaultSettings.name,
-        bio: inBio.value || defaultSettings.bio,
-        location: inLocation.value || defaultSettings.location,
-        avatar: inAvatar.value || defaultSettings.avatar,
-        video: inVideo.value || defaultSettings.video,
-        showIcons: inShowIcons.value === "1",
-        cta: inCTA.value || defaultSettings.cta,
-        views: inViews.value || defaultSettings.views
-    };
-    localStorage.setItem('profileSettings', JSON.stringify(settings));
-    applySettingsToUI(settings);
-    modal.style.display = "none";
-    modal.setAttribute('aria-hidden','true');
-});
+        // View Count erhöhen
+        function incrementViewCount() {
+            const viewsRef = database.ref('viewCount');
+            viewsRef.transaction((currentCount) => {
+                return (currentCount || 0) + 1;
+            }).then((result) => {
+                viewCountEl.textContent = result.snapshot.val() || "0";
+            });
+        }
 
-/* Reset auf Standard */
-btnReset.addEventListener('click', ()=>{
-    if(!confirm("Auf Standard-Einstellungen zurücksetzen?")) return;
-    localStorage.removeItem('profileSettings');
-    loadSettings();
-    alert("Zurückgesetzt.");
-});
+        // Links rendern
+        function renderLinks(links) {
+            linksContainer.innerHTML = '';
+            linksList.innerHTML = '';
+            
+            if (!links || links.length === 0) {
+                linksContainer.innerHTML = '<p style="color: var(--muted);">Noch keine Links hinzugefügt</p>';
+                return;
+            }
+            
+            links.forEach((link, index) => {
+                // Link in der Hauptansicht
+                const linkElement = document.createElement('a');
+                linkElement.href = link.url;
+                linkElement.target = "_blank";
+                linkElement.className = "link-button cursor-pointer";
+                linkElement.innerHTML = `
+                    <img src="${link.icon || 'https://cdn-icons-png.flaticon.com/512/1006/1006771.png'}" alt="${link.title}">
+                    <span>${link.title}</span>
+                `;
+                linksContainer.appendChild(linkElement);
+                
+                // Link in der Einstellungsansicht
+                const linkItem = document.createElement('div');
+                linkItem.className = 'link-item';
+                linkItem.innerHTML = `
+                    <div class="link-item-header">
+                        <strong>${link.title}</strong>
+                        <div class="link-item-actions">
+                            <button class="btn btn-small btn-danger" onclick="removeLink(${index})">Löschen</button>
+                        </div>
+                    </div>
+                    <div>${link.url}</div>
+                `;
+                linksList.appendChild(linkItem);
+            });
+        }
 
-/* Klick auf CTA (nur Demo) */
-document.getElementById('ctaButton').addEventListener('click', ()=>{
-    alert("CTA gedrückt – hier könntest du z.B. zu Roblox oder einem externen Link weiterleiten.");
-});
+        // Link entfernen
+        function removeLink(index) {
+            const settingsRef = database.ref('settings');
+            settingsRef.once('value').then((snapshot) => {
+                const settings = snapshot.val();
+                settings.links.splice(index, 1);
+                settingsRef.set(settings).then(() => {
+                    renderLinks(settings.links);
+                });
+            });
+        }
 
-/* Init */
-loadSettings();
+        // Formular mit Einstellungen füllen
+        function fillSettingsForm(settings) {
+            inName.value = settings.name || "";
+            inBio.value = settings.bio || "";
+            inLocation.value = settings.location || "";
+            inAvatar.value = settings.avatar || "";
+            inVideo.value = settings.video || "";
+            inShowIcons.value = settings.showIcons ? "1" : "0";
+        }
 
-/* Optional: Escape-Taste schließt Modal */
-window.addEventListener('keydown', (e)=>{
-    if(e.key === "Escape" && modal.style.display === "flex"){
-        modal.style.display = "none";modal.setAttribute('aria-hidden','true');
-    }
-});
-</script>
+        // Event Listeners
+        gear.addEventListener('click', async () => {
+            const pw = prompt("Bitte Passwort eingeben, um Einstellungen zu öffnen:");
+            if (pw === null) return;
+            if (pw === "110121") {
+                modal.style.display = "flex";
+                modal.setAttribute('aria-hidden', 'false');
+            } else {
+                alert("Falsches Passwort.");
+            }
+        });
+
+        btnClose.addEventListener('click', () => {
+            modal.style.display = "none";
+            modal.setAttribute('aria-hidden', 'true');
+        });
+
+        btnSave.addEventListener('click', () => {
+            const settingsRef = database.ref('settings');
+            settingsRef.once('value').then((snapshot) => {
+                const currentSettings = snapshot.val();
+                const settings = {
+                    name: inName.value || defaultSettings.name,
+                    bio: inBio.value || defaultSettings.bio,
+                    location: inLocation.value || defaultSettings.location,
+                    avatar: inAvatar.value || defaultSettings.avatar,
+                    video: inVideo.value || defaultSettings.video,
+                    showIcons: inShowIcons.value === "1",
+                    links: currentSettings.links || defaultSettings.links
+                };
+                settingsRef.set(settings).then(() => {
+                    applySettingsToUI(settings);
+                    modal.style.display = "none";
+                    modal.setAttribute('aria-hidden', 'true');
+                });
+            });
+        });
+
+        btnReset.addEventListener('click', () => {
+            if (!confirm("Auf Standard-Einstellungen zurücksetzen?")) return;
+            const settingsRef = database.ref('settings');
+            settingsRef.set(defaultSettings).then(() => {
+                loadSettings();
+                alert("Zurückgesetzt.");
+            });
+        });
+
+        addLinkBtn.addEventListener('click', () => {
+            const title = newLinkTitle.value.trim();
+            const url = newLinkUrl.value.trim();
+            
+            if (!title || !url) {
+                alert("Bitte Titel und URL eingeben.");
+                return;
+            }
+            
+            const settingsRef = database.ref('settings');
+            settingsRef.once('value').then((snapshot) => {
+                const settings = snapshot.val();
+                if (!settings.links) settings.links = [];
+                
+                settings.links.push({
+                    title: title,
+                    url: url,
+                    icon: 'https://cdn-icons-png.flaticon.com/512/1006/1006771.png'
+                });
+                
+                settingsRef.set(settings).then(() => {
+                    newLinkTitle.value = '';
+                    newLinkUrl.value = '';
+                    renderLinks(settings.links);
+                });
+            });
+        });
+
+        audioControl.addEventListener('click', () => {
+            if (bgVideo.muted) {
+                bgVideo.muted = false;
+                audioControl.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                    </svg>
+                `;
+            } else {
+                bgVideo.muted = true;
+                audioControl.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+                    </svg>
+                `;
+            }
+        });
+
+        // Escape-Taste schließt Modal
+        window.addEventListener('keydown', (e) => {
+            if (e.key === "Escape" && modal.style.display === "flex") {
+                modal.style.display = "none";
+                modal.setAttribute('aria-hidden', 'true');
+            }
+        });
+
+        // Initialisierung
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSettings();
+            createParticles();
+        });
+
+        // Globale Funktionen für Event Handler
+        window.removeLink = removeLink;
+    </script>
 </body>
 </html>
