@@ -616,35 +616,12 @@
       background: rgba(220, 38, 38, 0.3);
       transform: scale(1.05);
     }
-    
-    /* NEU: INPUT FELD FÜR DIREKTE ZAHLENEINGABE */
-    .product-quantity-input {
-      width: 60px;
-      text-align: center;
-      padding: 6px 8px;
-      border-radius: 6px;
-      background: rgba(30, 41, 59, 0.5);
-      border: 1px solid rgba(220, 38, 38, 0.3);
-      color: #dc2626;
+    .product-quantity-display {
+      font-size: 1rem; /* Größer gemacht */
       font-weight: 600;
-      font-size: 0.9rem;
-    }
-    
-    .product-quantity-input:focus {
-      outline: none;
-      border-color: #dc2626;
-      box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.3);
-    }
-    
-    /* Verstecke Standard-Pfeile im Number-Input */
-    .product-quantity-input::-webkit-outer-spin-button,
-    .product-quantity-input::-webkit-inner-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-    
-    .product-quantity-input[type=number] {
-      -moz-appearance: textfield;
+      color: #dc2626;
+      min-width: 50px; /* Größer gemacht */
+      text-align: center;
     }
     
     /* STYLES FÜR ZEIT-ANZEIGE */
@@ -1697,7 +1674,7 @@
       });
     }
 
-    // VERBESSERTE Produkte rendern mit größerem Text und direkter Zahlen-Eingabe
+    // VERBESSERTE Produkte rendern mit größerem Text
     function renderWorkbenches() {
       const workbenchesGrid = document.getElementById('workbenchesGrid');
       workbenchesGrid.innerHTML = '';
@@ -1723,14 +1700,13 @@
              <img src="${workbench.imageUrl}" class="image-preview-small" alt="${workbench.name}">
            </div>` : '';
         
-        // Mengen-Steuerung für jede Karte mit Zeit-Berechnung - JETZT MIT DIREKTER EINGABE
+        // Mengen-Steuerung für jede Karte mit Zeit-Berechnung
         const quantityControls = `
           <div class="product-quantity-controls">
             <button class="product-quantity-btn decrease-btn" data-key="${workbench.key}">
               <i class="fas fa-minus"></i>
             </button>
-            <input type="number" class="product-quantity-input" id="quantity-input-${workbench.key}" 
-                   value="1" min="1" data-key="${workbench.key}">
+            <div class="product-quantity-display" id="quantity-${workbench.key}">1x</div>
             <button class="product-quantity-btn increase-btn" data-key="${workbench.key}">
               <i class="fas fa-plus"></i>
             </button>
@@ -1792,7 +1768,7 @@
       setupQuantityControls();
     }
 
-    // Mengen-Steuerung für Produkte einrichten - JETZT MIT DIREKTER EINGABE
+    // Mengen-Steuerung für Produkte einrichten
     function setupQuantityControls() {
       // Plus-Buttons
       document.querySelectorAll('.increase-btn').forEach(btn => {
@@ -1809,44 +1785,14 @@
           decreaseQuantity(key);
         });
       });
-      
-      // Direkte Eingabe
-      document.querySelectorAll('.product-quantity-input').forEach(input => {
-        input.addEventListener('input', function() {
-          const key = this.getAttribute('data-key');
-          const value = parseInt(this.value) || 1;
-          
-          // Sicherstellen, dass der Wert mindestens 1 ist
-          if (value < 1) {
-            this.value = 1;
-            updateTimeForQuantity(key, 1);
-            updateResourceQuantities(key, 1);
-          } else {
-            updateTimeForQuantity(key, value);
-            updateResourceQuantities(key, value);
-          }
-        });
-        
-        // Bei Fokus verlassen sicherstellen, dass der Wert gültig ist
-        input.addEventListener('blur', function() {
-          const key = this.getAttribute('data-key');
-          const value = parseInt(this.value) || 1;
-          
-          if (value < 1) {
-            this.value = 1;
-            updateTimeForQuantity(key, 1);
-            updateResourceQuantities(key, 1);
-          }
-        });
-      });
     }
 
     // Menge erhöhen und Zeit berechnen
     function increaseQuantity(key) {
-      const quantityInput = document.getElementById(`quantity-input-${key}`);
-      let currentQuantity = parseInt(quantityInput.value) || 1;
+      const quantityDisplay = document.getElementById(`quantity-${key}`);
+      let currentQuantity = parseInt(quantityDisplay.textContent.replace('x', '')) || 1;
       currentQuantity++;
-      quantityInput.value = currentQuantity;
+      quantityDisplay.textContent = `${currentQuantity}x`;
       
       // Zeit entsprechend der Menge berechnen
       updateTimeForQuantity(key, currentQuantity);
@@ -1855,11 +1801,11 @@
 
     // Menge verringern und Zeit berechnen
     function decreaseQuantity(key) {
-      const quantityInput = document.getElementById(`quantity-input-${key}`);
-      let currentQuantity = parseInt(quantityInput.value) || 1;
+      const quantityDisplay = document.getElementById(`quantity-${key}`);
+      let currentQuantity = parseInt(quantityDisplay.textContent.replace('x', '')) || 1;
       if (currentQuantity > 1) {
         currentQuantity--;
-        quantityInput.value = currentQuantity;
+        quantityDisplay.textContent = `${currentQuantity}x`;
         
         // Zeit entsprechend der Menge berechnen
         updateTimeForQuantity(key, currentQuantity);
@@ -2315,7 +2261,7 @@
       } else if (tempCategories.includes(categoryName)) {
         showNotification('Kategorie existiert bereits', 'error');
       }
-    }
+    });
 
     // Kategorie entfernen
     categoriesList.addEventListener('click', (e) => {
