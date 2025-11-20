@@ -765,12 +765,35 @@
       background: rgba(59, 130, 246, 0.3);
       transform: scale(1.05);
     }
-    .npc-quantity-display {
-      font-size: 1rem;
-      font-weight: 600;
-      color: #3b82f6;
-      min-width: 50px;
+    
+    /* NEU: INPUT FELD FÜR DIREKTE ZAHLENEINGABE */
+    .npc-quantity-input {
+      width: 60px;
       text-align: center;
+      padding: 6px 8px;
+      border-radius: 6px;
+      background: rgba(30, 41, 59, 0.5);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      color: #3b82f6;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    
+    .npc-quantity-input:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+    }
+    
+    /* Verstecke Standard-Pfeile im Number-Input */
+    .npc-quantity-input::-webkit-outer-spin-button,
+    .npc-quantity-input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    
+    .npc-quantity-input[type=number] {
+      -moz-appearance: textfield;
     }
     
     /* BEZAHLUNG ANZEIGE */
@@ -1788,7 +1811,8 @@
             <button class="npc-quantity-btn decrease-btn" data-key="${npc.key}">
               <i class="fas fa-minus"></i>
             </button>
-            <div class="npc-quantity-display" id="quantity-${npc.key}">1x</div>
+            <input type="number" class="npc-quantity-input" id="quantity-input-${npc.key}" 
+                   value="1" min="1" data-key="${npc.key}">
             <button class="npc-quantity-btn increase-btn" data-key="${npc.key}">
               <i class="fas fa-plus"></i>
             </button>
@@ -1837,14 +1861,41 @@
           decreaseQuantity(key);
         });
       });
+      
+      // Direkte Eingabe
+      document.querySelectorAll('.npc-quantity-input').forEach(input => {
+        input.addEventListener('input', function() {
+          const key = this.getAttribute('data-key');
+          const value = parseInt(this.value) || 1;
+          
+          // Sicherstellen, dass der Wert mindestens 1 ist
+          if (value < 1) {
+            this.value = 1;
+            updatePaymentForQuantity(key, 1);
+          } else {
+            updatePaymentForQuantity(key, value);
+          }
+        });
+        
+        // Bei Fokus verlassen sicherstellen, dass der Wert gültig ist
+        input.addEventListener('blur', function() {
+          const key = this.getAttribute('data-key');
+          const value = parseInt(this.value) || 1;
+          
+          if (value < 1) {
+            this.value = 1;
+            updatePaymentForQuantity(key, 1);
+          }
+        });
+      });
     }
 
     // Menge erhöhen und Bezahlung berechnen
     function increaseQuantity(key) {
-      const quantityDisplay = document.getElementById(`quantity-${key}`);
-      let currentQuantity = parseInt(quantityDisplay.textContent.replace('x', '')) || 1;
+      const quantityInput = document.getElementById(`quantity-input-${key}`);
+      let currentQuantity = parseInt(quantityInput.value) || 1;
       currentQuantity++;
-      quantityDisplay.textContent = `${currentQuantity}x`;
+      quantityInput.value = currentQuantity;
       
       // Bezahlung entsprechend der Menge berechnen
       updatePaymentForQuantity(key, currentQuantity);
@@ -1852,11 +1903,11 @@
 
     // Menge verringern und Bezahlung berechnen
     function decreaseQuantity(key) {
-      const quantityDisplay = document.getElementById(`quantity-${key}`);
-      let currentQuantity = parseInt(quantityDisplay.textContent.replace('x', '')) || 1;
+      const quantityInput = document.getElementById(`quantity-input-${key}`);
+      let currentQuantity = parseInt(quantityInput.value) || 1;
       if (currentQuantity > 1) {
         currentQuantity--;
-        quantityDisplay.textContent = `${currentQuantity}x`;
+        quantityInput.value = currentQuantity;
         
         // Bezahlung entsprechend der Menge berechnen
         updatePaymentForQuantity(key, currentQuantity);
