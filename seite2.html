@@ -738,54 +738,51 @@
       border: 1px solid rgba(59, 130, 246, 0.3);
     }
 
-    /* PLUS/MINUS BUTTONS STYLES */
-    .plus-minus-container {
+    /* PLUS/MINUS BUTTONS STYLES FÜR NPC-KARTEN */
+    .npc-quantity-controls {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 15px;
-      margin: 20px 0;
-      padding: 15px;
-      background: rgba(30, 41, 59, 0.7);
-      border-radius: 12px;
-      border: 1px solid rgba(59, 130, 246, 0.3);
+      gap: 10px;
+      margin: 12px 0;
     }
-
-    .plus-minus-btn {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
+    .npc-quantity-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
       background: rgba(59, 130, 246, 0.2);
-      border: 2px solid rgba(59, 130, 246, 0.3);
+      border: 1px solid rgba(59, 130, 246, 0.3);
       color: #3b82f6;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: all 0.3s ease;
-      font-size: 1.2rem;
+      transition: all 0.2s ease;
+      font-size: 1rem;
       font-weight: bold;
     }
-
-    .plus-minus-btn:hover {
+    .npc-quantity-btn:hover {
       background: rgba(59, 130, 246, 0.3);
-      transform: scale(1.1);
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+      transform: scale(1.05);
     }
-
-    .quantity-display {
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: #3b82f6;
-      min-width: 60px;
-      text-align: center;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.5);
-    }
-
-    .quantity-label {
+    .npc-quantity-display {
+      font-size: 1rem;
       font-weight: 600;
       color: #3b82f6;
-      font-size: 1.1rem;
+      min-width: 50px;
+      text-align: center;
+    }
+    
+    /* GELD-BEREICH ANZEIGE */
+    .npc-money-display {
+      font-size: 0.9rem;
+      color: #3b82f6;
+      font-weight: 600;
+      text-align: center;
+      margin-top: 6px;
+      background: rgba(59, 130, 246, 0.1);
+      padding: 6px 10px;
+      border-radius: 6px;
     }
   </style>
 </head>
@@ -856,13 +853,12 @@
             </button>
             <div id="hamburgerMenu" class="hamburger-menu hidden absolute right-0 mt-2 w-44 glass-effect border border-gray-700 rounded-lg shadow-lg overflow-hidden">
               <a href="index.html" class="block px-4 py-3 hover:bg-gray-700 active-link transition-colors">
-              <a href="seite1.html" class="block px-4 py-3 hover:bg-gray-700 transition-colors">
-                <i class="fas fa-recycle mr-2"></i> Herstellung
-             </a>
+                <i class="fas fa-industry mr-2"></i> Herstellung
+              </a>
               <a href="seite1.html" class="block px-4 py-3 hover:bg-gray-700 transition-colors">
                 <i class="fas fa-recycle mr-2"></i> Materialrecycler
-                 </a>
-                <a href="index.html" class="block px-4 py-3 hover:bg-gray-700 active-link transition-colors">
+              </a>
+              <a href="seite2.html" class="block px-4 py-3 hover:bg-gray-700 transition-colors">
                 <i class="fas fa-users mr-2"></i> NPC Verkäufer
               </a>
               <a href="https://guns.lol/colinse20" class="block px-3 py-2 hover:bg-gray-700 transition-colors text-sm">
@@ -877,16 +873,6 @@
       </header>
 
       <div id="mainContainer" class="space-y-6 relative z-0">
-
-        <!-- PLUS/MINUS BUTTONS SECTION -->
-        <div class="plus-minus-container">
-          <div class="quantity-label">Anzahl:</div>
-          <div class="flex items-center gap-4">
-            <button class="plus-minus-btn" id="minusBtn">-</button>
-            <div class="quantity-display" id="quantityDisplay">1</div>
-            <button class="plus-minus-btn" id="plusBtn">+</button>
-          </div>
-        </div>
 
         <!-- NPC VERKÄUFER -->
         <div id="npcsSection" class="card p-6 shadow-soft fade-in">
@@ -1138,11 +1124,6 @@
     const notification = document.getElementById('notification');
     const accessBadge = document.getElementById('accessBadge');
     const forceCheckBtn = document.getElementById('forceCheckBtn');
-
-    // Plus/Minus Buttons
-    const plusBtn = document.getElementById('plusBtn');
-    const minusBtn = document.getElementById('minusBtn');
-    const quantityDisplay = document.getElementById('quantityDisplay');
 
     // Notification System
     function showNotification(message, type = 'info', duration = 5000) {
@@ -1492,27 +1473,6 @@
     logoutBtn.addEventListener('click', logout);
     forceCheckBtn.addEventListener('click', forceImmediateCheck);
 
-    // Plus/Minus Event Listener
-    let currentQuantity = 1;
-
-    function updateQuantity(value) {
-      currentQuantity = Math.max(1, value);
-      quantityDisplay.textContent = currentQuantity;
-      localStorage.setItem('npcQuantity', currentQuantity);
-      
-      // Hier könnten Sie zusätzliche Logik hinzufügen, 
-      // falls die Menge Einfluss auf die NPCs haben soll
-      console.log(`Menge aktualisiert auf: ${currentQuantity}`);
-    }
-
-    plusBtn.addEventListener('click', () => {
-      updateQuantity(currentQuantity + 1);
-    });
-
-    minusBtn.addEventListener('click', () => {
-      updateQuantity(currentQuantity - 1);
-    });
-
     // Initialisierung
     checkExistingLogin();
 
@@ -1547,6 +1507,17 @@
         return `${minMoney} Gold`;
       }
       return `${minMoney} - ${maxMoney} Gold`;
+    }
+
+    // Geld-Bereich mit Multiplikator berechnen
+    function calculateMoneyRange(minMoney, maxMoney, multiplier) {
+      const calculatedMin = minMoney * multiplier;
+      const calculatedMax = maxMoney * multiplier;
+      
+      if (calculatedMin === calculatedMax) {
+        return `${calculatedMin} Gold`;
+      }
+      return `${calculatedMin} - ${calculatedMax} Gold`;
     }
 
     // Firebase Funktionen
@@ -1726,7 +1697,7 @@
       });
     }
 
-    // NPCs rendern
+    // NPCs rendern mit Plus/Minus Buttons
     function renderNpcs() {
       const npcsGrid = document.getElementById('npcsGrid');
       npcsGrid.innerHTML = '';
@@ -1752,6 +1723,22 @@
              <img src="${npc.imageUrl}" class="image-preview-small" alt="${npc.name}">
            </div>` : '';
         
+        // Mengen-Steuerung für jede Karte mit Geld-Bereich-Berechnung
+        const quantityControls = `
+          <div class="npc-quantity-controls">
+            <button class="npc-quantity-btn decrease-btn" data-key="${npc.key}">
+              <i class="fas fa-minus"></i>
+            </button>
+            <div class="npc-quantity-display" id="quantity-${npc.key}">1x</div>
+            <button class="npc-quantity-btn increase-btn" data-key="${npc.key}">
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>
+          <div class="npc-money-display" id="money-${npc.key}">
+            Gesamtgeld: ${formatMoneyRange(npc.minMoney || 0, npc.maxMoney || 0)}
+          </div>
+        `;
+        
         // Geld-Bereich anzeigen
         const moneyRange = formatMoneyRange(npc.minMoney || 0, npc.maxMoney || 0);
         
@@ -1764,20 +1751,87 @@
           <div class="npc-category">
             <i class="fas fa-folder mr-1"></i>${npc.category}
           </div>
+          ${quantityControls}
           <div class="npc-money-box">
             <div class="npc-money-title">Geld-Bereich</div>
             <div class="npc-money-item">
               <span><span class="money-icon">💰</span>Minimal:</span>
-              <span>${npc.minMoney || 0} Gold</span>
+              <span id="min-${npc.key}">${npc.minMoney || 0} Gold</span>
             </div>
             <div class="npc-money-item">
               <span><span class="money-icon">💰</span>Maximal:</span>
-              <span>${npc.maxMoney || 0} Gold</span>
+              <span id="max-${npc.key}">${npc.maxMoney || 0} Gold</span>
             </div>
           </div>
         `;
         npcsGrid.appendChild(el);
       });
+      
+      // Event Listener für Mengen-Buttons hinzufügen
+      setupQuantityControls();
+    }
+
+    // Mengen-Steuerung für NPCs einrichten
+    function setupQuantityControls() {
+      // Plus-Buttons
+      document.querySelectorAll('.increase-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const key = this.getAttribute('data-key');
+          increaseQuantity(key);
+        });
+      });
+      
+      // Minus-Buttons
+      document.querySelectorAll('.decrease-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const key = this.getAttribute('data-key');
+          decreaseQuantity(key);
+        });
+      });
+    }
+
+    // Menge erhöhen und Geld-Bereich berechnen
+    function increaseQuantity(key) {
+      const quantityDisplay = document.getElementById(`quantity-${key}`);
+      let currentQuantity = parseInt(quantityDisplay.textContent.replace('x', '')) || 1;
+      currentQuantity++;
+      quantityDisplay.textContent = `${currentQuantity}x`;
+      
+      // Geld-Bereich entsprechend der Menge berechnen
+      updateMoneyForQuantity(key, currentQuantity);
+    }
+
+    // Menge verringern und Geld-Bereich berechnen
+    function decreaseQuantity(key) {
+      const quantityDisplay = document.getElementById(`quantity-${key}`);
+      let currentQuantity = parseInt(quantityDisplay.textContent.replace('x', '')) || 1;
+      if (currentQuantity > 1) {
+        currentQuantity--;
+        quantityDisplay.textContent = `${currentQuantity}x`;
+        
+        // Geld-Bereich entsprechend der Menge berechnen
+        updateMoneyForQuantity(key, currentQuantity);
+      }
+    }
+
+    // Geld-Bereich basierend auf Menge aktualisieren
+    function updateMoneyForQuantity(key, multiplier) {
+      const npc = npcs.find(n => n.key === key);
+      if (!npc) return;
+      
+      const moneyDisplay = document.getElementById(`money-${key}`);
+      const minMoneyDisplay = document.getElementById(`min-${key}`);
+      const maxMoneyDisplay = document.getElementById(`max-${key}`);
+      
+      const baseMinMoney = npc.minMoney || 0;
+      const baseMaxMoney = npc.maxMoney || 0;
+      
+      const calculatedMin = baseMinMoney * multiplier;
+      const calculatedMax = baseMaxMoney * multiplier;
+      
+      moneyDisplay.textContent = `Gesamtgeld: ${calculateMoneyRange(baseMinMoney, baseMaxMoney, multiplier)}`;
+      minMoneyDisplay.textContent = `${calculatedMin} Gold`;
+      maxMoneyDisplay.textContent = `${calculatedMax} Gold`;
     }
 
     function filterNpcs(category) {
@@ -2210,12 +2264,6 @@
       // Sicherstellen, dass alle Modals versteckt sind
       hide(npcModal);
       hide(categoriesModal);
-      
-      // Menge aus localStorage laden
-      const savedQuantity = localStorage.getItem('npcQuantity');
-      if (savedQuantity) {
-        updateQuantity(parseInt(savedQuantity));
-      }
     });
   </script>
 </body>
