@@ -773,8 +773,8 @@
       text-align: center;
     }
     
-    /* GELD-BEREICH ANZEIGE */
-    .npc-money-display {
+    /* BEZAHLUNG ANZEIGE */
+    .npc-payment-display {
       font-size: 0.9rem;
       color: #3b82f6;
       font-weight: 600;
@@ -783,6 +783,38 @@
       background: rgba(59, 130, 246, 0.1);
       padding: 6px 10px;
       border-radius: 6px;
+    }
+
+    /* WÄHRUNGS-ICONS */
+    .currency-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      margin-right: 6px;
+      border-radius: 50%;
+      font-size: 0.8rem;
+    }
+    
+    .currency-unknown {
+      background: rgba(156, 163, 175, 0.3);
+      color: #9ca3af;
+    }
+    
+    .currency-dead-dollars {
+      background: rgba(34, 197, 94, 0.3);
+      color: #22c55e;
+    }
+    
+    .currency-alte-waehrung {
+      background: rgba(59, 130, 246, 0.3);
+      color: #3b82f6;
+    }
+    
+    .currency-dead-coins {
+      background: rgba(245, 158, 11, 0.3);
+      color: #f59e0b;
     }
   </style>
 </head>
@@ -946,7 +978,7 @@
                   <tr>
                     <th class="p-3 font-medium">Name</th>
                     <th class="p-3 font-medium">Kategorie</th>
-                    <th class="p-3 font-medium">Preisbereich</th>
+                    <th class="p-3 font-medium">Bezahlung</th>
                     <th class="p-3 font-medium">Aktion</th>
                   </tr>
                 </thead>
@@ -984,10 +1016,22 @@
             </select>
           </div>
           
-          <!-- Kiste für Geld-Einstellungen -->
+          <!-- Kiste für Bezahlung-Einstellungen -->
           <div class="border border-gray-600 rounded-lg p-4">
             <div class="text-center mb-3">
-              <div class="text-lg font-bold text-blue-400">Geld-Einstellungen</div>
+              <div class="text-lg font-bold text-blue-400">Bezahlung-Einstellungen</div>
+            </div>
+            
+            <div class="mb-4">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-medium text-gray-300">Währungstyp</span>
+              </div>
+              <select id="npcCurrency" class="p-3 rounded-lg bg-gray-800/50 border border-gray-700 w-full focus:border-blue-500" required>
+                <option value="unbekannt">Unbekannt</option>
+                <option value="dead-dollars">Dead Dollars</option>
+                <option value="alte-waehrung">Alte Währung</option>
+                <option value="dead-coins">Dead Coins</option>
+              </select>
             </div>
             
             <div class="mb-4">
@@ -996,20 +1040,20 @@
               </div>
               <div class="resource-input-group">
                 <div class="resource-input-column">
-                  <label>Minimales Geld</label>
+                  <label>Minimaler Betrag</label>
                   <input type="number" id="npcMinMoney" class="p-3 rounded-lg bg-gray-800/50 border border-gray-700 w-full focus:border-blue-500" placeholder="Minimaler Betrag" min="0"/>
                 </div>
                 <div class="resource-input-column">
-                  <label>Maximales Geld</label>
+                  <label>Maximaler Betrag</label>
                   <input type="number" id="npcMaxMoney" class="p-3 rounded-lg bg-gray-800/50 border border-gray-700 w-full focus:border-blue-500" placeholder="Maximaler Betrag" min="0"/>
                 </div>
               </div>
             </div>
             
             <div class="border-t border-gray-600 pt-3">
-              <div class="text-sm font-medium text-gray-300 mb-2">Geld-Bereich:</div>
-              <div id="moneyRangeDisplay" class="space-y-1">
-                <!-- Hier wird der Geld-Bereich angezeigt -->
+              <div class="text-sm font-medium text-gray-300 mb-2">Bezahlung:</div>
+              <div id="paymentDisplay" class="space-y-1">
+                <!-- Hier wird die Bezahlung angezeigt -->
               </div>
             </div>
           </div>
@@ -1491,6 +1535,14 @@
     let tempCategories = [];
     const ADMIN_PASSWORD = '1101';
 
+    // Währungstypen
+    const currencyTypes = {
+      'unbekannt': { name: 'Unbekannt', icon: '❓', class: 'currency-unknown' },
+      'dead-dollars': { name: 'Dead Dollars', icon: '💀', class: 'currency-dead-dollars' },
+      'alte-waehrung': { name: 'Alte Währung', icon: '🏛️', class: 'currency-alte-waehrung' },
+      'dead-coins': { name: 'Dead Coins', icon: '⚰️', class: 'currency-dead-coins' }
+    };
+
     // Utility
     function show(el) { 
       el.classList.remove('hidden'); 
@@ -1504,20 +1556,27 @@
     // Geld-Bereich formatieren
     function formatMoneyRange(minMoney, maxMoney) {
       if (minMoney === maxMoney) {
-        return `${minMoney} Gold`;
+        return `${minMoney}`;
       }
-      return `${minMoney} - ${maxMoney} Gold`;
+      return `${minMoney} - ${maxMoney}`;
     }
 
-    // Geld-Bereich mit Multiplikator berechnen
-    function calculateMoneyRange(minMoney, maxMoney, multiplier) {
+    // Bezahlung mit Multiplikator berechnen
+    function calculatePayment(minMoney, maxMoney, currency, multiplier) {
       const calculatedMin = minMoney * multiplier;
       const calculatedMax = maxMoney * multiplier;
+      const currencyInfo = currencyTypes[currency] || currencyTypes['unbekannt'];
       
       if (calculatedMin === calculatedMax) {
-        return `${calculatedMin} Gold`;
+        return `${calculatedMin} ${currencyInfo.name}`;
       }
-      return `${calculatedMin} - ${calculatedMax} Gold`;
+      return `${calculatedMin} - ${calculatedMax} ${currencyInfo.name}`;
+    }
+
+    // Währungs-Icon anzeigen
+    function getCurrencyIcon(currency) {
+      const currencyInfo = currencyTypes[currency] || currencyTypes['unbekannt'];
+      return `<span class="currency-icon ${currencyInfo.class}">${currencyInfo.icon}</span>`;
     }
 
     // Firebase Funktionen
@@ -1697,7 +1756,7 @@
       });
     }
 
-    // NPCs rendern mit Plus/Minus Buttons
+    // NPCs rendern mit Plus/Minus Buttons und Bezahlung
     function renderNpcs() {
       const npcsGrid = document.getElementById('npcsGrid');
       npcsGrid.innerHTML = '';
@@ -1723,7 +1782,7 @@
              <img src="${npc.imageUrl}" class="image-preview-small" alt="${npc.name}">
            </div>` : '';
         
-        // Mengen-Steuerung für jede Karte mit Geld-Bereich-Berechnung
+        // Mengen-Steuerung für jede Karte mit Bezahlung-Berechnung
         const quantityControls = `
           <div class="npc-quantity-controls">
             <button class="npc-quantity-btn decrease-btn" data-key="${npc.key}">
@@ -1734,35 +1793,25 @@
               <i class="fas fa-plus"></i>
             </button>
           </div>
-          <div class="npc-money-display" id="money-${npc.key}">
-            Gesamtgeld: ${formatMoneyRange(npc.minMoney || 0, npc.maxMoney || 0)}
+          <div class="npc-payment-display" id="payment-${npc.key}">
+            Bezahlung: ${calculatePayment(npc.minMoney || 0, npc.maxMoney || 0, npc.currency || 'unbekannt', 1)}
           </div>
         `;
         
-        // Geld-Bereich anzeigen
-        const moneyRange = formatMoneyRange(npc.minMoney || 0, npc.maxMoney || 0);
+        // Bezahlung anzeigen (nur die ausgewählte Währung)
+        const currencyInfo = currencyTypes[npc.currency] || currencyTypes['unbekannt'];
+        const paymentDisplay = `${getCurrencyIcon(npc.currency || 'unbekannt')} ${currencyInfo.name}`;
         
         el.innerHTML = `
           ${imageHtml}
           <div class="npc-header">
             <div class="npc-name">${npc.name}</div>
-            <div class="npc-price">${moneyRange}</div>
+            <div class="npc-price">${paymentDisplay}</div>
           </div>
           <div class="npc-category">
             <i class="fas fa-folder mr-1"></i>${npc.category}
           </div>
           ${quantityControls}
-          <div class="npc-money-box">
-            <div class="npc-money-title">Geld-Bereich</div>
-            <div class="npc-money-item">
-              <span><span class="money-icon">💰</span>Minimal:</span>
-              <span id="min-${npc.key}">${npc.minMoney || 0} Gold</span>
-            </div>
-            <div class="npc-money-item">
-              <span><span class="money-icon">💰</span>Maximal:</span>
-              <span id="max-${npc.key}">${npc.maxMoney || 0} Gold</span>
-            </div>
-          </div>
         `;
         npcsGrid.appendChild(el);
       });
@@ -1790,18 +1839,18 @@
       });
     }
 
-    // Menge erhöhen und Geld-Bereich berechnen
+    // Menge erhöhen und Bezahlung berechnen
     function increaseQuantity(key) {
       const quantityDisplay = document.getElementById(`quantity-${key}`);
       let currentQuantity = parseInt(quantityDisplay.textContent.replace('x', '')) || 1;
       currentQuantity++;
       quantityDisplay.textContent = `${currentQuantity}x`;
       
-      // Geld-Bereich entsprechend der Menge berechnen
-      updateMoneyForQuantity(key, currentQuantity);
+      // Bezahlung entsprechend der Menge berechnen
+      updatePaymentForQuantity(key, currentQuantity);
     }
 
-    // Menge verringern und Geld-Bereich berechnen
+    // Menge verringern und Bezahlung berechnen
     function decreaseQuantity(key) {
       const quantityDisplay = document.getElementById(`quantity-${key}`);
       let currentQuantity = parseInt(quantityDisplay.textContent.replace('x', '')) || 1;
@@ -1809,29 +1858,23 @@
         currentQuantity--;
         quantityDisplay.textContent = `${currentQuantity}x`;
         
-        // Geld-Bereich entsprechend der Menge berechnen
-        updateMoneyForQuantity(key, currentQuantity);
+        // Bezahlung entsprechend der Menge berechnen
+        updatePaymentForQuantity(key, currentQuantity);
       }
     }
 
-    // Geld-Bereich basierend auf Menge aktualisieren
-    function updateMoneyForQuantity(key, multiplier) {
+    // Bezahlung basierend auf Menge aktualisieren
+    function updatePaymentForQuantity(key, multiplier) {
       const npc = npcs.find(n => n.key === key);
       if (!npc) return;
       
-      const moneyDisplay = document.getElementById(`money-${key}`);
-      const minMoneyDisplay = document.getElementById(`min-${key}`);
-      const maxMoneyDisplay = document.getElementById(`max-${key}`);
+      const paymentDisplay = document.getElementById(`payment-${key}`);
       
       const baseMinMoney = npc.minMoney || 0;
       const baseMaxMoney = npc.maxMoney || 0;
+      const currency = npc.currency || 'unbekannt';
       
-      const calculatedMin = baseMinMoney * multiplier;
-      const calculatedMax = baseMaxMoney * multiplier;
-      
-      moneyDisplay.textContent = `Gesamtgeld: ${calculateMoneyRange(baseMinMoney, baseMaxMoney, multiplier)}`;
-      minMoneyDisplay.textContent = `${calculatedMin} Gold`;
-      maxMoneyDisplay.textContent = `${calculatedMax} Gold`;
+      paymentDisplay.textContent = `Bezahlung: ${calculatePayment(baseMinMoney, baseMaxMoney, currency, multiplier)}`;
     }
 
     function filterNpcs(category) {
@@ -1867,36 +1910,35 @@
     const saveCategories = document.getElementById('saveCategories');
     const cancelCategories = document.getElementById('cancelCategories');
 
-    // Geld-Elemente
+    // Bezahlung-Elemente
+    const npcCurrency = document.getElementById('npcCurrency');
     const npcMinMoney = document.getElementById('npcMinMoney');
     const npcMaxMoney = document.getElementById('npcMaxMoney');
-    const moneyRangeDisplay = document.getElementById('moneyRangeDisplay');
+    const paymentDisplay = document.getElementById('paymentDisplay');
 
     // Bild Upload
     const npcImage = document.getElementById('npcImage');
     const imagePreview = document.getElementById('imagePreview');
     const previewImage = document.getElementById('previewImage');
 
-    // Geld-Inputs überwachen für Live-Anzeige
-    npcMinMoney.addEventListener('input', updateMoneyRangeDisplay);
-    npcMaxMoney.addEventListener('input', updateMoneyRangeDisplay);
+    // Bezahlung-Inputs überwachen für Live-Anzeige
+    npcCurrency.addEventListener('change', updatePaymentDisplay);
+    npcMinMoney.addEventListener('input', updatePaymentDisplay);
+    npcMaxMoney.addEventListener('input', updatePaymentDisplay);
 
-    function updateMoneyRangeDisplay() {
+    function updatePaymentDisplay() {
+      const currency = npcCurrency.value;
       const minMoney = npcMinMoney.value || 0;
       const maxMoney = npcMaxMoney.value || 0;
+      const currencyInfo = currencyTypes[currency] || currencyTypes['unbekannt'];
       
-      moneyRangeDisplay.innerHTML = `
-        <div class="flex justify-between text-sm">
-          <span>Minimal:</span>
-          <span>${minMoney} Gold</span>
-        </div>
-        <div class="flex justify-between text-sm">
-          <span>Maximal:</span>
-          <span>${maxMoney} Gold</span>
-        </div>
-        <div class="flex justify-between text-sm font-bold text-blue-400 mt-2">
-          <span>Bereich:</span>
-          <span>${formatMoneyRange(minMoney, maxMoney)}</span>
+      paymentDisplay.innerHTML = `
+        <div class="flex justify-between text-sm items-center">
+          <span>Bezahlung:</span>
+          <span class="flex items-center">
+            ${getCurrencyIcon(currency)}
+            ${formatMoneyRange(minMoney, maxMoney)} ${currencyInfo.name}
+          </span>
         </div>
       `;
     }
@@ -1943,12 +1985,20 @@
       
       // NPCs in Admin-Tabelle
       npcs.forEach(npc => {
+        const currencyInfo = currencyTypes[npc.currency] || currencyTypes['unbekannt'];
+        const paymentText = `${formatMoneyRange(npc.minMoney || 0, npc.maxMoney || 0)} ${currencyInfo.name}`;
+        
         const tr = document.createElement('tr');
         tr.className = 'border-t border-gray-800 hover:bg-gray-800/30 transition-colors';
         tr.innerHTML = `
           <td class="p-3">${npc.name}</td>
           <td class="p-3">${npc.category}</td>
-          <td class="p-3">${formatMoneyRange(npc.minMoney || 0, npc.maxMoney || 0)}</td>
+          <td class="p-3">
+            <div class="flex items-center">
+              ${getCurrencyIcon(npc.currency || 'unbekannt')}
+              ${paymentText}
+            </div>
+          </td>
           <td class="p-3">
             <div class="flex gap-2">
               <button class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-sm rounded-lg btn flex items-center gap-1 edit-npc" data-key="${npc.key}">
@@ -1991,6 +2041,7 @@
       // Formular mit NPC-Daten füllen
       document.getElementById('npcName').value = npc.name;
       document.getElementById('npcCategory').value = npc.category;
+      document.getElementById('npcCurrency').value = npc.currency || 'unbekannt';
       document.getElementById('npcMinMoney').value = npc.minMoney || 0;
       document.getElementById('npcMaxMoney').value = npc.maxMoney || 0;
       
@@ -2004,8 +2055,8 @@
         imagePreview.classList.add('hidden');
       }
       
-      // Geld-Bereich Anzeige aktualisieren
-      updateMoneyRangeDisplay();
+      // Bezahlung Anzeige aktualisieren
+      updatePaymentDisplay();
       
       // Modal-Titel ändern
       npcModalTitle.innerHTML = '<i class="fas fa-edit mr-2"></i> NPC Verkäufer bearbeiten';
@@ -2022,8 +2073,9 @@
       // Formular zurücksetzen
       npcForm.reset();
       npcKeyInput.value = '';
+      document.getElementById('npcCurrency').value = 'unbekannt';
       imagePreview.classList.add('hidden');
-      updateMoneyRangeDisplay();
+      updatePaymentDisplay();
       
       // Modal-Titel ändern
       npcModalTitle.innerHTML = '<i class="fas fa-plus mr-2"></i> NPC Verkäufer hinzufügen';
@@ -2162,6 +2214,7 @@
       
       const name = document.getElementById('npcName').value;
       const category = document.getElementById('npcCategory').value;
+      const currency = document.getElementById('npcCurrency').value;
       const minMoney = parseInt(document.getElementById('npcMinMoney').value) || 0;
       const maxMoney = parseInt(document.getElementById('npcMaxMoney').value) || 0;
       
@@ -2177,6 +2230,7 @@
       const npcData = {
         name,
         category,
+        currency,
         minMoney,
         maxMoney,
         imageUrl: imageUrl,
@@ -2225,11 +2279,13 @@
         return;
       }
       
-      const header = ['Name', 'Kategorie', 'Minimales Geld', 'Maximales Geld'];
+      const header = ['Name', 'Kategorie', 'Währung', 'Minimaler Betrag', 'Maximaler Betrag'];
       const rows = npcs.map(npc => {
+        const currencyInfo = currencyTypes[npc.currency] || currencyTypes['unbekannt'];
         return [
           `"${npc.name}"`,
           `"${npc.category}"`,
+          `"${currencyInfo.name}"`,
           `"${npc.minMoney || 0}"`,
           `"${npc.maxMoney || 0}"`
         ].join(';');
