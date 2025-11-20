@@ -945,11 +945,35 @@
     </div>
   </div>
 
-  <script>
+  <script type="module">
     // Discord OAuth Konfiguration
     const DISCORD_CLIENT_ID = '1432942180770644079';
     const DISCORD_REDIRECT_URI = window.location.origin + window.location.pathname;
     const BACKEND_URL = 'https://discord-oauth.ehrlichcolin2.workers.dev';
+
+    // Firebase Import und Konfiguration
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-analytics.js";
+    import { getDatabase, ref, push, onValue, remove, set, update } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCw4nadHCIRcouTJJoQ3ElToiVVFr5Rufo",
+      authDomain: "khusland-b7d13.firebaseapp.com",
+      databaseURL: "https://khusland-b7d13-default-rtdb.firebaseio.com",
+      projectId: "khusland-b7d13",
+      storageBucket: "khusland-b7d13.firebasestorage.app",
+      messagingSenderId: "69573193613",
+      appId: "1:69573193613:web:86c4d839281b1e343cd7c4",
+      measurementId: "G-JSCWR4207G"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const db = getDatabase(app);
+    
+    // Firebase Referenzen
+    const workbenchesRef = ref(db, 'werkbank_manager/workbenches');
+    const categoriesRef = ref(db, 'werkbank_manager/categories');
 
     // DOM Elemente
     const loginScreen = document.getElementById('loginScreen');
@@ -957,20 +981,13 @@
     const discordLoginBtn = document.getElementById('discordLogin');
     const loginError = document.getElementById('loginError');
     const errorMessage = document.getElementById('errorMessage');
+    const logoutBtn = document.getElementById('logoutBtn');
     const debugInfo = document.getElementById('debugInfo');
     const debugMessage = document.getElementById('debugMessage');
-    const notification = document.getElementById('notification');
-    const logoutBtn = document.getElementById('logoutBtn');
     const usernameElement = document.getElementById('username');
+    const notification = document.getElementById('notification');
     const accessBadge = document.getElementById('accessBadge');
     const forceCheckBtn = document.getElementById('forceCheckBtn');
-
-    // Debug-Funktion
-    function showDebugInfo(message) {
-      console.log('DEBUG:', message);
-      debugMessage.textContent = message;
-      debugInfo.classList.remove('hidden');
-    }
 
     // Notification System
     function showNotification(message, type = 'info', duration = 5000) {
@@ -987,13 +1004,10 @@
       }, duration);
     }
 
-    function showError(message) {
-      console.log('ERROR:', message);
-      errorMessage.textContent = message;
-      loginError.classList.remove('hidden');
-      setTimeout(() => {
-        loginError.classList.add('hidden');
-      }, 5000);
+    // Debug-Funktion
+    function showDebugInfo(message) {
+      debugMessage.textContent = message;
+      debugInfo.classList.remove('hidden');
     }
 
     // Discord OAuth Login
@@ -1223,49 +1237,271 @@
       }
     });
 
-    // DEMO-DATEN für die Werkbank-Funktionalität
+    // Globale Variablen für Werkbank-Manager
     let categories = ["Grundlegend", "Metall", "Alchemie", "Rüstung", "Waffen", "Magie", "Kochen"];
     let workbenches = [];
-    
-    // Einige Demo-Produkte
-    workbenches = [
-      {
-        key: '1',
-        name: 'Eisenschwert',
-        category: 'Waffen',
-        time: 120,
-        resources: [
-          { name: 'Eisenbarren', amount: 5 },
-          { name: 'Holz', amount: 2 }
-        ],
-        outputResources: [
-          { name: 'Eisenschwert', amount: 1 }
-        ]
-      },
-      {
-        key: '2', 
-        name: 'Heiltrank',
-        category: 'Alchemie',
-        time: 60,
-        resources: [
-          { name: 'Kräuter', amount: 3 },
-          { name: 'Wasser', amount: 1 }
-        ],
-        outputResources: [
-          { name: 'Heiltrank', amount: 2 }
-        ]
-      }
-    ];
+    let filteredWorkbenches = [];
+    let tempCategories = [];
+    let currentResources = [];
+    let currentOutputResources = [];
+    const ADMIN_PASSWORD = '1101';
 
-    // Einfache Werkbank-Funktionalität
+    // Utility Funktionen
+    function show(el) { 
+      el.classList.remove('hidden'); 
+      el.classList.add('fade-in');
+    }
+    function hide(el) { 
+      el.classList.add('hidden'); 
+      el.classList.remove('fade-in');
+    }
+
+    // Zeit in Sekunden umrechnen
+    function convertTimeToSeconds(minutes, seconds, milliseconds) {
+      const mins = parseInt(minutes) || 0;
+      const secs = parseInt(seconds) || 0;
+      const ms = parseInt(milliseconds) || 0;
+      return (mins * 60) + secs + (ms / 1000);
+    }
+
+    // Zeit formatieren für Anzeige
+    function formatTime(totalSeconds) {
+      if (totalSeconds === 0) return "0s";
+      
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      const seconds = Math.floor(totalSeconds % 60);
+      const milliseconds = Math.round((totalSeconds % 1) * 1000);
+      
+      let parts = [];
+      
+      if (hours > 0) parts.push(`${hours}h`);
+      if (minutes > 0) parts.push(`${minutes}m`);
+      if (seconds > 0 || (minutes === 0 && hours === 0)) {
+        parts.push(`${seconds}s`);
+      }
+      if (milliseconds > 0 && totalSeconds < 10) {
+        parts.push(`${milliseconds}ms`);
+      }
+      
+      return parts.join(' ') || '0s';
+    }
+
+    // Firebase Funktionen
+    async function saveWorkbench(workbench) {
+      try {
+        await push(workbenchesRef, workbench);
+        return true;
+      } catch (error) {
+        console.error('Fehler beim Speichern der Werkbank:', error);
+        return false;
+      }
+    }
+
+    async function updateWorkbench(key, workbench) {
+      try {
+        await update(ref(db, `werkbank_manager/workbenches/${key}`), workbench);
+        return true;
+      } catch (error) {
+        console.error('Fehler beim Aktualisieren der Werkbank:', error);
+        return false;
+      }
+    }
+
+    async function deleteWorkbenchFromFirebase(key) {
+      try {
+        await remove(ref(db, `werkbank_manager/workbenches/${key}`));
+        return true;
+      } catch (error) {
+        console.error('Fehler beim Löschen der Werkbank:', error);
+        return false;
+      }
+    }
+
+    async function saveCategoriesToFirebase() {
+      try {
+        await set(categoriesRef, categories);
+        return true;
+      } catch (error) {
+        console.error('Fehler beim Speichern der Kategorien:', error);
+        return false;
+      }
+    }
+
+    // Firebase Listener
+    onValue(workbenchesRef, (snapshot) => {
+      workbenches = [];
+      snapshot.forEach((childSnap) => {
+        const data = childSnap.val();
+        data.key = childSnap.key;
+        
+        // Stelle sicher, dass time als Zahl gespeichert ist
+        if (typeof data.time === 'string') {
+          data.time = parseFloat(data.time);
+        }
+        
+        workbenches.push(data);
+      });
+      filteredWorkbenches = [...workbenches];
+      renderWorkbenches();
+      renderAdminTable();
+    });
+
+    onValue(categoriesRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        categories = data;
+        renderCategories();
+        loadCategoriesToDropdown();
+      }
+    });
+
+    // Werkbank-Funktionalität initialisieren
+    function initWorkbenchManager() {
+      renderCategories();
+      renderWorkbenches();
+      setupEventListeners();
+      showNotification('Werkbank Manager erfolgreich geladen!', 'success');
+    }
+
+    // Event Listeners für Werkbank-Manager
+    function setupEventListeners() {
+      // Tabs Navigation
+      document.getElementById('btnWorkbenches').addEventListener('click', async () => {
+        show(document.getElementById('workbenchesSection')); 
+        hide(document.getElementById('adminPanel'));
+        updateButtonStates('workbenches');
+      });
+      
+      document.getElementById('btnAdmin').addEventListener('click', async () => {
+        hide(document.getElementById('workbenchesSection')); 
+        show(document.getElementById('adminPanel'));
+        updateButtonStates('admin');
+      });
+
+      // Suchfunktion
+      document.getElementById('searchInput').addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        
+        if (searchTerm.trim() === '') {
+          filteredWorkbenches = [...workbenches];
+        } else {
+          filteredWorkbenches = workbenches.filter(workbench => 
+            workbench.name.toLowerCase().includes(searchTerm) || 
+            workbench.category.toLowerCase().includes(searchTerm)
+          );
+        }
+        
+        renderWorkbenches();
+      });
+
+      // Admin Login
+      document.getElementById('adminLoginBtn').addEventListener('click', () => {
+        const adminPassInput = document.getElementById('adminPass');
+        const adminError = document.getElementById('adminError');
+        
+        if (adminPassInput.value === ADMIN_PASSWORD) { 
+          adminError.classList.add('hidden'); 
+          show(document.getElementById('adminContent')); 
+          renderAdminTable(); 
+          adminPassInput.value = '';
+          showNotification('Admin-Bereich erfolgreich betreten', 'success');
+        } else {
+          adminError.classList.remove('hidden');
+          adminPassInput.value = '';
+          adminPassInput.focus();
+          showNotification('Falsches Admin-Passwort', 'error');
+        }
+      });
+
+      // Weitere Event Listener hier...
+    }
+
+    function updateButtonStates(activeButton) {
+      const buttons = {
+        workbenches: document.getElementById('btnWorkbenches'),
+        admin: document.getElementById('btnAdmin')
+      };
+      
+      Object.values(buttons).forEach(btn => {
+        btn.classList.remove('pulse-glow', 'bg-red-600', 'bg-blue-600');
+        btn.classList.add('bg-gray-700');
+      });
+      
+      if (buttons[activeButton]) {
+        buttons[activeButton].classList.remove('bg-gray-700');
+        if (activeButton === 'workbenches') {
+          buttons[activeButton].classList.add('bg-red-600', 'pulse-glow');
+        } else if (activeButton === 'admin') {
+          buttons[activeButton].classList.add('bg-blue-600');
+        }
+      }
+    }
+
+    // Kategorien Filter rendern
+    function renderCategories() {
+      const categoriesContainer = document.getElementById('categoriesContainer');
+      categoriesContainer.innerHTML = '<button class="category-btn px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg active" data-category="all"><i class="fas fa-layer-group mr-1"></i> Alle</button>';
+      
+      categories.forEach(category => {
+        const btn = document.createElement('button');
+        btn.className = 'category-btn px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg';
+        btn.setAttribute('data-category', category);
+        btn.innerHTML = `<i class="fas fa-folder mr-1"></i> ${category}`;
+        categoriesContainer.appendChild(btn);
+      });
+      
+      setupCategoryFilters();
+    }
+
+    function setupCategoryFilters() {
+      document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('category-btn')) {
+          document.querySelectorAll('#categoriesContainer .category-btn').forEach(b => b.classList.remove('active'));
+          e.target.classList.add('active');
+          
+          const category = e.target.getAttribute('data-category');
+          filterWorkbenches(category);
+        }
+      });
+    }
+
+    function filterWorkbenches(category) {
+      if (category === 'all') {
+        filteredWorkbenches = [...workbenches];
+      } else {
+        filteredWorkbenches = workbenches.filter(w => w.category === category);
+      }
+      renderWorkbenches();
+    }
+
+    // Produkte rendern mit direkter Zahlen-Eingabe
     function renderWorkbenches() {
       const workbenchesGrid = document.getElementById('workbenchesGrid');
       workbenchesGrid.innerHTML = '';
       
-      workbenches.forEach(workbench => {
+      if (filteredWorkbenches.length === 0) {
+        workbenchesGrid.innerHTML = `
+          <div class="col-span-full text-center py-8 text-gray-400">
+            <i class="fas fa-boxes text-4xl mb-4 text-gray-600"></i>
+            <p class="text-lg">Keine Produkte gefunden.</p>
+            <p class="text-sm mt-2">Fügen Sie Produkte im Admin-Bereich hinzu oder ändern Sie Ihre Suchkriterien.</p>
+          </div>
+        `;
+        return;
+      }
+      
+      filteredWorkbenches.forEach(workbench => {
         const el = document.createElement('div');
         el.className = 'product-card';
         
+        // Bild anzeigen falls vorhanden
+        const imageHtml = workbench.imageUrl ? 
+          `<div class="flex justify-center mb-3">
+             <img src="${workbench.imageUrl}" class="image-preview-small" alt="${workbench.name}">
+           </div>` : '';
+        
+        // Mengen-Steuerung mit direkter Eingabe
         const quantityControls = `
           <div class="product-quantity-controls">
             <button class="product-quantity-btn decrease-btn" data-key="${workbench.key}">
@@ -1282,6 +1518,7 @@
           </div>
         `;
         
+        // Input-Ressourcen
         let inputResourcesHtml = '';
         if (workbench.resources && workbench.resources.length > 0) {
           inputResourcesHtml = `
@@ -1297,6 +1534,7 @@
           `;
         }
         
+        // Output-Ressourcen
         let outputResourcesHtml = '';
         if (workbench.outputResources && workbench.outputResources.length > 0) {
           outputResourcesHtml = `
@@ -1313,6 +1551,7 @@
         }
         
         el.innerHTML = `
+          ${imageHtml}
           <div class="product-header">
             <div class="product-name">${workbench.name}</div>
             <div class="product-time">${formatTime(workbench.time || 0)}</div>
@@ -1326,30 +1565,158 @@
         `;
         workbenchesGrid.appendChild(el);
       });
+      
+      setupQuantityControls();
     }
 
-    function formatTime(totalSeconds) {
-      if (totalSeconds === 0) return "0s";
+    // Mengen-Steuerung für Produkte einrichten
+    function setupQuantityControls() {
+      // Plus-Buttons
+      document.querySelectorAll('.increase-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const key = this.getAttribute('data-key');
+          increaseQuantity(key);
+        });
+      });
       
-      const hours = Math.floor(totalSeconds / 3600);
-      const minutes = Math.floor((totalSeconds % 3600) / 60);
-      const seconds = Math.floor(totalSeconds % 60);
+      // Minus-Buttons
+      document.querySelectorAll('.decrease-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const key = this.getAttribute('data-key');
+          decreaseQuantity(key);
+        });
+      });
       
-      let parts = [];
+      // Direkte Eingabe
+      document.querySelectorAll('.product-quantity-input').forEach(input => {
+        input.addEventListener('input', function() {
+          const key = this.getAttribute('data-key');
+          const value = parseInt(this.value) || 1;
+          
+          if (value < 1) {
+            this.value = 1;
+            updateTimeForQuantity(key, 1);
+            updateResourceQuantities(key, 1);
+          } else {
+            updateTimeForQuantity(key, value);
+            updateResourceQuantities(key, value);
+          }
+        });
+        
+        input.addEventListener('blur', function() {
+          const key = this.getAttribute('data-key');
+          const value = parseInt(this.value) || 1;
+          
+          if (value < 1) {
+            this.value = 1;
+            updateTimeForQuantity(key, 1);
+            updateResourceQuantities(key, 1);
+          }
+        });
+      });
+    }
+
+    // Menge erhöhen und Zeit berechnen
+    function increaseQuantity(key) {
+      const quantityInput = document.getElementById(`quantity-input-${key}`);
+      let currentQuantity = parseInt(quantityInput.value) || 1;
+      currentQuantity++;
+      quantityInput.value = currentQuantity;
+      updateTimeForQuantity(key, currentQuantity);
+      updateResourceQuantities(key, currentQuantity);
+    }
+
+    // Menge verringern und Zeit berechnen
+    function decreaseQuantity(key) {
+      const quantityInput = document.getElementById(`quantity-input-${key}`);
+      let currentQuantity = parseInt(quantityInput.value) || 1;
+      if (currentQuantity > 1) {
+        currentQuantity--;
+        quantityInput.value = currentQuantity;
+        updateTimeForQuantity(key, currentQuantity);
+        updateResourceQuantities(key, currentQuantity);
+      }
+    }
+
+    // Zeit basierend auf Menge aktualisieren
+    function updateTimeForQuantity(key, multiplier) {
+      const workbench = workbenches.find(w => w.key === key);
+      if (!workbench) return;
       
-      if (hours > 0) parts.push(`${hours}h`);
-      if (minutes > 0) parts.push(`${minutes}m`);
-      if (seconds > 0 || (minutes === 0 && hours === 0)) {
-        parts.push(`${seconds}s`);
+      const timeDisplay = document.getElementById(`time-${key}`);
+      const baseTime = workbench.time || 0;
+      const totalTime = baseTime * multiplier;
+      timeDisplay.textContent = `Gesamtzeit: ${formatTime(totalTime)}`;
+    }
+
+    // Ressourcen-Mengen aktualisieren
+    function updateResourceQuantities(key, multiplier) {
+      const workbench = workbenches.find(w => w.key === key);
+      if (!workbench) return;
+      
+      // Input-Ressourcen aktualisieren
+      if (workbench.resources) {
+        workbench.resources.forEach(resource => {
+          const elementId = `input-${key}-${resource.name.replace(/\s+/g, '-')}`;
+          const element = document.getElementById(elementId);
+          if (element) {
+            const baseAmount = resource.amount;
+            element.textContent = baseAmount * multiplier;
+          }
+        });
       }
       
-      return parts.join(' ') || '0s';
+      // Output-Ressourcen aktualisieren
+      if (workbench.outputResources) {
+        workbench.outputResources.forEach(resource => {
+          const elementId = `output-${key}-${resource.name.replace(/\s+/g, '-')}`;
+          const element = document.getElementById(elementId);
+          if (element) {
+            const baseAmount = resource.amount;
+            element.textContent = baseAmount * multiplier;
+          }
+        });
+      }
     }
 
-    // Initialisiere Werkbank-Daten nach Login
-    function initWorkbenchManager() {
-      renderWorkbenches();
-      showNotification('Werkbank Manager erfolgreich geladen!', 'success');
+    function renderAdminTable() {
+      const adminTableBody = document.getElementById('adminTableBody');
+      adminTableBody.innerHTML = '';
+      
+      workbenches.forEach(workbench => {
+        const tr = document.createElement('tr');
+        tr.className = 'border-t border-gray-800 hover:bg-gray-800/30 transition-colors';
+        tr.innerHTML = `
+          <td class="p-3">${workbench.name}</td>
+          <td class="p-3">${workbench.category}</td>
+          <td class="p-3">${formatTime(workbench.time || 0)}</td>
+          <td class="p-3">
+            <div class="flex gap-2">
+              <button class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-sm rounded-lg btn flex items-center gap-1 edit-workbench" data-key="${workbench.key}">
+                <i class="fas fa-edit mr-1"></i>
+                Bearbeiten
+              </button>
+              <button class="px-3 py-1.5 bg-red-600 hover:bg-red-500 text-sm rounded-lg btn flex items-center gap-1 delete-workbench" data-key="${workbench.key}">
+                <i class="fas fa-trash mr-1"></i>
+                Löschen
+              </button>
+            </div>
+          </td>`;
+        adminTableBody.appendChild(tr);
+      });
+      
+      document.getElementById('totalWorkbenches').innerText = workbenches.length;
+    }
+
+    function loadCategoriesToDropdown() {
+      const categorySelect = document.getElementById('workbenchCategory');
+      categorySelect.innerHTML = '';
+      categories.forEach(category => {
+        const option = document.createElement('option');
+        option.value = category;
+        option.textContent = category;
+        categorySelect.appendChild(option);
+      });
     }
 
     // Starte Werkbank-Manager nach erfolgreichem Login
